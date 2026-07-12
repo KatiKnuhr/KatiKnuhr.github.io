@@ -51,7 +51,10 @@
 
         .page-hero {
             height: 40vh;
-            background: url('Medien/Sunset.jpeg') center center / cover no-repeat;
+            background-image: url('Medien/Sunset.jpeg');
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -147,6 +150,7 @@
                 opacity: 1;
             }
 
+        /* LIGHTBOX */
         .lightbox {
             display: none;
             position: fixed;
@@ -163,8 +167,8 @@
             }
 
             .lightbox img {
-                max-width: 88%;
-                max-height: 85vh;
+                max-width: 80%;
+                max-height: 80vh;
                 border-radius: 12px;
                 box-shadow: 0 0 60px rgba(255,255,255,0.1);
             }
@@ -178,13 +182,59 @@
             cursor: pointer;
             font-weight: bold;
             line-height: 1;
+            z-index: 1001;
         }
+
+            .lightbox-close:hover {
+                color: #a8d8ea;
+            }
 
         .lightbox-caption {
             color: white;
             margin-top: 16px;
             font-size: 16px;
             opacity: 0.7;
+        }
+
+        /* PFEILE */
+        .lightbox-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            font-size: 60px;
+            padding: 10px 24px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background 0.3s;
+            z-index: 1000;
+            line-height: 1;
+        }
+
+            .lightbox-arrow:hover {
+                background: rgba(255,255,255,0.35);
+            }
+
+            .lightbox-arrow.left {
+                left: 20px;
+            }
+
+            .lightbox-arrow.right {
+                right: 20px;
+            }
+
+        /* BILD COUNTER */
+        .lightbox-counter {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 15px;
+            opacity: 0.6;
+            z-index: 1001;
         }
 
         footer {
@@ -213,6 +263,11 @@
                 nav a {
                     font-size: 13px;
                 }
+
+            .lightbox-arrow {
+                font-size: 40px;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
@@ -370,9 +425,12 @@
     </div>
 
     <!-- LIGHTBOX -->
-    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-        <span class="lightbox-close">✕</span>
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+        <div class="lightbox-counter" id="lightbox-counter"></div>
+        <button class="lightbox-arrow left" onclick="changeImage(-1)">&#8249;</button>
         <img id="lightbox-img" src="" alt="" />
+        <button class="lightbox-arrow right" onclick="changeImage(1)">&#8250;</button>
         <div class="lightbox-caption" id="lightbox-caption"></div>
     </div>
 
@@ -382,15 +440,62 @@
     </footer>
 
     <script>
+        let currentIndex = 0;
+        let currentItems = [];
+
+        function buildItemList() {
+            currentItems = [];
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                if (item.style.display !== 'none') {
+                    currentItems.push({
+                        src: item.querySelector('img').src,
+                        caption: item.querySelector('img').alt
+                    });
+                }
+            });
+        }
+
         function openLightbox(src, caption) {
-            document.getElementById('lightbox-img').src = src;
-            document.getElementById('lightbox-caption').textContent = caption;
+            buildItemList();
+            currentIndex = currentItems.findIndex(item =>
+                item.src.includes(src.split('/').pop())
+            );
+            if (currentIndex === -1) currentIndex = 0;
+            showImage(currentIndex);
             document.getElementById('lightbox').classList.add('active');
+        }
+
+        function showImage(index) {
+            if (index < 0) index = currentItems.length - 1;
+            if (index >= currentItems.length) index = 0;
+            currentIndex = index;
+            document.getElementById('lightbox-img').src = currentItems[index].src;
+            document.getElementById('lightbox-caption').textContent = currentItems[index].caption;
+            document.getElementById('lightbox-counter').textContent =
+                (currentIndex + 1) + ' / ' + currentItems.length;
+        }
+
+        function changeImage(direction) {
+            showImage(currentIndex + direction);
         }
 
         function closeLightbox() {
             document.getElementById('lightbox').classList.remove('active');
         }
+
+        // Klick außerhalb schließt Lightbox
+        document.getElementById('lightbox').addEventListener('click', function (e) {
+            if (e.target === this) closeLightbox();
+        });
+
+        // Pfeiltasten & ESC
+        document.addEventListener('keydown', function (e) {
+            const lb = document.getElementById('lightbox');
+            if (!lb.classList.contains('active')) return;
+            if (e.key === 'ArrowRight') changeImage(1);
+            if (e.key === 'ArrowLeft') changeImage(-1);
+            if (e.key === 'Escape') closeLightbox();
+        });
 
         function filterGallery(cat, btn) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
