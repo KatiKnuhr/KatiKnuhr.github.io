@@ -1,0 +1,409 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Galerie – Kati Knuhr</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #333;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(44, 110, 138, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 18px 0;
+            z-index: 100;
+        }
+
+            nav a {
+                color: white;
+                text-decoration: none;
+                font-size: 16px;
+                font-weight: 600;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                transition: color 0.3s;
+            }
+
+                nav a:hover {
+                    color: #a8d8ea;
+                }
+
+                nav a.active {
+                    border-bottom: 2px solid #a8d8ea;
+                    padding-bottom: 4px;
+                }
+
+        .page-hero {
+            height: 40vh;
+            background: url('Medien/Sunset.jpeg') center center / cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+            .page-hero::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+            }
+
+            .page-hero h1 {
+                position: relative;
+                z-index: 2;
+                color: white;
+                font-size: 52px;
+                letter-spacing: 4px;
+                text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            }
+
+        .content {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 40px;
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .filter-btn {
+            padding: 10px 24px;
+            border: 2px solid #2c6e8a;
+            border-radius: 50px;
+            background: transparent;
+            color: #2c6e8a;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+            .filter-btn:hover,
+            .filter-btn.active {
+                background: #2c6e8a;
+                color: white;
+            }
+
+        .gallery-grid {
+            columns: 4;
+            column-gap: 16px;
+        }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+            .gallery-item img {
+                width: 100%;
+                display: block;
+                transition: transform 0.4s;
+            }
+
+            .gallery-item:hover img {
+                transform: scale(1.05);
+            }
+
+            .gallery-item .overlay {
+                position: absolute;
+                inset: 0;
+                background: rgba(44, 110, 138, 0.7);
+                opacity: 0;
+                transition: opacity 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 32px;
+            }
+
+            .gallery-item:hover .overlay {
+                opacity: 1;
+            }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+            .lightbox.active {
+                display: flex;
+            }
+
+            .lightbox img {
+                max-width: 88%;
+                max-height: 85vh;
+                border-radius: 12px;
+                box-shadow: 0 0 60px rgba(255,255,255,0.1);
+            }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 44px;
+            cursor: pointer;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .lightbox-caption {
+            color: white;
+            margin-top: 16px;
+            font-size: 16px;
+            opacity: 0.7;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #1a4a5e, #2c6e8a);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+        }
+
+            footer p {
+                opacity: 0.7;
+                font-size: 14px;
+                margin-top: 8px;
+            }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                columns: 2;
+            }
+
+            nav {
+                gap: 16px;
+            }
+
+                nav a {
+                    font-size: 13px;
+                }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="ueber.html">Über mich</a>
+        <a href="hobbys.html">Hobbys</a>
+        <a href="galerie.html" class="active">Galerie</a>
+    </nav>
+
+    <div class="page-hero">
+        <h1>Galerie</h1>
+    </div>
+
+    <div class="content">
+
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterGallery('all', this)">Alle</button>
+            <button class="filter-btn" onclick="filterGallery('ski', this)">🎿 Ski</button>
+            <button class="filter-btn" onclick="filterGallery('sommer', this)">☀️ Sommer</button>
+            <button class="filter-btn" onclick="filterGallery('reisen', this)">✈️ Reisen</button>
+            <button class="filter-btn" onclick="filterGallery('friends', this)">👫 Friends</button>
+        </div>
+
+        <div class="gallery-grid" id="gallery">
+
+            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/Skiurlaub.jpeg', 'Skiurlaub')">
+                <img src="Medien/Skiurlaub.jpeg" alt="Skiurlaub" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/Skitour2.jpeg', 'Skitour')">
+                <img src="Medien/Skitour2.jpeg" alt="Skitour" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/LangeSkitour.jpeg', 'Lange Skitour')">
+                <img src="Medien/LangeSkitour.jpeg" alt="Lange Skitour" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/Skifoan.jpeg', 'Skifahren')">
+                <img src="Medien/Skifoan.jpeg" alt="Skifahren" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/FaschingSki.jpeg', 'Fasching Ski')">
+                <img src="Medien/FaschingSki.jpeg" alt="Fasching Ski" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/WinterCampen.jpeg', 'Winter Camping')">
+                <img src="Medien/WinterCampen.jpeg" alt="Winter Camping" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/Ski.jpeg', 'Ski')">
+                <img src="Medien/Ski.jpeg" alt="Ski" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/Surfen.jpeg', 'Surfen')">
+                <img src="Medien/Surfen.jpeg" alt="Surfen" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/Beach.jpeg', 'Beach')">
+                <img src="Medien/Beach.jpeg" alt="Beach" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/Lauf.jpeg', 'Laufen')">
+                <img src="Medien/Lauf.jpeg" alt="Laufen" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/TerrexLauf.jpeg', 'Trail Running')">
+                <img src="Medien/TerrexLauf.jpeg" alt="Trail Running" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/BikeTour.jpeg', 'Bike Tour')">
+                <img src="Medien/BikeTour.jpeg" alt="Bike Tour" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/Campen.jpeg', 'Camping')">
+                <img src="Medien/Campen.jpeg" alt="Camping" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/Duenen.jpeg', 'Dünen')">
+                <img src="Medien/Duenen.jpeg" alt="Dünen" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/A Coruna.jpeg', 'A Coruña')">
+                <img src="Medien/A Coruna.jpeg" alt="A Coruña" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/Sunset.jpeg', 'Sonnenuntergang')">
+                <img src="Medien/Sunset.jpeg" alt="Sonnenuntergang" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/Spain Clip.jpeg', 'Spanien')">
+                <img src="Medien/Spain Clip.jpeg" alt="Spanien" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/Fliegen.jpeg', 'Fliegen')">
+                <img src="Medien/Fliegen.jpeg" alt="Fliegen" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/Fliegen2.jpeg', 'Fliegen 2')">
+                <img src="Medien/Fliegen2.jpeg" alt="Fliegen 2" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/JuliUrlaub.jpeg', 'Urlaub')">
+                <img src="Medien/JuliUrlaub.jpeg" alt="Urlaub" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/Fondue.jpeg', 'Fondue Abend')">
+                <img src="Medien/Fondue.jpeg" alt="Fondue" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/Brotzeit.jpeg', 'Brotzeit')">
+                <img src="Medien/Brotzeit.jpeg" alt="Brotzeit" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/JuliTraktor.jpeg', 'Traktor Spaß')">
+                <img src="Medien/JuliTraktor.jpeg" alt="Traktor" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/PeterTraktor.jpeg', 'Traktor Peter')">
+                <img src="Medien/PeterTraktor.jpeg" alt="Traktor Peter" />
+                <div class="overlay">🔍</div>
+            </div>
+
+            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/JuliKati.jpeg', 'Kati & Juli')">
+                <img src="Medien/JuliKati.jpeg" alt="Kati und Juli" />
+                <div class="overlay">🔍</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">✕</span>
+        <img id="lightbox-img" src="" alt="" />
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+
+    <footer>
+        <h3>Kati Knuhr</h3>
+        <p>© 2026 – Made with ❤️ and lots of adventures</p>
+    </footer>
+
+    <script>
+        function openLightbox(src, caption) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-caption').textContent = caption;
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        function filterGallery(cat, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                if (cat === 'all' || item.dataset.cat === cat) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

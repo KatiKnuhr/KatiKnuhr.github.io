@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hobbys – Kati Knuhr</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #333;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(44, 110, 138, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 18px 0;
+            z-index: 100;
+        }
+
+            nav a {
+                color: white;
+                text-decoration: none;
+                font-size: 16px;
+                font-weight: 600;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                transition: color 0.3s;
+            }
+
+                nav a:hover {
+                    color: #a8d8ea;
+                }
+
+                nav a.active {
+                    border-bottom: 2px solid #a8d8ea;
+                    padding-bottom: 4px;
+                }
+
+        .page-hero {
+            height: 40vh;
+            background: url('Medien/Skitour.jpeg') center center / cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+            .page-hero::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+            }
+
+            .page-hero h1 {
+                position: relative;
+                z-index: 2;
+                color: white;
+                font-size: 52px;
+                letter-spacing: 4px;
+                text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            }
+
+        .content {
+            max-width: 1100px;
+            margin: 60px auto;
+            padding: 0 40px;
+        }
+
+        .hobby-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            align-items: center;
+            margin-bottom: 60px;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+            .hobby-section.reverse {
+                direction: rtl;
+            }
+
+                .hobby-section.reverse > * {
+                    direction: ltr;
+                }
+
+            .hobby-section img {
+                width: 100%;
+                height: 380px;
+                object-fit: cover;
+            }
+
+        .hobby-text {
+            padding: 40px;
+        }
+
+            .hobby-text .icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+            }
+
+            .hobby-text h2 {
+                font-size: 32px;
+                color: #2c6e8a;
+                margin-bottom: 16px;
+            }
+
+            .hobby-text p {
+                font-size: 17px;
+                line-height: 1.8;
+                color: #555;
+            }
+
+            .hobby-text .tag {
+                display: inline-block;
+                background: #e8f4f8;
+                color: #2c6e8a;
+                padding: 6px 16px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+                margin-top: 16px;
+                margin-right: 8px;
+            }
+
+        footer {
+            background: linear-gradient(135deg, #1a4a5e, #2c6e8a);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 40px;
+        }
+
+            footer p {
+                opacity: 0.7;
+                font-size: 14px;
+                margin-top: 8px;
+            }
+
+        @media (max-width: 768px) {
+            .hobby-section {
+                grid-template-columns: 1fr;
+            }
+
+                .hobby-section.reverse {
+                    direction: ltr;
+                }
+
+            nav {
+                gap: 16px;
+            }
+
+                nav a {
+                    font-size: 13px;
+                }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="ueber.html">Über mich</a>
+        <a href="hobbys.html" class="active">Hobbys</a>
+        <a href="galerie.html">Galerie</a>
+    </nav>
+
+    <div class="page-hero">
+        <h1>Meine Hobbys</h1>
+    </div>
+
+    <div class="content">
+
+        <div class="hobby-section">
+            <img src="Medien/Skitour2.jpeg" alt="Skifahren" />
+            <div class="hobby-text">
+                <div class="icon">🎿</div>
+                <h2>Skifahren & Skitouren</h2>
+                <p>
+                    Schnee, Berge und Geschwindigkeit – Skifahren ist meine große Leidenschaft.
+                    Ob auf der Piste oder auf einer langen Skitour durch unberührte Hänge:
+                    Der Winter ist meine liebste Jahreszeit!
+                </p>
+                <span class="tag">Piste</span>
+                <span class="tag">Skitour</span>
+                <span class="tag">Tirol</span>
+            </div>
+        </div>
+
+        <div class="hobby-section reverse">
+            <img src="Medien/TerrexLauf.jpeg" alt="Wandern & Laufen" />
+            <div class="hobby-text">
+                <div class="icon">🥾</div>
+                <h2>Wandern & Trailrunning</h2>
+                <p>
+                    Die Berge rund um Innsbruck sind mein Spielplatz.
+                    Ob gemütliche Wanderung oder schneller Trailrun –
+                    in der Natur finde ich meinen Ausgleich und meine Energie.
+                </p>
+                <span class="tag">Alpen</span>
+                <span class="tag">Trail</span>
+                <span class="tag">Natur</span>
+            </div>
+        </div>
+
+        <div class="hobby-section">
+            <img src="Medien/BikeTour.jpeg" alt="Radfahren" />
+            <div class="hobby-text">
+                <div class="icon">🚴</div>
+                <h2>Radfahren</h2>
+                <p>
+                    Auf zwei Rädern durch die schönsten Landschaften –
+                    Radtouren sind für mich pure Freiheit.
+                    Von kurzen Ausfahrten bis zu mehrtägigen Bikepacking-Abenteuern.
+                </p>
+                <span class="tag">MTB</span>
+                <span class="tag">Bikepacking</span>
+                <span class="tag">Alpen</span>
+            </div>
+        </div>
+
+        <div class="hobby-section reverse">
+            <img src="Medien/Surfen.jpeg" alt="Surfen" />
+            <div class="hobby-text">
+                <div class="icon">🏄</div>
+                <h2>Surfen</h2>
+                <p>
+                    Wellen reiten im Atlantik – am liebsten in Spanien oder Portugal!
+                    Das Surfen ist mein perfekter Gegenpol zu den Bergen:
+                    Salz, Sonne, Meer und das Gefühl, auf dem Wasser zu fliegen. 🌊
+                </p>
+                <span class="tag">Atlantik</span>
+                <span class="tag">Spanien</span>
+                <span class="tag">Portugal</span>
+            </div>
+        </div>
+
+        <div class="hobby-section">
+            <img src="Medien/Campen.jpeg" alt="Camping" />
+            <div class="hobby-text">
+                <div class="icon">🏕️</div>
+                <h2>Camping & Reisen</h2>
+                <p>
+                    Zelt aufschlagen, Feuer machen, Sterne schauen –
+                    Camping ist für mich die schönste Art zu reisen.
+                    Besonders in Spanien und Portugal fühle ich mich wie zu Hause. 🌅
+                </p>
+                <span class="tag">Camping</span>
+                <span class="tag">Spanien</span>
+                <span class="tag">Portugal</span>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <h3>Kati Knuhr</h3>
+        <p>© 2026 – Made with ❤️ and lots of adventures</p>
+    </footer>
+
+</body>
+</html>
