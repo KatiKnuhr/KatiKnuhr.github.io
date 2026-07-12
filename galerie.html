@@ -123,13 +123,15 @@
             position: relative;
         }
 
-            .gallery-item img {
+            .gallery-item img,
+            .gallery-item video {
                 width: 100%;
                 display: block;
                 transition: transform 0.4s;
             }
 
-            .gallery-item:hover img {
+            .gallery-item:hover img,
+            .gallery-item:hover video {
                 transform: scale(1.05);
             }
 
@@ -149,6 +151,20 @@
             .gallery-item:hover .overlay {
                 opacity: 1;
             }
+
+        /* VIDEO BADGE */
+        .video-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            z-index: 2;
+            pointer-events: none;
+        }
 
         /* LIGHTBOX */
         .lightbox {
@@ -171,6 +187,14 @@
                 max-height: 80vh;
                 border-radius: 12px;
                 box-shadow: 0 0 60px rgba(255,255,255,0.1);
+            }
+
+            .lightbox video {
+                max-width: 85%;
+                max-height: 82vh;
+                border-radius: 12px;
+                box-shadow: 0 0 60px rgba(255,255,255,0.1);
+                outline: none;
             }
 
         .lightbox-close {
@@ -237,6 +261,26 @@
             z-index: 1001;
         }
 
+        /* FULLSCREEN BUTTON */
+        .lightbox-fullscreen {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            z-index: 1001;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            transition: background 0.3s;
+        }
+
+            .lightbox-fullscreen:hover {
+                background: rgba(255,255,255,0.35);
+            }
+
         footer {
             background: linear-gradient(135deg, #1a4a5e, #2c6e8a);
             color: white;
@@ -296,127 +340,129 @@
 
         <div class="gallery-grid" id="gallery">
 
-            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/Skiurlaub.jpeg', 'Skiurlaub')">
+            <!-- SKI -->
+            <div class="gallery-item" data-cat="ski" data-type="image" onclick="openLightbox('Medien/Skiurlaub.jpeg', 'Skiurlaub', 'image')">
                 <img src="Medien/Skiurlaub.jpeg" alt="Skiurlaub" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/Skitour2.jpeg', 'Skitour')">
+            <div class="gallery-item" data-cat="ski" data-type="image" onclick="openLightbox('Medien/Skitour2.jpeg', 'Skitour', 'image')">
                 <img src="Medien/Skitour2.jpeg" alt="Skitour" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/LangeSkitour.jpeg', 'Lange Skitour')">
+            <div class="gallery-item" data-cat="ski" data-type="image" onclick="openLightbox('Medien/LangeSkitour.jpeg', 'Lange Skitour', 'image')">
                 <img src="Medien/LangeSkitour.jpeg" alt="Lange Skitour" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/Skifoan.jpeg', 'Skifahren')">
+            <div class="gallery-item" data-cat="ski" data-type="image" onclick="openLightbox('Medien/Skifoan.jpeg', 'Skifahren', 'image')">
                 <img src="Medien/Skifoan.jpeg" alt="Skifahren" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/FaschingSki.jpeg', 'Fasching Ski')">
+            <div class="gallery-item" data-cat="ski" data-type="image" onclick="openLightbox('Medien/FaschingSki.jpeg', 'Fasching Ski', 'image')">
                 <img src="Medien/FaschingSki.jpeg" alt="Fasching Ski" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/WinterCampen.jpeg', 'Winter Camping')">
+            <div class="gallery-item" data-cat="ski" data-type="image" onclick="openLightbox('Medien/WinterCampen.jpeg', 'Winter Camping', 'image')">
                 <img src="Medien/WinterCampen.jpeg" alt="Winter Camping" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="ski" onclick="openLightbox('Medien/Ski.jpeg', 'Ski')">
+            <div class="gallery-item" data-cat="ski" data-type="image" onclick="openLightbox('Medien/Ski.jpeg', 'Ski', 'image')">
                 <img src="Medien/Ski.jpeg" alt="Ski" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/Surfen.jpeg', 'Surfen')">
+            <!-- SOMMER -->
+            <div class="gallery-item" data-cat="sommer" data-type="image" onclick="openLightbox('Medien/Surfen.jpeg', 'Surfen', 'image')">
                 <img src="Medien/Surfen.jpeg" alt="Surfen" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/Beach.jpeg', 'Beach')">
+            <div class="gallery-item" data-cat="sommer" data-type="image" onclick="openLightbox('Medien/Beach.jpeg', 'Beach', 'image')">
                 <img src="Medien/Beach.jpeg" alt="Beach" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/Lauf.jpeg', 'Laufen')">
+            <div class="gallery-item" data-cat="sommer" data-type="image" onclick="openLightbox('Medien/Lauf.jpeg', 'Laufen', 'image')">
                 <img src="Medien/Lauf.jpeg" alt="Laufen" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/TerrexLauf.jpeg', 'Trail Running')">
+            <div class="gallery-item" data-cat="sommer" data-type="image" onclick="openLightbox('Medien/TerrexLauf.jpeg', 'Trail Running', 'image')">
                 <img src="Medien/TerrexLauf.jpeg" alt="Trail Running" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="sommer" onclick="openLightbox('Medien/BikeTour.jpeg', 'Bike Tour')">
+            <div class="gallery-item" data-cat="sommer" data-type="image" onclick="openLightbox('Medien/BikeTour.jpeg', 'Bike Tour', 'image')">
                 <img src="Medien/BikeTour.jpeg" alt="Bike Tour" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/Campen.jpeg', 'Camping')">
+            <!-- REISEN -->
+            <div class="gallery-item" data-cat="reisen" data-type="image" onclick="openLightbox('Medien/Campen.jpeg', 'Camping', 'image')">
                 <img src="Medien/Campen.jpeg" alt="Camping" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/Duenen.jpeg', 'Dünen')">
-                <img src="Medien/Duenen.jpeg" alt="Dünen" />
+            <!-- ⚠️ DÜNEN: Prüfe den genauen Dateinamen in deinem Medien-Ordner!
+                 Mögliche Namen: Duenen.jpeg / Dünen.jpeg / duenen.jpeg / Dunen.jpeg -->
+            <div class="gallery-item" data-cat="reisen" data-type="image" onclick="openLightbox('Medien/Duenen.jpeg', 'Dünen', 'image')">
+                <img src="Medien/Duenen.jpeg" alt="Dünen"
+                     onerror="this.parentElement.style.display='none'" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/A Coruna.jpeg', 'A Coruña')">
+            <div class="gallery-item" data-cat="reisen" data-type="image" onclick="openLightbox('Medien/A Coruna.jpeg', 'A Coruña', 'image')">
                 <img src="Medien/A Coruna.jpeg" alt="A Coruña" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/Sunset.jpeg', 'Sonnenuntergang')">
+            <div class="gallery-item" data-cat="reisen" data-type="image" onclick="openLightbox('Medien/Sunset.jpeg', 'Sonnenuntergang', 'image')">
                 <img src="Medien/Sunset.jpeg" alt="Sonnenuntergang" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="reisen" onclick="openLightbox('Medien/Spain Clip.jpeg', 'Spanien')">
+            <div class="gallery-item" data-cat="reisen" data-type="image" onclick="openLightbox('Medien/Spain Clip.jpeg', 'Spanien', 'image')">
                 <img src="Medien/Spain Clip.jpeg" alt="Spanien" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/Fliegen.jpeg', 'Fliegen')">
-                <img src="Medien/Fliegen.jpeg" alt="Fliegen" />
+            <!-- FRIENDS – Fliegen.jpeg ENTFERNT, nur Fliegen2 bleibt -->
+            <div class="gallery-item" data-cat="friends" data-type="image" onclick="openLightbox('Medien/Fliegen2.jpeg', 'Fliegen', 'image')">
+                <img src="Medien/Fliegen2.jpeg" alt="Fliegen" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/Fliegen2.jpeg', 'Fliegen 2')">
-                <img src="Medien/Fliegen2.jpeg" alt="Fliegen 2" />
-                <div class="overlay">🔍</div>
-            </div>
-
-            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/JuliUrlaub.jpeg', 'Urlaub')">
+            <div class="gallery-item" data-cat="friends" data-type="image" onclick="openLightbox('Medien/JuliUrlaub.jpeg', 'Urlaub', 'image')">
                 <img src="Medien/JuliUrlaub.jpeg" alt="Urlaub" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/Fondue.jpeg', 'Fondue Abend')">
+            <div class="gallery-item" data-cat="friends" data-type="image" onclick="openLightbox('Medien/Fondue.jpeg', 'Fondue Abend', 'image')">
                 <img src="Medien/Fondue.jpeg" alt="Fondue" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/Brotzeit.jpeg', 'Brotzeit')">
+            <div class="gallery-item" data-cat="friends" data-type="image" onclick="openLightbox('Medien/Brotzeit.jpeg', 'Brotzeit', 'image')">
                 <img src="Medien/Brotzeit.jpeg" alt="Brotzeit" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/JuliTraktor.jpeg', 'Traktor Spaß')">
+            <div class="gallery-item" data-cat="friends" data-type="image" onclick="openLightbox('Medien/JuliTraktor.jpeg', 'Traktor Spaß', 'image')">
                 <img src="Medien/JuliTraktor.jpeg" alt="Traktor" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/PeterTraktor.jpeg', 'Traktor Peter')">
+            <div class="gallery-item" data-cat="friends" data-type="image" onclick="openLightbox('Medien/PeterTraktor.jpeg', 'Traktor Peter', 'image')">
                 <img src="Medien/PeterTraktor.jpeg" alt="Traktor Peter" />
                 <div class="overlay">🔍</div>
             </div>
 
-            <div class="gallery-item" data-cat="friends" onclick="openLightbox('Medien/JuliKati.jpeg', 'Kati & Juli')">
+            <div class="gallery-item" data-cat="friends" data-type="image" onclick="openLightbox('Medien/JuliKati.jpeg', 'Kati & Juli', 'image')">
                 <img src="Medien/JuliKati.jpeg" alt="Kati und Juli" />
                 <div class="overlay">🔍</div>
             </div>
@@ -428,8 +474,12 @@
     <div class="lightbox" id="lightbox">
         <span class="lightbox-close" onclick="closeLightbox()">✕</span>
         <div class="lightbox-counter" id="lightbox-counter"></div>
+        <button class="lightbox-fullscreen" onclick="toggleFullscreen()" title="Vollbild">⛶</button>
         <button class="lightbox-arrow left" onclick="changeImage(-1)">&#8249;</button>
-        <img id="lightbox-img" src="" alt="" />
+
+        <img id="lightbox-img" src="" alt="" style="display:none;" />
+        <video id="lightbox-video" controls playsinline style="display:none;"></video>
+
         <button class="lightbox-arrow right" onclick="changeImage(1)">&#8250;</button>
         <div class="lightbox-caption" id="lightbox-caption"></div>
     </div>
@@ -447,15 +497,23 @@
             currentItems = [];
             document.querySelectorAll('.gallery-item').forEach(item => {
                 if (item.style.display !== 'none') {
+                    const isVideo = item.dataset.type === 'video';
+                    const mediaSrc = isVideo
+                        ? item.querySelector('video').src
+                        : item.querySelector('img').src;
+                    const caption = isVideo
+                        ? 'Video'
+                        : item.querySelector('img').alt;
                     currentItems.push({
-                        src: item.querySelector('img').src,
-                        caption: item.querySelector('img').alt
+                        src: mediaSrc,
+                        caption: caption,
+                        type: item.dataset.type || 'image'
                     });
                 }
             });
         }
 
-        function openLightbox(src, caption) {
+        function openLightbox(src, caption, type) {
             buildItemList();
             currentIndex = currentItems.findIndex(item =>
                 item.src.includes(src.split('/').pop())
@@ -469,8 +527,27 @@
             if (index < 0) index = currentItems.length - 1;
             if (index >= currentItems.length) index = 0;
             currentIndex = index;
-            document.getElementById('lightbox-img').src = currentItems[index].src;
-            document.getElementById('lightbox-caption').textContent = currentItems[index].caption;
+
+            const item = currentItems[index];
+            const imgEl = document.getElementById('lightbox-img');
+            const videoEl = document.getElementById('lightbox-video');
+
+            videoEl.pause();
+            videoEl.src = '';
+
+            if (item.type === 'video') {
+                imgEl.style.display = 'none';
+                videoEl.style.display = 'block';
+                videoEl.src = item.src;
+                videoEl.load();
+            } else {
+                videoEl.style.display = 'none';
+                imgEl.style.display = 'block';
+                imgEl.src = item.src;
+                imgEl.alt = item.caption;
+            }
+
+            document.getElementById('lightbox-caption').textContent = item.caption;
             document.getElementById('lightbox-counter').textContent =
                 (currentIndex + 1) + ' / ' + currentItems.length;
         }
@@ -480,21 +557,38 @@
         }
 
         function closeLightbox() {
+            const videoEl = document.getElementById('lightbox-video');
+            videoEl.pause();
+            videoEl.src = '';
+            if (document.fullscreenElement) document.exitFullscreen();
             document.getElementById('lightbox').classList.remove('active');
         }
 
-        // Klick außerhalb schließt Lightbox
+        function toggleFullscreen() {
+            const videoEl = document.getElementById('lightbox-video');
+            if (currentItems[currentIndex]?.type === 'video') {
+                if (videoEl.requestFullscreen) videoEl.requestFullscreen();
+                return;
+            }
+            const lb = document.getElementById('lightbox');
+            if (!document.fullscreenElement) {
+                lb.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
         document.getElementById('lightbox').addEventListener('click', function (e) {
             if (e.target === this) closeLightbox();
         });
 
-        // Pfeiltasten & ESC
         document.addEventListener('keydown', function (e) {
             const lb = document.getElementById('lightbox');
             if (!lb.classList.contains('active')) return;
             if (e.key === 'ArrowRight') changeImage(1);
             if (e.key === 'ArrowLeft') changeImage(-1);
             if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'f' || e.key === 'F') toggleFullscreen();
         });
 
         function filterGallery(cat, btn) {
