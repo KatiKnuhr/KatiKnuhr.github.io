@@ -1,6 +1,17 @@
 ﻿<!DOCTYPE html>
 <html lang="de">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z106BT6HR8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Z106BT6HR8');
+    </script>
+
+    <!-- Rest deines bestehenden Codes -->
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hobbys – Kati Knuhr</title>
@@ -48,16 +59,17 @@
                     border-bottom: 2px solid #a8d8ea;
                     padding-bottom: 4px;
                 }
-
         .page-hero {
             height: 40vh;
-            background: url('Medien/Skitour.jpeg') center center / cover no-repeat;
+            background-image: url('Medien/Skitour.jpeg');
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
         }
-
             .page-hero::after {
                 content: '';
                 position: absolute;
