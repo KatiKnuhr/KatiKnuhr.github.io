@@ -574,6 +574,7 @@
     <script>
         let currentIndex = 0;
         let currentItems = [];
+        let wasFullscreen = false; // ✅ Merkt sich ob Vollbild aktiv war
 
         function buildItemList() {
             currentItems = [];
@@ -602,6 +603,7 @@
                 item.src.includes(src.split('/').pop())
             );
             if (currentIndex === -1) currentIndex = 0;
+            wasFullscreen = false;
             showImage(currentIndex);
             document.getElementById('lightbox').classList.add('active');
         }
@@ -615,7 +617,6 @@
             const imgEl = document.getElementById('lightbox-img');
             const videoEl = document.getElementById('lightbox-video');
 
-            // Video immer stoppen und zurücksetzen
             videoEl.pause();
             videoEl.src = '';
 
@@ -624,10 +625,7 @@
                 videoEl.style.display = 'block';
                 videoEl.src = item.src;
                 videoEl.load();
-                // ✅ Sofort abspielen sobald genug geladen
-                videoEl.play().catch(() => {
-                    // Browser blockiert manchmal Autoplay – kein Problem
-                });
+                videoEl.play().catch(() => { });
             } else {
                 videoEl.style.display = 'none';
                 imgEl.style.display = 'block';
@@ -641,9 +639,18 @@
         }
 
         function changeImage(direction) {
-            if (document.fullscreenElement) {
+            const lb = document.getElementById('lightbox');
+            const inFullscreen = !!document.fullscreenElement;
+
+            if (inFullscreen) {
+                // ✅ Vollbild merken, raus, neues Bild laden, wieder rein
+                wasFullscreen = true;
                 document.exitFullscreen().then(() => {
                     showImage(currentIndex + direction);
+                    // Kurz warten damit DOM updated, dann wieder Vollbild
+                    setTimeout(() => {
+                        lb.requestFullscreen().catch(() => { });
+                    }, 50);
                 });
             } else {
                 showImage(currentIndex + direction);
@@ -654,6 +661,7 @@
             const videoEl = document.getElementById('lightbox-video');
             videoEl.pause();
             videoEl.src = '';
+            wasFullscreen = false;
             if (document.fullscreenElement) {
                 document.exitFullscreen().then(() => {
                     document.getElementById('lightbox').classList.remove('active');
@@ -670,15 +678,18 @@
                     console.warn('Vollbild nicht möglich:', err);
                 });
             } else {
+                wasFullscreen = false;
                 document.exitFullscreen();
             }
         }
 
+        // Klick auf Bild = Vollbild toggeln
         document.getElementById('lightbox-img').addEventListener('click', function (e) {
             e.stopPropagation();
             toggleFullscreen();
         });
 
+        // Klick auf Hintergrund = schließen
         document.getElementById('lightbox').addEventListener('click', function (e) {
             if (e.target === this) closeLightbox();
         });
@@ -690,6 +701,7 @@
             if (e.key === 'ArrowLeft') changeImage(-1);
             if (e.key === 'Escape') {
                 if (!document.fullscreenElement) closeLightbox();
+                // ESC aus Vollbild macht der Browser automatisch
             }
             if (e.key === 'f' || e.key === 'F') toggleFullscreen();
         });
