@@ -593,6 +593,12 @@
             if (e.target === this) closeLightbox();
         });
 
+        // Bild klicken = Vollbild
+        document.getElementById('lightbox-img').addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleFullscreen();
+        });
+
         document.addEventListener('keydown', function (e) {
             const lb = document.getElementById('lightbox');
             if (!lb.classList.contains('active')) return;
