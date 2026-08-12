@@ -10,8 +10,6 @@
         gtag('config', 'G-Z106BT6HR8');
     </script>
 
-    <!-- Rest deines bestehenden Codes -->
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hobbys – Kati Knuhr</title>
@@ -60,6 +58,32 @@
                     border-bottom: 2px solid #a8d8ea;
                     padding-bottom: 4px;
                 }
+
+        .nav-login {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .nav-login-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            backdrop-filter: blur(6px);
+        }
+
+            .nav-login-btn:hover {
+                background: rgba(255, 255, 255, 0.35);
+                transform: scale(1.05);
+            }
 
         .page-hero {
             height: 40vh;
@@ -184,12 +208,26 @@
                 nav a {
                     font-size: 13px;
                 }
+
+            .nav-login-btn {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
         }
     </style>
 </head>
 <body>
 
+    <script>
+        if (sessionStorage.getItem('kati_logged_in') !== 'true') {
+            window.location.href = 'Mentlberg.html';
+        }
+    </script>
+
     <nav>
+        <div class="nav-login">
+            <button class="nav-login-btn" onclick="logout()">🔓 Abmelden</button>
+        </div>
         <a href="index.html">Home</a>
         <a href="ueber.html">Über mich</a>
         <a href="hobbys.html" class="active">Hobbys</a>
@@ -288,6 +326,13 @@
         <h3>Kati Knuhr</h3>
         <p>© 2026 – Made with ❤️ and lots of adventures</p>
     </footer>
+
+    <script>
+        function logout() {
+            sessionStorage.removeItem('kati_logged_in');
+            window.location.href = 'Mentlberg.html';
+        }
+    </script>
 
 </body>
 </html>

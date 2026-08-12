@@ -1,7 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="de">
 <head>
-
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z106BT6HR8"></script>
     <script>
@@ -14,7 +13,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Galerie – Kati Knuhr</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛷️</text></svg>">    <style>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛷️</text></svg>">
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -58,6 +58,32 @@
                     border-bottom: 2px solid #a8d8ea;
                     padding-bottom: 4px;
                 }
+
+        .nav-login {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .nav-login-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            backdrop-filter: blur(6px);
+        }
+
+            .nav-login-btn:hover {
+                background: rgba(255, 255, 255, 0.35);
+                transform: scale(1.05);
+            }
 
         .page-hero {
             height: 40vh;
@@ -162,7 +188,6 @@
                 opacity: 1;
             }
 
-        /* VIDEO BADGE */
         .video-badge {
             position: absolute;
             top: 10px;
@@ -176,7 +201,6 @@
             pointer-events: none;
         }
 
-        /* LIGHTBOX */
         .lightbox {
             display: none;
             position: fixed;
@@ -209,7 +233,6 @@
                 outline: none;
             }
 
-            /* Vollbild-Styles */
             .lightbox:fullscreen {
                 background: black;
                 display: flex;
@@ -373,6 +396,11 @@
                     font-size: 13px;
                 }
 
+            .nav-login-btn {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+
             .lightbox-arrow {
                 font-size: 40px;
                 padding: 8px 16px;
@@ -382,7 +410,16 @@
 </head>
 <body>
 
+    <script>
+        if (sessionStorage.getItem('kati_logged_in') !== 'true') {
+            window.location.href = 'Mentlberg.html';
+        }
+    </script>
+
     <nav>
+        <div class="nav-login">
+            <button class="nav-login-btn" onclick="logout()">🔓 Abmelden</button>
+        </div>
         <a href="index.html">Home</a>
         <a href="ueber.html">Über mich</a>
         <a href="hobbys.html">Hobbys</a>
@@ -572,9 +609,16 @@
     </footer>
 
     <script>
+        // Schutz
+        function logout() {
+            sessionStorage.removeItem('kati_logged_in');
+            window.location.href = 'Mentlberg.html';
+        }
+
+        // Galerie & Lightbox
         let currentIndex = 0;
         let currentItems = [];
-        let wasFullscreen = false; // ✅ Merkt sich ob Vollbild aktiv war
+        let wasFullscreen = false;
 
         function buildItemList() {
             currentItems = [];
@@ -643,11 +687,9 @@
             const inFullscreen = !!document.fullscreenElement;
 
             if (inFullscreen) {
-                // ✅ Vollbild merken, raus, neues Bild laden, wieder rein
                 wasFullscreen = true;
                 document.exitFullscreen().then(() => {
                     showImage(currentIndex + direction);
-                    // Kurz warten damit DOM updated, dann wieder Vollbild
                     setTimeout(() => {
                         lb.requestFullscreen().catch(() => { });
                     }, 50);
@@ -683,13 +725,11 @@
             }
         }
 
-        // Klick auf Bild = Vollbild toggeln
         document.getElementById('lightbox-img').addEventListener('click', function (e) {
             e.stopPropagation();
             toggleFullscreen();
         });
 
-        // Klick auf Hintergrund = schließen
         document.getElementById('lightbox').addEventListener('click', function (e) {
             if (e.target === this) closeLightbox();
         });
@@ -701,7 +741,6 @@
             if (e.key === 'ArrowLeft') changeImage(-1);
             if (e.key === 'Escape') {
                 if (!document.fullscreenElement) closeLightbox();
-                // ESC aus Vollbild macht der Browser automatisch
             }
             if (e.key === 'f' || e.key === 'F') toggleFullscreen();
         });
