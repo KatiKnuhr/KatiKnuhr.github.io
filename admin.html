@@ -197,6 +197,12 @@
             color: #58151c;
         }
 
+        /* ✅ NEU: reregister Badge */
+        .status-reregister {
+            background: #ffe5d0;
+            color: #7d3200;
+        }
+
         .action-btns {
             display: flex;
             gap: 8px;
@@ -251,6 +257,24 @@
 
             .btn-delete:hover {
                 background: #495057;
+                transform: scale(1.05);
+            }
+
+        /* ✅ NEU: reregister Button */
+        .btn-reregister {
+            padding: 6px 14px;
+            border-radius: 50px;
+            border: none;
+            background: #fd7e14;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-reregister:hover {
+                background: #e8650a;
                 transform: scale(1.05);
             }
 
@@ -362,6 +386,7 @@
     <script>
         const EMAILJS_SERVICE_ID = 'service_8zqqtp2';
         const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
+        const EMAILJS_TEMPLATE_REREGISTER = 'template_o78ci8o'; // ✅ eigenes Template empfohlen
 
         // ✅ Zugriffsschutz
         if (sessionStorage.getItem('kati_role') !== 'admin') {
@@ -405,7 +430,7 @@
             tbody.innerHTML = '';
 
             users.sort((a, b) => {
-                const order = { pending: 0, approved: 1, rejected: 2 };
+                const order = { pending: 0, approved: 1, rejected: 2, reregister: 3 };
                 return (order[a.status] || 0) - (order[b.status] || 0);
             });
 
@@ -417,7 +442,8 @@
                 const statusLabels = {
                     pending: '<span class="status-badge status-pending">⏳ Ausstehend</span>',
                     approved: '<span class="status-badge status-approved">✅ Freigeschaltet</span>',
-                    rejected: '<span class="status-badge status-rejected">❌ Abgelehnt</span>'
+                    rejected: '<span class="status-badge status-rejected">❌ Abgelehnt</span>',
+                    reregister: '<span class="status-badge status-reregister">🔄 Neu eingeladen</span>'
                 };
 
                 let actions = '';
@@ -433,11 +459,20 @@
                                 <button class="btn-reject" onclick="rejectUser('${user.id}', '${user.name}')">🚫 Sperren</button>
                                 <button class="btn-delete" onclick="deleteUser('${user.id}', '${user.name}')">🗑️ Löschen</button>
                             </div>`;
-                } else {
+                } else if (user.status === 'reregister') {
+                    // ✅ NEU: Bereits eingeladen – warten auf neue Registrierung
                     actions = `
                             <div class="action-btns">
-                                <button class="btn-approve" onclick="approveUser('${user.id}', '${user.email}', '${user.name}')">♻️ Reaktivieren</button>
+                                <button class="btn-approve" onclick="approveUser('${user.id}', '${user.email}', '${user.name}')">✅ Direkt freischalten</button>
                                 <button class="btn-delete"  onclick="deleteUser('${user.id}', '${user.name}')">🗑️ Löschen</button>
+                            </div>`;
+                } else {
+                    // rejected
+                    actions = `
+                            <div class="action-btns">
+                                <button class="btn-approve"     onclick="approveUser('${user.id}', '${user.email}', '${user.name}')">♻️ Reaktivieren</button>
+                                <button class="btn-reregister"  onclick="allowReregister('${user.id}', '${user.email}', '${user.name}')">🔄 Neu einladen</button>
+                                <button class="btn-delete"      onclick="deleteUser('${user.id}', '${user.name}')">🗑️ Löschen</button>
                             </div>`;
                 }
 
@@ -461,7 +496,10 @@
             const { doc, updateDoc } = window._firebaseFns;
             const db = window._db;
 
-            await updateDoc(doc(db, 'users', uid), { status: 'approved' });
+            await updateDoc(doc(db, 'users', uid), {
+                status: 'approved',
+                reregisterAllowed: false
+            });
 
             try {
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ACTIVATED, {
@@ -484,8 +522,38 @@
             const { doc, updateDoc } = window._firebaseFns;
             const db = window._db;
 
-            await updateDoc(doc(db, 'users', uid), { status: 'rejected' });
+            await updateDoc(doc(db, 'users', uid), {
+                status: 'rejected',
+                reregisterAllowed: false
+            });
             showToast(`🚫 ${name} wurde gesperrt.`);
+            loadUsers();
+        }
+
+        // ✅ NEU: Neue Registrierung erlauben
+        async function allowReregister(uid, email, name) {
+            if (!confirm(`🔄 "${name}" darf sich erneut registrieren?`)) return;
+
+            await waitForFirebase();
+            const { doc, updateDoc } = window._firebaseFns;
+            const db = window._db;
+
+            await updateDoc(doc(db, 'users', uid), {
+                status: 'reregister',
+                reregisterAllowed: true
+            });
+
+            try {
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REREGISTER, {
+                    to_email: email,
+                    to_name: name,
+                    login_link: 'https://katiknuhr.github.io/start.html'
+                });
+            } catch (e) {
+                console.warn('E-Mail konnte nicht gesendet werden:', e);
+            }
+
+            showToast(`🔄 ${name} wurde zur erneuten Registrierung eingeladen!`);
             loadUsers();
         }
 
@@ -508,7 +576,6 @@
             setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        // ✅ "Zur Website" → index.html (Hauptseite, nicht Login)
         function goHome() { window.location.href = 'index.html'; }
 
         function logout() {

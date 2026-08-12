@@ -20,6 +20,7 @@
             doc,
             setDoc,
             getDoc,
+            updateDoc,
             serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -45,6 +46,7 @@
             doc,
             setDoc,
             getDoc,
+            updateDoc,
             serverTimestamp
         };
 
@@ -240,6 +242,19 @@
             display: none;
             line-height: 1.6;
         }
+
+        /* ✅ NEU: Banner für erneute Registrierung */
+        .reregister-banner {
+            background: rgba(253,126,20,0.2);
+            border: 1px solid rgba(253,126,20,0.4);
+            border-radius: 12px;
+            padding: 14px;
+            color: #ffb347;
+            font-size: 13px;
+            margin-top: 14px;
+            display: none;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -264,6 +279,11 @@
             <div class="pending-banner" id="pending-banner">
                 ⏳ Dein Account wartet noch auf Genehmigung.<br>
                 Kati wird deine Anfrage prüfen und du erhältst eine E-Mail sobald du freigeschaltet wirst.
+            </div>
+            <!-- ✅ NEU: Banner für erneute Registrierung -->
+            <div class="reregister-banner" id="reregister-banner">
+                🔄 Du wurdest zur erneuten Registrierung eingeladen!<br>
+                Bitte wechsle zum Tab <strong>📝 Registrieren</strong> und erstelle deinen Account neu.
             </div>
         </div>
 
@@ -299,7 +319,7 @@
         }
 
         function hideAllMessages() {
-            document.querySelectorAll('.msg, .pending-banner').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.msg, .pending-banner, .reregister-banner').forEach(el => el.style.display = 'none');
         }
 
         function showMsg(id, text, type = 'error') {
@@ -319,7 +339,7 @@
                 return;
             }
 
-            // ✅ Admin Login → admin.html
+            // ✅ Admin Login
             if (user === ADMIN_USER && pass === ADMIN_PASS) {
                 sessionStorage.setItem('kati_logged_in', 'true');
                 sessionStorage.setItem('kati_role', 'admin');
@@ -360,6 +380,15 @@
 
                 if (data.status === 'rejected') {
                     showMsg('login-error', '❌ Dein Account wurde abgelehnt.');
+                    btn.disabled = false;
+                    btn.textContent = 'Anmelden';
+                    return;
+                }
+
+                // ✅ NEU: reregister Status → Hinweis anzeigen
+                if (data.status === 'reregister') {
+                    document.getElementById('reregister-banner').style.display = 'block';
+                    document.getElementById('login-error').style.display = 'none';
                     btn.disabled = false;
                     btn.textContent = 'Anmelden';
                     return;
@@ -422,20 +451,64 @@
 
             try {
                 await waitForFirebase();
-                const { createUserWithEmailAndPassword, doc, setDoc, serverTimestamp } = window._firebaseFns;
+                const { createUserWithEmailAndPassword, doc, setDoc, getDoc, updateDoc, serverTimestamp } = window._firebaseFns;
                 const auth = window._auth;
                 const db = window._db;
 
-                const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-                const uid = userCred.user.uid;
+                // ✅ NEU: Prüfen ob E-Mail bereits als "reregister" existiert
+                // Firebase Auth erstellt neuen User – danach Firestore prüfen
+                let uid;
+                let isReregister = false;
 
-                await setDoc(doc(db, 'users', uid), {
-                    uid: uid,
-                    name: name,
-                    email: email,
-                    status: 'pending',
-                    createdAt: serverTimestamp()
-                });
+                try {
+                    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+                    uid = userCred.user.uid;
+                } catch (authErr) {
+                    if (authErr.code === 'auth/email-already-in-use') {
+                        // ✅ Email existiert bereits → prüfen ob reregister erlaubt
+                        const { signInWithEmailAndPassword } = window._firebaseFns;
+                        try {
+                            const userCred = await signInWithEmailAndPassword(auth, email, pass);
+                            uid = userCred.user.uid;
+                            const existingDoc = await getDoc(doc(db, 'users', uid));
+                            if (existingDoc.exists() && existingDoc.data().status === 'reregister' && existingDoc.data().reregisterAllowed) {
+                                isReregister = true;
+                            } else {
+                                showMsg('reg-error', '❌ Diese E-Mail ist bereits registriert.');
+                                btn.disabled = false;
+                                btn.textContent = 'Registrieren';
+                                return;
+                            }
+                        } catch {
+                            showMsg('reg-error', '❌ Diese E-Mail ist bereits registriert. Bitte melde dich an.');
+                            btn.disabled = false;
+                            btn.textContent = 'Registrieren';
+                            return;
+                        }
+                    } else {
+                        throw authErr;
+                    }
+                }
+
+                if (isReregister) {
+                    // ✅ NEU: Bestehenden Eintrag auf "pending" zurücksetzen
+                    await updateDoc(doc(db, 'users', uid), {
+                        name: name,
+                        status: 'pending',
+                        reregisterAllowed: false,
+                        createdAt: serverTimestamp()
+                    });
+                } else {
+                    // Normaler neuer User
+                    await setDoc(doc(db, 'users', uid), {
+                        uid: uid,
+                        name: name,
+                        email: email,
+                        status: 'pending',
+                        reregisterAllowed: false,
+                        createdAt: serverTimestamp()
+                    });
+                }
 
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REQUEST, {
                     to_email: OWNER_EMAIL,
@@ -459,9 +532,7 @@
 
             } catch (err) {
                 let msg = '❌ Registrierung fehlgeschlagen.';
-                if (err.code === 'auth/email-already-in-use') {
-                    msg = '❌ Diese E-Mail ist bereits registriert.';
-                } else if (err.code === 'auth/invalid-email') {
+                if (err.code === 'auth/invalid-email') {
                     msg = '❌ Ungültige E-Mail-Adresse.';
                 } else if (err.code === 'auth/weak-password') {
                     msg = '❌ Passwort zu schwach (min. 6 Zeichen).';
@@ -488,7 +559,7 @@
             }
         });
 
-        // ✅ Bereits eingeloggt → direkt zu Mentlberg.html
+        // ✅ Bereits eingeloggt → direkt weiterleiten
         if (sessionStorage.getItem('kati_logged_in') === 'true') {
             const role = sessionStorage.getItem('kati_role');
             if (role === 'admin') {
