@@ -442,7 +442,8 @@
                     user_name: name,
                     user_email: email,
                     user_uid: uid,
-                    approve_link: 'https://katiknuhr.github.io/admin.html',
+                    approve_link: `https://katiknuhr.github.io/action.html?uid=${uid}&action=approve`,
+                    reject_link: `https://katiknuhr.github.io/action.html?uid=${uid}&action=reject`,
                     reply_to: email
                 });
 

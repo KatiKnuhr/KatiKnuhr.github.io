@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aktion – Kati Knuhr</title>
+    <link rel="icon" type="image/jpeg" href="Ice.jpeg">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getFirestore,
+            doc,
+            updateDoc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHCOxeQufkdx0sYIxTKPnAdrzcvErOrEA",
+            authDomain: "katiknuhr-91ba3.firebaseapp.com",
+            projectId: "katiknuhr-91ba3",
+            storageBucket: "katiknuhr-91ba3.firebasestorage.app",
+            messagingSenderId: "608861491092",
+            appId: "1:608861491092:web:73a0deb3c58cbd75c18981"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function handleAction() {
+            const params = new URLSearchParams(window.location.search);
+            const uid = params.get('uid');
+            const action = params.get('action');
+
+            const statusEl = document.getElementById('status');
+            const iconEl = document.getElementById('icon');
+
+            if (!uid || !action) {
+                statusEl.textContent = '❌ Ungültiger Link.';
+                return;
+            }
+
+            try {
+                // User-Daten laden
+                const userDoc = await getDoc(doc(db, 'users', uid));
+                if (!userDoc.exists()) {
+                    statusEl.textContent = '❌ Benutzer nicht gefunden.';
+                    return;
+                }
+
+                const userData = userDoc.data();
+                const userName = userData.name || 'Unbekannt';
+
+                if (action === 'approve') {
+                    await updateDoc(doc(db, 'users', uid), { status: 'approved' });
+                    iconEl.textContent = '✅';
+                    statusEl.innerHTML = `<strong>${userName}</strong> wurde erfolgreich freigeschaltet!`;
+                    document.getElementById('card').style.borderTop = '4px solid #28a745';
+
+                } else if (action === 'reject') {
+                    await updateDoc(doc(db, 'users', uid), { status: 'rejected' });
+                    iconEl.textContent = '❌';
+                    statusEl.innerHTML = `<strong>${userName}</strong> wurde abgelehnt.`;
+                    document.getElementById('card').style.borderTop = '4px solid #dc3545';
+
+                } else {
+                    statusEl.textContent = '❌ Unbekannte Aktion.';
+                }
+
+            } catch (err) {
+                statusEl.textContent = '❌ Fehler: ' + err.message;
+                console.error(err);
+            }
+        }
+
+        handleAction();
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 44px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            border-top: 4px solid #2c6e8a;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #1a4a5e;
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+
+        #status {
+            font-size: 16px;
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #2c6e8a, #a8d8ea);
+            color: white;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(44,110,138,0.4);
+            }
+    </style>
+</head>
+<body>
+    <div class="card" id="card">
+        <div class="icon" id="icon">⏳</div>
+        <h2>Kati Knuhr – Admin Aktion</h2>
+        <p id="status">Aktion wird ausgeführt...</p>
+        <a href="admin.html" class="btn">🛡️ Zum Admin Panel</a>
+    </div>
+</body>
+</html>
