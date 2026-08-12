@@ -21,7 +21,11 @@
             setDoc,
             getDoc,
             updateDoc,
-            serverTimestamp
+            serverTimestamp,
+            collection,
+            query,
+            where,
+            getDocs
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -47,7 +51,11 @@
             setDoc,
             getDoc,
             updateDoc,
-            serverTimestamp
+            serverTimestamp,
+            collection,
+            query,
+            where,
+            getDocs
         };
 
         window._firebaseReady = true;
@@ -271,7 +279,7 @@
 
         <!-- LOGIN TAB -->
         <div class="tab-content active" id="tab-login">
-            <input type="text" id="login-user" placeholder="Benutzername oder E-Mail" />
+            <input type="text" id="login-user" placeholder="Benutzerna oder E-Mail" />
             <input type="password" id="login-pass" placeholder="Passwort" />
             <button class="login-btn" id="login-btn" onclick="doLogin()">Anmelden</button>
             <div class="msg error" id="login-error"></div>
@@ -327,18 +335,44 @@
             el.style.display = 'block';
         }
 
+        // ✅ NEU: Hilfsfunktion – Benutzername → E-Mail aus Firestore holen
+        async function getEmailByUsername(username) {
+            const { collection, query, where, getDocs } = window._firebaseFns;
+            const db = window._db;
+
+            // Suche case-insensitive: name-Feld in Firestore (exakter Match)
+            const q = query(collection(db, 'users'), where('name', '==', username));
+            const snapshot = await getDocs(q);
+
+            if (!snapshot.empty) {
+                return snapshot.docs[0].data().email;
+            }
+
+            // Zweiter Versuch: lowercase vergleichen (falls Name mit anderer Groß-/Kleinschreibung gespeichert)
+            const qAll = query(collection(db, 'users'));
+            const allSnapshot = await getDocs(qAll);
+            for (const d of allSnapshot.docs) {
+                const data = d.data();
+                if (data.name && data.name.toLowerCase() === username.toLowerCase()) {
+                    return data.email;
+                }
+            }
+
+            return null; // Kein User gefunden
+        }
+
         async function doLogin() {
-            const user = document.getElementById('login-user').value.trim();
+            const userInput = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
             const btn = document.getElementById('login-btn');
 
-            if (!user || !pass) {
+            if (!userInput || !pass) {
                 showMsg('login-error', '❌ Bitte alle Felder ausfüllen.');
                 return;
             }
 
             // Admin Login
-            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+            if (userInput === ADMIN_USER && pass === ADMIN_PASS) {
                 sessionStorage.setItem('kati_logged_in', 'true');
                 sessionStorage.setItem('kati_role', 'admin');
                 sessionStorage.setItem('kati_name', 'Kati (Admin)');
@@ -355,7 +389,24 @@
                 const auth = window._auth;
                 const db = window._db;
 
-                const userCred = await signInWithEmailAndPassword(auth, user, pass);
+                // ✅ NEU: Prüfen ob Eingabe eine E-Mail ist oder ein Benutzername
+                let emailToUse = userInput;
+                const isEmail = userInput.includes('@');
+
+                if (!isEmail) {
+                    // Benutzername → E-Mail aus Firestore holen
+                    const foundEmail = await getEmailByUsername(userInput);
+                    if (!foundEmail) {
+                        showMsg('login-error', '❌ Benutzername nicht gefunden.');
+                        btn.disabled = false;
+                        btn.textContent = 'Anmelden';
+                        return;
+                    }
+                    emailToUse = foundEmail;
+                }
+
+                // Firebase Auth Login mit E-Mail
+                const userCred = await signInWithEmailAndPassword(auth, emailToUse, pass);
                 const uid = userCred.user.uid;
                 const userDoc = await getDoc(doc(db, 'users', uid));
 
@@ -395,15 +446,19 @@
                     sessionStorage.setItem('kati_logged_in', 'true');
                     sessionStorage.setItem('kati_role', 'user');
                     sessionStorage.setItem('kati_uid', uid);
-                    sessionStorage.setItem('kati_name', data.name || user);
-                    sessionStorage.setItem('kati_email', user);
+                    sessionStorage.setItem('kati_name', data.name || userInput);
+                    sessionStorage.setItem('kati_email', emailToUse);
                     window.location.href = 'Mentlberg.html';
                     return;
                 }
 
             } catch (err) {
                 let msg = '❌ Anmeldung fehlgeschlagen.';
-                if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                if (
+                    err.code === 'auth/user-not-found' ||
+                    err.code === 'auth/wrong-password' ||
+                    err.code === 'auth/invalid-credential'
+                ) {
                     msg = '❌ Falscher Benutzername oder Passwort.';
                 } else if (err.code === 'auth/too-many-requests') {
                     msg = '⚠️ Zu viele Versuche. Bitte warte kurz.';
@@ -459,65 +514,50 @@
                 const db = window._db;
 
                 let uid;
-                let needsFirestoreDoc = false; // wird true wenn Firestore-Dokument fehlt oder reregister
+                let needsFirestoreDoc = false;
 
                 try {
-                    // Versuch: neuen Auth-Account erstellen
                     const userCred = await createUserWithEmailAndPassword(auth, email, pass);
                     uid = userCred.user.uid;
                     needsFirestoreDoc = true;
 
                 } catch (authErr) {
                     if (authErr.code === 'auth/email-already-in-use') {
-                        // Auth-Account existiert bereits → einloggen und Firestore prüfen
                         try {
                             const userCred = await signInWithEmailAndPassword(auth, email, pass);
                             uid = userCred.user.uid;
                             const existingDoc = await getDoc(doc(db, 'users', uid));
 
                             if (!existingDoc.exists()) {
-                                // ✅ KERNFIX: Auth vorhanden, Firestore-Dokument fehlt
-                                // → Admin hat nur Firestore gelöscht → erneute Registrierung erlaubt
                                 needsFirestoreDoc = true;
-
                             } else {
                                 const data = existingDoc.data();
-
                                 if (data.status === 'reregister' && data.reregisterAllowed) {
-                                    // ✅ Admin hat explizit zur Neu-Registrierung eingeladen
                                     needsFirestoreDoc = true;
-
                                 } else if (data.status === 'rejected') {
-                                    // ❌ Gesperrt → auf keinen Fall erlauben
                                     showMsg('reg-error', '❌ Dein Account wurde gesperrt. Eine erneute Registrierung ist nicht möglich.');
                                     btn.disabled = false;
                                     btn.textContent = 'Registrieren';
                                     return;
-
                                 } else {
-                                    // pending / approved → bereits aktiv
                                     showMsg('reg-error', '❌ Diese E-Mail ist bereits registriert.');
                                     btn.disabled = false;
                                     btn.textContent = 'Registrieren';
                                     return;
                                 }
                             }
-
                         } catch (loginErr) {
-                            // Falsches Passwort oder anderer Fehler
                             showMsg('reg-error', '❌ Diese E-Mail ist bereits registriert. Bitte melde dich an.');
                             btn.disabled = false;
                             btn.textContent = 'Registrieren';
                             return;
                         }
-
                     } else {
                         throw authErr;
                     }
                 }
 
                 if (needsFirestoreDoc) {
-                    // Firestore-Dokument anlegen (neu oder überschreiben)
                     await setDoc(doc(db, 'users', uid), {
                         uid: uid,
                         name: name,
@@ -528,7 +568,6 @@
                     });
                 }
 
-                // Benachrichtigungs-E-Mail an Admin
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REQUEST, {
                     to_email: OWNER_EMAIL,
                     user_name: name,
