@@ -17,15 +17,8 @@
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import {
             getFirestore,
-            doc,
-            setDoc,
-            getDoc,
-            updateDoc,
-            serverTimestamp,
-            collection,
-            query,
-            where,
-            getDocs
+            doc, setDoc, getDoc, updateDoc,
+            serverTimestamp, collection, query, where, getDocs
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -44,29 +37,17 @@
         window._auth = auth;
         window._db = db;
         window._firebaseFns = {
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut,
-            doc,
-            setDoc,
-            getDoc,
-            updateDoc,
-            serverTimestamp,
-            collection,
-            query,
-            where,
-            getDocs
+            createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+            doc, setDoc, getDoc, updateDoc, serverTimestamp,
+            collection, query, where, getDocs
         };
-
         window._firebaseReady = true;
         document.dispatchEvent(new Event('firebaseReady'));
     </script>
 
     <!-- EmailJS -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script>
-        emailjs.init("0pUv4sx0wjheKsoPj");
-    </script>
+    <script>emailjs.init("0pUv4sx0wjheKsoPj");</script>
 
     <style>
         * {
@@ -160,7 +141,10 @@
                 display: block;
             }
 
-        .login-box input {
+        /* Alle normalen Inputs */
+        .login-box input[type="text"],
+        .login-box input[type="email"],
+        .login-box input[type="password"] {
             width: 100%;
             padding: 14px 18px;
             border-radius: 12px;
@@ -173,13 +157,61 @@
             transition: border 0.3s;
         }
 
-            .login-box input::placeholder {
-                color: rgba(255,255,255,0.6);
+        .login-box input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .login-box input:focus {
+            border-color: #a8d8ea;
+        }
+
+        /* ── REMEMBER ME ──────────────────────────────── */
+        .remember-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            user-select: none;
+            text-align: left;
+        }
+
+            /* Verstecke native Checkbox */
+            .remember-row input[type="checkbox"] {
+                display: none;
             }
 
-            .login-box input:focus {
-                border-color: #a8d8ea;
+        .custom-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            border: 2px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.22s;
+        }
+
+        .remember-row input[type="checkbox"]:checked + .custom-checkbox {
+            background: linear-gradient(135deg, #2c6e8a, #a8d8ea);
+            border-color: #a8d8ea;
+        }
+
+            .remember-row input[type="checkbox"]:checked + .custom-checkbox::after {
+                content: '✓';
+                color: white;
+                font-size: 13px;
+                font-weight: 800;
             }
+
+        .remember-label {
+            color: rgba(255,255,255,0.78);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        /* ─────────────────────────────────────────────── */
 
         .login-btn {
             width: 100%;
@@ -279,10 +311,19 @@
 
         <!-- LOGIN TAB -->
         <div class="tab-content active" id="tab-login">
-            <input type="text" id="login-user" placeholder="Benutzerna oder E-Mail" />
+            <input type="text" id="login-user" placeholder="Benutzername oder E-Mail" />
             <input type="password" id="login-pass" placeholder="Passwort" />
+
+            <!-- ✅ ANGEMELDET BLEIBEN -->
+            <label class="remember-row">
+                <input type="checkbox" id="remember-me" />
+                <span class="custom-checkbox"></span>
+                <span class="remember-label">Angemeldet bleiben</span>
+            </label>
+
             <button class="login-btn" id="login-btn" onclick="doLogin()">Anmelden</button>
             <div class="msg error" id="login-error"></div>
+
             <div class="pending-banner" id="pending-banner">
                 ⏳ Dein Account wartet noch auf Genehmigung.<br>
                 Kati wird deine Anfrage prüfen und du erhältst eine E-Mail sobald du freigeschaltet wirst.
@@ -315,9 +356,45 @@
         const EMAILJS_TEMPLATE_REQUEST = 'template_yh83gp9';
         const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
 
+        // ── Schlüssel die wir speichern ───────────────────────────
+        const SESSION_KEYS = [
+            'kati_logged_in', 'kati_role',
+            'kati_uid', 'kati_name', 'kati_email'
+        ];
+
+        // ── Speichert in localStorage UND sessionStorage ──────────
+        // persistent = true  → localStorage (bleibt nach Browser-Schließen)
+        // persistent = false → nur sessionStorage (weg beim Tab-Schließen)
+        function saveSession(key, value, persistent) {
+            sessionStorage.setItem(key, value);          // immer
+            if (persistent) localStorage.setItem(key, value);
+        }
+
+        // ── Beim Laden: localStorage → sessionStorage übertragen ──
+        // Damit Mentlberg.html (das sessionStorage liest) funktioniert
+        (function checkPersistentLogin() {
+            const stored = localStorage.getItem('kati_logged_in');
+            if (stored === 'true') {
+                SESSION_KEYS.forEach(k => {
+                    const v = localStorage.getItem(k);
+                    if (v) sessionStorage.setItem(k, v);
+                });
+                const role = localStorage.getItem('kati_role');
+                window.location.href = role === 'admin' ? 'admin.html' : 'Mentlberg.html';
+                return;
+            }
+            // Fallback: normaler sessionStorage-Check
+            if (sessionStorage.getItem('kati_logged_in') === 'true') {
+                const role = sessionStorage.getItem('kati_role');
+                window.location.href = role === 'admin' ? 'admin.html' : 'Mentlberg.html';
+            }
+        })();
+
+        // ── Hilfsfunktionen ───────────────────────────────────────
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach((b, i) => {
-                b.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+                b.classList.toggle('active',
+                    (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
             });
             document.getElementById('tab-login').classList.toggle('active', tab === 'login');
             document.getElementById('tab-register').classList.toggle('active', tab === 'register');
@@ -325,7 +402,8 @@
         }
 
         function hideAllMessages() {
-            document.querySelectorAll('.msg, .pending-banner, .reregister-banner').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.msg, .pending-banner, .reregister-banner')
+                .forEach(el => el.style.display = 'none');
         }
 
         function showMsg(id, text, type = 'error') {
@@ -335,35 +413,38 @@
             el.style.display = 'block';
         }
 
-        // ✅ NEU: Hilfsfunktion – Benutzername → E-Mail aus Firestore holen
+        function waitForFirebase() {
+            return new Promise(r => {
+                if (window._firebaseReady) r();
+                else document.addEventListener('firebaseReady', r, { once: true });
+            });
+        }
+
+        // ── Benutzername → E-Mail aus Firestore ──────────────────
         async function getEmailByUsername(username) {
             const { collection, query, where, getDocs } = window._firebaseFns;
             const db = window._db;
 
-            // Suche case-insensitive: name-Feld in Firestore (exakter Match)
+            // Exakter Match
             const q = query(collection(db, 'users'), where('name', '==', username));
-            const snapshot = await getDocs(q);
+            const snap = await getDocs(q);
+            if (!snap.empty) return snap.docs[0].data().email;
 
-            if (!snapshot.empty) {
-                return snapshot.docs[0].data().email;
-            }
-
-            // Zweiter Versuch: lowercase vergleichen (falls Name mit anderer Groß-/Kleinschreibung gespeichert)
-            const qAll = query(collection(db, 'users'));
-            const allSnapshot = await getDocs(qAll);
-            for (const d of allSnapshot.docs) {
+            // Fallback: case-insensitive
+            const all = await getDocs(collection(db, 'users'));
+            for (const d of all.docs) {
                 const data = d.data();
-                if (data.name && data.name.toLowerCase() === username.toLowerCase()) {
+                if (data.name && data.name.toLowerCase() === username.toLowerCase())
                     return data.email;
-                }
             }
-
-            return null; // Kein User gefunden
+            return null;
         }
 
+        // ── LOGIN ─────────────────────────────────────────────────
         async function doLogin() {
             const userInput = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
+            const remember = document.getElementById('remember-me').checked; // ✅
             const btn = document.getElementById('login-btn');
 
             if (!userInput || !pass) {
@@ -371,11 +452,11 @@
                 return;
             }
 
-            // Admin Login
+            // ── Admin-Login ───────────────────────────────────────
             if (userInput === ADMIN_USER && pass === ADMIN_PASS) {
-                sessionStorage.setItem('kati_logged_in', 'true');
-                sessionStorage.setItem('kati_role', 'admin');
-                sessionStorage.setItem('kati_name', 'Kati (Admin)');
+                saveSession('kati_logged_in', 'true', remember);
+                saveSession('kati_role', 'admin', remember);
+                saveSession('kati_name', 'Kati (Admin)', remember);
                 window.location.href = 'admin.html';
                 return;
             }
@@ -389,31 +470,25 @@
                 const auth = window._auth;
                 const db = window._db;
 
-                // ✅ NEU: Prüfen ob Eingabe eine E-Mail ist oder ein Benutzername
+                // Benutzername oder E-Mail?
                 let emailToUse = userInput;
-                const isEmail = userInput.includes('@');
-
-                if (!isEmail) {
-                    // Benutzername → E-Mail aus Firestore holen
-                    const foundEmail = await getEmailByUsername(userInput);
-                    if (!foundEmail) {
+                if (!userInput.includes('@')) {
+                    const found = await getEmailByUsername(userInput);
+                    if (!found) {
                         showMsg('login-error', '❌ Benutzername nicht gefunden.');
-                        btn.disabled = false;
-                        btn.textContent = 'Anmelden';
+                        btn.disabled = false; btn.textContent = 'Anmelden';
                         return;
                     }
-                    emailToUse = foundEmail;
+                    emailToUse = found;
                 }
 
-                // Firebase Auth Login mit E-Mail
                 const userCred = await signInWithEmailAndPassword(auth, emailToUse, pass);
                 const uid = userCred.user.uid;
                 const userDoc = await getDoc(doc(db, 'users', uid));
 
                 if (!userDoc.exists()) {
                     showMsg('login-error', '❌ Kein Account gefunden.');
-                    btn.disabled = false;
-                    btn.textContent = 'Anmelden';
+                    btn.disabled = false; btn.textContent = 'Anmelden';
                     return;
                 }
 
@@ -421,48 +496,38 @@
 
                 if (data.status === 'pending') {
                     document.getElementById('pending-banner').style.display = 'block';
-                    document.getElementById('login-error').style.display = 'none';
-                    btn.disabled = false;
-                    btn.textContent = 'Anmelden';
+                    btn.disabled = false; btn.textContent = 'Anmelden';
                     return;
                 }
-
                 if (data.status === 'rejected') {
                     showMsg('login-error', '❌ Dein Account wurde gesperrt.');
-                    btn.disabled = false;
-                    btn.textContent = 'Anmelden';
+                    btn.disabled = false; btn.textContent = 'Anmelden';
                     return;
                 }
-
                 if (data.status === 'reregister') {
                     document.getElementById('reregister-banner').style.display = 'block';
-                    document.getElementById('login-error').style.display = 'none';
-                    btn.disabled = false;
-                    btn.textContent = 'Anmelden';
+                    btn.disabled = false; btn.textContent = 'Anmelden';
                     return;
                 }
 
                 if (data.status === 'approved') {
-                    sessionStorage.setItem('kati_logged_in', 'true');
-                    sessionStorage.setItem('kati_role', 'user');
-                    sessionStorage.setItem('kati_uid', uid);
-                    sessionStorage.setItem('kati_name', data.name || userInput);
-                    sessionStorage.setItem('kati_email', emailToUse);
+                    // ✅ Mit "remember" in localStorage, sonst nur sessionStorage
+                    saveSession('kati_logged_in', 'true', remember);
+                    saveSession('kati_role', 'user', remember);
+                    saveSession('kati_uid', uid, remember);
+                    saveSession('kati_name', data.name || userInput, remember);
+                    saveSession('kati_email', emailToUse, remember);
                     window.location.href = 'Mentlberg.html';
                     return;
                 }
 
             } catch (err) {
                 let msg = '❌ Anmeldung fehlgeschlagen.';
-                if (
-                    err.code === 'auth/user-not-found' ||
-                    err.code === 'auth/wrong-password' ||
-                    err.code === 'auth/invalid-credential'
-                ) {
+                if (['auth/user-not-found', 'auth/wrong-password', 'auth/invalid-credential']
+                    .includes(err.code))
                     msg = '❌ Falscher Benutzername oder Passwort.';
-                } else if (err.code === 'auth/too-many-requests') {
+                else if (err.code === 'auth/too-many-requests')
                     msg = '⚠️ Zu viele Versuche. Bitte warte kurz.';
-                }
                 showMsg('login-error', msg);
             }
 
@@ -470,6 +535,7 @@
             btn.textContent = 'Anmelden';
         }
 
+        // ── REGISTER ──────────────────────────────────────────────
         async function doRegister() {
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim();
@@ -481,20 +547,16 @@
             document.getElementById('reg-success').style.display = 'none';
 
             if (!name || !email || !pass || !pass2) {
-                showMsg('reg-error', '❌ Bitte alle Felder ausfüllen.');
-                return;
+                showMsg('reg-error', '❌ Bitte alle Felder ausfüllen.'); return;
             }
             if (pass.length < 6) {
-                showMsg('reg-error', '❌ Passwort muss mindestens 6 Zeichen haben.');
-                return;
+                showMsg('reg-error', '❌ Passwort muss mindestens 6 Zeichen haben.'); return;
             }
             if (pass !== pass2) {
-                showMsg('reg-error', '❌ Passwörter stimmen nicht überein.');
-                return;
+                showMsg('reg-error', '❌ Passwörter stimmen nicht überein.'); return;
             }
             if (!email.includes('@')) {
-                showMsg('reg-error', '❌ Bitte eine gültige E-Mail eingeben.');
-                return;
+                showMsg('reg-error', '❌ Bitte eine gültige E-Mail eingeben.'); return;
             }
 
             btn.disabled = true;
@@ -503,12 +565,8 @@
             try {
                 await waitForFirebase();
                 const {
-                    createUserWithEmailAndPassword,
-                    signInWithEmailAndPassword,
-                    doc,
-                    setDoc,
-                    getDoc,
-                    serverTimestamp
+                    createUserWithEmailAndPassword, signInWithEmailAndPassword,
+                    doc, setDoc, getDoc, serverTimestamp
                 } = window._firebaseFns;
                 const auth = window._auth;
                 const db = window._db;
@@ -520,7 +578,6 @@
                     const userCred = await createUserWithEmailAndPassword(auth, email, pass);
                     uid = userCred.user.uid;
                     needsFirestoreDoc = true;
-
                 } catch (authErr) {
                     if (authErr.code === 'auth/email-already-in-use') {
                         try {
@@ -531,37 +588,32 @@
                             if (!existingDoc.exists()) {
                                 needsFirestoreDoc = true;
                             } else {
-                                const data = existingDoc.data();
-                                if (data.status === 'reregister' && data.reregisterAllowed) {
+                                const d = existingDoc.data();
+                                if (d.status === 'reregister' && d.reregisterAllowed) {
                                     needsFirestoreDoc = true;
-                                } else if (data.status === 'rejected') {
-                                    showMsg('reg-error', '❌ Dein Account wurde gesperrt. Eine erneute Registrierung ist nicht möglich.');
-                                    btn.disabled = false;
-                                    btn.textContent = 'Registrieren';
+                                } else if (d.status === 'rejected') {
+                                    showMsg('reg-error',
+                                        '❌ Dein Account wurde gesperrt. Erneute Registrierung nicht möglich.');
+                                    btn.disabled = false; btn.textContent = 'Registrieren';
                                     return;
                                 } else {
                                     showMsg('reg-error', '❌ Diese E-Mail ist bereits registriert.');
-                                    btn.disabled = false;
-                                    btn.textContent = 'Registrieren';
+                                    btn.disabled = false; btn.textContent = 'Registrieren';
                                     return;
                                 }
                             }
-                        } catch (loginErr) {
-                            showMsg('reg-error', '❌ Diese E-Mail ist bereits registriert. Bitte melde dich an.');
-                            btn.disabled = false;
-                            btn.textContent = 'Registrieren';
+                        } catch {
+                            showMsg('reg-error',
+                                '❌ Diese E-Mail ist bereits registriert. Bitte melde dich an.');
+                            btn.disabled = false; btn.textContent = 'Registrieren';
                             return;
                         }
-                    } else {
-                        throw authErr;
-                    }
+                    } else { throw authErr; }
                 }
 
                 if (needsFirestoreDoc) {
                     await setDoc(doc(db, 'users', uid), {
-                        uid: uid,
-                        name: name,
-                        email: email,
+                        uid, name, email,
                         status: 'pending',
                         reregisterAllowed: false,
                         createdAt: serverTimestamp()
@@ -579,22 +631,16 @@
                 });
 
                 showMsg('reg-success',
-                    '✅ Registrierung erfolgreich! Kati wird deine Anfrage prüfen. Du erhältst eine E-Mail sobald dein Account freigeschaltet wird.',
-                    'success'
-                );
+                    '✅ Registrierung erfolgreich! Kati prüft deine Anfrage – du erhältst eine E-Mail.',
+                    'success');
 
-                document.getElementById('reg-name').value = '';
-                document.getElementById('reg-email').value = '';
-                document.getElementById('reg-pass').value = '';
-                document.getElementById('reg-pass2').value = '';
+                ['reg-name', 'reg-email', 'reg-pass', 'reg-pass2']
+                    .forEach(id => document.getElementById(id).value = '');
 
             } catch (err) {
                 let msg = '❌ Registrierung fehlgeschlagen.';
-                if (err.code === 'auth/invalid-email') {
-                    msg = '❌ Ungültige E-Mail-Adresse.';
-                } else if (err.code === 'auth/weak-password') {
-                    msg = '❌ Passwort zu schwach (min. 6 Zeichen).';
-                }
+                if (err.code === 'auth/invalid-email') msg = '❌ Ungültige E-Mail-Adresse.';
+                if (err.code === 'auth/weak-password') msg = '❌ Passwort zu schwach (min. 6 Zeichen).';
                 showMsg('reg-error', msg);
             }
 
@@ -602,30 +648,14 @@
             btn.textContent = 'Registrieren';
         }
 
-        function waitForFirebase() {
-            return new Promise((resolve) => {
-                if (window._firebaseReady) resolve();
-                else document.addEventListener('firebaseReady', resolve, { once: true });
-            });
-        }
-
-        document.addEventListener('keydown', function (e) {
+        // ── Enter-Taste ───────────────────────────────────────────
+        document.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 const activeTab = document.querySelector('.tab-content.active').id;
                 if (activeTab === 'tab-login') doLogin();
                 else doRegister();
             }
         });
-
-        // Bereits eingeloggt → direkt weiterleiten
-        if (sessionStorage.getItem('kati_logged_in') === 'true') {
-            const role = sessionStorage.getItem('kati_role');
-            if (role === 'admin') {
-                window.location.href = 'admin.html';
-            } else {
-                window.location.href = 'Mentlberg.html';
-            }
-        }
     </script>
 
 </body>

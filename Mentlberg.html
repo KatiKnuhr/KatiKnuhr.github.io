@@ -1216,7 +1216,9 @@
         }
 
         function logout() {
+            // Beide Speicher leeren → wirklich ausloggen
             sessionStorage.clear();
+            localStorage.clear();
             window.location.href = 'start.html';
         }
 
