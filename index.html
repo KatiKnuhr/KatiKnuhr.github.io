@@ -68,8 +68,8 @@
         }
 
         .nav-login-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.5);
             color: white;
             padding: 8px 18px;
             border-radius: 50px;
@@ -82,7 +82,7 @@
         }
 
             .nav-login-btn:hover {
-                background: rgba(255, 255, 255, 0.35);
+                background: rgba(255,255,255,0.35);
                 transform: scale(1.05);
             }
 
@@ -315,8 +315,9 @@
 <body>
 
     <script>
+        // ✅ Nicht eingeloggt → zur Login-Seite (start.html)
         if (sessionStorage.getItem('kati_logged_in') !== 'true') {
-            window.location.href = 'Mentlberg.html';
+            window.location.href = 'start.html';
         }
     </script>
 
@@ -387,8 +388,8 @@
 
     <script>
         function logout() {
-            sessionStorage.removeItem('kati_logged_in');
-            window.location.href = 'Mentlberg.html';
+            sessionStorage.clear(); // ✅ Alles clearen, nicht nur kati_logged_in
+            window.location.href = 'start.html'; // ✅ Zur Login-Seite
         }
     </script>
 

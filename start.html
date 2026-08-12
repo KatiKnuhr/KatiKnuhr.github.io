@@ -1,0 +1,502 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Willkommen – Kati Knuhr</title>
+    <link rel="icon" type="image/jpeg" href="Ice.jpeg">
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            getDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHCOxeQufkdx0sYIxTKPnAdrzcvErOrEA",
+            authDomain: "katiknuhr-91ba3.firebaseapp.com",
+            projectId: "katiknuhr-91ba3",
+            storageBucket: "katiknuhr-91ba3.firebasestorage.app",
+            messagingSenderId: "608861491092",
+            appId: "1:608861491092:web:73a0deb3c58cbd75c18981"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window._auth = auth;
+        window._db = db;
+        window._firebaseFns = {
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            doc,
+            setDoc,
+            getDoc,
+            serverTimestamp
+        };
+
+        window._firebaseReady = true;
+        document.dispatchEvent(new Event('firebaseReady'));
+    </script>
+
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        emailjs.init("0pUv4sx0wjheKsoPj");
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-image: url('Medien/Eis.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+        }
+
+        .login-box {
+            position: relative;
+            z-index: 2;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 24px;
+            padding: 50px 44px;
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+            .login-box h1 {
+                color: white;
+                font-size: 36px;
+                font-weight: 800;
+                letter-spacing: 3px;
+                margin-bottom: 8px;
+                text-shadow: 1px 1px 8px rgba(0,0,0,0.5);
+            }
+
+            .login-box .subtitle {
+                color: rgba(255,255,255,0.75);
+                font-size: 15px;
+                margin-bottom: 28px;
+                font-style: italic;
+            }
+
+        .tab-switcher {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            padding: 4px;
+            margin-bottom: 28px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.5px;
+        }
+
+            .tab-btn.active {
+                background: linear-gradient(135deg, #2c6e8a, #a8d8ea);
+                color: white;
+                box-shadow: 0 4px 12px rgba(44,110,138,0.4);
+            }
+
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 14px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+            .login-box input::placeholder {
+                color: rgba(255,255,255,0.6);
+            }
+
+            .login-box input:focus {
+                border-color: #a8d8ea;
+            }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            border: none;
+            background: linear-gradient(135deg, #2c6e8a, #a8d8ea);
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            margin-top: 6px;
+        }
+
+            .login-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(44,110,138,0.5);
+            }
+
+            .login-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        .msg {
+            font-size: 14px;
+            margin-top: 14px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            display: none;
+        }
+
+            .msg.error {
+                background: rgba(255,100,100,0.2);
+                color: #ff8a8a;
+                border: 1px solid rgba(255,100,100,0.3);
+            }
+
+            .msg.success {
+                background: rgba(100,200,100,0.2);
+                color: #90ee90;
+                border: 1px solid rgba(100,200,100,0.3);
+            }
+
+            .msg.info {
+                background: rgba(168,216,234,0.2);
+                color: #a8d8ea;
+                border: 1px solid rgba(168,216,234,0.3);
+            }
+
+        .hint {
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            margin-top: 18px;
+        }
+
+        .pending-banner {
+            background: rgba(255,200,50,0.2);
+            border: 1px solid rgba(255,200,50,0.4);
+            border-radius: 12px;
+            padding: 14px;
+            color: #ffd700;
+            font-size: 13px;
+            margin-top: 14px;
+            display: none;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <div class="login-box">
+        <h1>Kati Knuhr</h1>
+        <p class="subtitle">Abenteurerin · Sportmanagement · Innsbruck</p>
+
+        <div class="tab-switcher">
+            <button class="tab-btn active" onclick="switchTab('login')">🔑 Anmelden</button>
+            <button class="tab-btn" onclick="switchTab('register')">📝 Registrieren</button>
+        </div>
+
+        <!-- LOGIN TAB -->
+        <div class="tab-content active" id="tab-login">
+            <input type="text" id="login-user" placeholder="Benutzername oder E-Mail" />
+            <input type="password" id="login-pass" placeholder="Passwort" />
+            <button class="login-btn" id="login-btn" onclick="doLogin()">Anmelden</button>
+            <div class="msg error" id="login-error"></div>
+            <div class="pending-banner" id="pending-banner">
+                ⏳ Dein Account wartet noch auf Genehmigung.<br>
+                Kati wird deine Anfrage prüfen und du erhältst eine E-Mail sobald du freigeschaltet wirst.
+            </div>
+        </div>
+
+        <!-- REGISTER TAB -->
+        <div class="tab-content" id="tab-register">
+            <input type="text" id="reg-name" placeholder="Dein Name" />
+            <input type="email" id="reg-email" placeholder="E-Mail Adresse" />
+            <input type="password" id="reg-pass" placeholder="Passwort (min. 6 Zeichen)" />
+            <input type="password" id="reg-pass2" placeholder="Passwort wiederholen" />
+            <button class="login-btn" id="reg-btn" onclick="doRegister()">Registrieren</button>
+            <div class="msg error" id="reg-error"></div>
+            <div class="msg success" id="reg-success"></div>
+        </div>
+
+        <p class="hint">Nur für eingeladene Besucher · Kati Knuhr © 2026</p>
+    </div>
+
+    <script>
+        const ADMIN_USER = 'kati';
+        const ADMIN_PASS = 'ibk';
+        const OWNER_EMAIL = 'julianknuhr92@gmail.com';
+        const EMAILJS_SERVICE_ID = 'service_8zqqtp2';
+        const EMAILJS_TEMPLATE_REQUEST = 'template_yh83gp9';
+        const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach((b, i) => {
+                b.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+            });
+            document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+            document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+            hideAllMessages();
+        }
+
+        function hideAllMessages() {
+            document.querySelectorAll('.msg, .pending-banner').forEach(el => el.style.display = 'none');
+        }
+
+        function showMsg(id, text, type = 'error') {
+            const el = document.getElementById(id);
+            el.textContent = text;
+            el.className = `msg ${type}`;
+            el.style.display = 'block';
+        }
+
+        async function doLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const btn = document.getElementById('login-btn');
+
+            if (!user || !pass) {
+                showMsg('login-error', '❌ Bitte alle Felder ausfüllen.');
+                return;
+            }
+
+            // ✅ Admin Login → admin.html
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                sessionStorage.setItem('kati_logged_in', 'true');
+                sessionStorage.setItem('kati_role', 'admin');
+                sessionStorage.setItem('kati_name', 'Kati (Admin)');
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Anmelden...';
+
+            try {
+                await waitForFirebase();
+                const { signInWithEmailAndPassword, doc, getDoc } = window._firebaseFns;
+                const auth = window._auth;
+                const db = window._db;
+
+                const userCred = await signInWithEmailAndPassword(auth, user, pass);
+                const uid = userCred.user.uid;
+                const userDoc = await getDoc(doc(db, 'users', uid));
+
+                if (!userDoc.exists()) {
+                    showMsg('login-error', '❌ Kein Account gefunden.');
+                    btn.disabled = false;
+                    btn.textContent = 'Anmelden';
+                    return;
+                }
+
+                const data = userDoc.data();
+
+                if (data.status === 'pending') {
+                    document.getElementById('pending-banner').style.display = 'block';
+                    document.getElementById('login-error').style.display = 'none';
+                    btn.disabled = false;
+                    btn.textContent = 'Anmelden';
+                    return;
+                }
+
+                if (data.status === 'rejected') {
+                    showMsg('login-error', '❌ Dein Account wurde abgelehnt.');
+                    btn.disabled = false;
+                    btn.textContent = 'Anmelden';
+                    return;
+                }
+
+                // ✅ Normaler User → Mentlberg.html
+                if (data.status === 'approved') {
+                    sessionStorage.setItem('kati_logged_in', 'true');
+                    sessionStorage.setItem('kati_role', 'user');
+                    sessionStorage.setItem('kati_uid', uid);
+                    sessionStorage.setItem('kati_name', data.name || user);
+                    sessionStorage.setItem('kati_email', user);
+                    window.location.href = 'Mentlberg.html';
+                    return;
+                }
+
+            } catch (err) {
+                let msg = '❌ Anmeldung fehlgeschlagen.';
+                if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                    msg = '❌ Falscher Benutzername oder Passwort.';
+                } else if (err.code === 'auth/too-many-requests') {
+                    msg = '⚠️ Zu viele Versuche. Bitte warte kurz.';
+                }
+                showMsg('login-error', msg);
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Anmelden';
+        }
+
+        async function doRegister() {
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+            const pass2 = document.getElementById('reg-pass2').value;
+            const btn = document.getElementById('reg-btn');
+
+            document.getElementById('reg-error').style.display = 'none';
+            document.getElementById('reg-success').style.display = 'none';
+
+            if (!name || !email || !pass || !pass2) {
+                showMsg('reg-error', '❌ Bitte alle Felder ausfüllen.');
+                return;
+            }
+            if (pass.length < 6) {
+                showMsg('reg-error', '❌ Passwort muss mindestens 6 Zeichen haben.');
+                return;
+            }
+            if (pass !== pass2) {
+                showMsg('reg-error', '❌ Passwörter stimmen nicht überein.');
+                return;
+            }
+            if (!email.includes('@')) {
+                showMsg('reg-error', '❌ Bitte eine gültige E-Mail eingeben.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Registrierung läuft...';
+
+            try {
+                await waitForFirebase();
+                const { createUserWithEmailAndPassword, doc, setDoc, serverTimestamp } = window._firebaseFns;
+                const auth = window._auth;
+                const db = window._db;
+
+                const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+                const uid = userCred.user.uid;
+
+                await setDoc(doc(db, 'users', uid), {
+                    uid: uid,
+                    name: name,
+                    email: email,
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                });
+
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REQUEST, {
+                    to_email: OWNER_EMAIL,
+                    user_name: name,
+                    user_email: email,
+                    user_uid: uid,
+                    approve_link: 'https://katiknuhr.github.io/admin.html',
+                    reply_to: email
+                });
+
+                showMsg('reg-success',
+                    '✅ Registrierung erfolgreich! Kati wird deine Anfrage prüfen. Du erhältst eine E-Mail sobald dein Account freigeschaltet wird.',
+                    'success'
+                );
+
+                document.getElementById('reg-name').value = '';
+                document.getElementById('reg-email').value = '';
+                document.getElementById('reg-pass').value = '';
+                document.getElementById('reg-pass2').value = '';
+
+            } catch (err) {
+                let msg = '❌ Registrierung fehlgeschlagen.';
+                if (err.code === 'auth/email-already-in-use') {
+                    msg = '❌ Diese E-Mail ist bereits registriert.';
+                } else if (err.code === 'auth/invalid-email') {
+                    msg = '❌ Ungültige E-Mail-Adresse.';
+                } else if (err.code === 'auth/weak-password') {
+                    msg = '❌ Passwort zu schwach (min. 6 Zeichen).';
+                }
+                showMsg('reg-error', msg);
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Registrieren';
+        }
+
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window._firebaseReady) resolve();
+                else document.addEventListener('firebaseReady', resolve, { once: true });
+            });
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                const activeTab = document.querySelector('.tab-content.active').id;
+                if (activeTab === 'tab-login') doLogin();
+                else doRegister();
+            }
+        });
+
+        // ✅ Bereits eingeloggt → direkt zu Mentlberg.html
+        if (sessionStorage.getItem('kati_logged_in') === 'true') {
+            const role = sessionStorage.getItem('kati_role');
+            if (role === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'Mentlberg.html';
+            }
+        }
+    </script>
+
+</body>
+</html>

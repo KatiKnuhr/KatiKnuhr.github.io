@@ -1,0 +1,524 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin – Kati Knuhr</title>
+    <link rel="icon" type="image/jpeg" href="Ice.jpeg">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            doc,
+            updateDoc,
+            deleteDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import {
+            getAuth
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHCOxeQufkdx0sYIxTKPnAdrzcvErOrEA",
+            authDomain: "katiknuhr-91ba3.firebaseapp.com",
+            projectId: "katiknuhr-91ba3",
+            storageBucket: "katiknuhr-91ba3.firebasestorage.app",
+            messagingSenderId: "608861491092",
+            appId: "1:608861491092:web:73a0deb3c58cbd75c18981"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        window._db = db;
+        window._auth = auth;
+        window._firebaseFns = { collection, getDocs, doc, updateDoc, deleteDoc };
+        window._firebaseReady = true;
+        document.dispatchEvent(new Event('firebaseReady'));
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        emailjs.init("0pUv4sx0wjheKsoPj");
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a4a5e, #2c6e8a);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            header h1 {
+                font-size: 24px;
+                letter-spacing: 2px;
+            }
+
+        .header-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-sm {
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+            .btn-sm:hover {
+                background: rgba(255,255,255,0.3);
+            }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            color: #2c6e8a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #a8d8ea;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+            .stat-card .number {
+                font-size: 42px;
+                font-weight: 800;
+                color: #2c6e8a;
+            }
+
+            .stat-card .label {
+                font-size: 14px;
+                color: #888;
+                margin-top: 4px;
+            }
+
+        .user-table {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+            .user-table table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .user-table th {
+                background: #f8fafc;
+                padding: 14px 20px;
+                text-align: left;
+                font-size: 13px;
+                color: #666;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .user-table td {
+                padding: 16px 20px;
+                border-bottom: 1px solid #f0f0f0;
+                font-size: 14px;
+                vertical-align: middle;
+            }
+
+            .user-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            .user-table tr:hover td {
+                background: #f8fafc;
+            }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d1e7dd;
+            color: #0a3622;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #58151c;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-approve {
+            padding: 6px 14px;
+            border-radius: 50px;
+            border: none;
+            background: #28a745;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-approve:hover {
+                background: #1e7e34;
+                transform: scale(1.05);
+            }
+
+        .btn-reject {
+            padding: 6px 14px;
+            border-radius: 50px;
+            border: none;
+            background: #dc3545;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-reject:hover {
+                background: #b02a37;
+                transform: scale(1.05);
+            }
+
+        .btn-delete {
+            padding: 6px 14px;
+            border-radius: 50px;
+            border: none;
+            background: #6c757d;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-delete:hover {
+                background: #495057;
+                transform: scale(1.05);
+            }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+            font-size: 16px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2c6e8a;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s;
+            z-index: 999;
+        }
+
+            .toast.show {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #2c6e8a;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .user-table {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🛡️ Admin Panel – Kati Knuhr</h1>
+        <div class="header-btns">
+            <button class="btn-sm" onclick="loadUsers()">🔄 Aktualisieren</button>
+            <button class="btn-sm" onclick="goHome()">🏠 Zur Website</button>
+            <button class="btn-sm" onclick="logout()">🔓 Abmelden</button>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="number" id="stat-total">–</div>
+                <div class="label">Gesamt Accounts</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-pending" style="color:#856404">–</div>
+                <div class="label">Ausstehend</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-approved" style="color:#28a745">–</div>
+                <div class="label">Freigeschaltet</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">👥 Alle Benutzer</h2>
+        <div class="user-table">
+            <div class="loading" id="loading">⏳ Lade Benutzer...</div>
+            <table id="user-table-el" style="display:none">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>E-Mail</th>
+                        <th>Status</th>
+                        <th>Registriert</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="user-tbody"></tbody>
+            </table>
+            <div class="empty-state" id="empty-state" style="display:none">
+                🎉 Noch keine Benutzer registriert.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const EMAILJS_SERVICE_ID = 'service_8zqqtp2';
+        const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
+
+        // ✅ Zugriffsschutz
+        if (sessionStorage.getItem('kati_role') !== 'admin') {
+            window.location.href = 'start.html';
+        }
+
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window._firebaseReady) resolve();
+                else document.addEventListener('firebaseReady', resolve, { once: true });
+            });
+        }
+
+        async function loadUsers() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('user-table-el').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'none';
+
+            await waitForFirebase();
+            const { collection, getDocs } = window._firebaseFns;
+            const db = window._db;
+
+            const snapshot = await getDocs(collection(db, 'users'));
+            const users = [];
+            snapshot.forEach(d => users.push({ id: d.id, ...d.data() }));
+
+            document.getElementById('loading').style.display = 'none';
+
+            const pending = users.filter(u => u.status === 'pending').length;
+            const approved = users.filter(u => u.status === 'approved').length;
+            document.getElementById('stat-total').textContent = users.length;
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-approved').textContent = approved;
+
+            if (users.length === 0) {
+                document.getElementById('empty-state').style.display = 'block';
+                return;
+            }
+
+            const tbody = document.getElementById('user-tbody');
+            tbody.innerHTML = '';
+
+            users.sort((a, b) => {
+                const order = { pending: 0, approved: 1, rejected: 2 };
+                return (order[a.status] || 0) - (order[b.status] || 0);
+            });
+
+            users.forEach(user => {
+                const date = user.createdAt?.toDate
+                    ? user.createdAt.toDate().toLocaleDateString('de-DE')
+                    : '–';
+
+                const statusLabels = {
+                    pending: '<span class="status-badge status-pending">⏳ Ausstehend</span>',
+                    approved: '<span class="status-badge status-approved">✅ Freigeschaltet</span>',
+                    rejected: '<span class="status-badge status-rejected">❌ Abgelehnt</span>'
+                };
+
+                let actions = '';
+                if (user.status === 'pending') {
+                    actions = `
+                            <div class="action-btns">
+                                <button class="btn-approve" onclick="approveUser('${user.id}', '${user.email}', '${user.name}')">✅ Genehmigen</button>
+                                <button class="btn-reject"  onclick="rejectUser('${user.id}', '${user.name}')">❌ Ablehnen</button>
+                            </div>`;
+                } else if (user.status === 'approved') {
+                    actions = `
+                            <div class="action-btns">
+                                <button class="btn-reject" onclick="rejectUser('${user.id}', '${user.name}')">🚫 Sperren</button>
+                                <button class="btn-delete" onclick="deleteUser('${user.id}', '${user.name}')">🗑️ Löschen</button>
+                            </div>`;
+                } else {
+                    actions = `
+                            <div class="action-btns">
+                                <button class="btn-approve" onclick="approveUser('${user.id}', '${user.email}', '${user.name}')">♻️ Reaktivieren</button>
+                                <button class="btn-delete"  onclick="deleteUser('${user.id}', '${user.name}')">🗑️ Löschen</button>
+                            </div>`;
+                }
+
+                tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${user.name || '–'}</strong></td>
+                            <td>${user.email || '–'}</td>
+                            <td>${statusLabels[user.status] || user.status}</td>
+                            <td>${date}</td>
+                            <td>${actions}</td>
+                        </tr>`;
+            });
+
+            document.getElementById('user-table-el').style.display = 'table';
+        }
+
+        async function approveUser(uid, email, name) {
+            if (!confirm(`✅ "${name}" freischalten?`)) return;
+
+            await waitForFirebase();
+            const { doc, updateDoc } = window._firebaseFns;
+            const db = window._db;
+
+            await updateDoc(doc(db, 'users', uid), { status: 'approved' });
+
+            try {
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ACTIVATED, {
+                    to_email: email,
+                    to_name: name,
+                    login_link: 'https://katiknuhr.github.io/start.html'
+                });
+            } catch (e) {
+                console.warn('E-Mail konnte nicht gesendet werden:', e);
+            }
+
+            showToast(`✅ ${name} wurde freigeschaltet!`);
+            loadUsers();
+        }
+
+        async function rejectUser(uid, name) {
+            if (!confirm(`❌ "${name}" ablehnen/sperren?`)) return;
+
+            await waitForFirebase();
+            const { doc, updateDoc } = window._firebaseFns;
+            const db = window._db;
+
+            await updateDoc(doc(db, 'users', uid), { status: 'rejected' });
+            showToast(`🚫 ${name} wurde gesperrt.`);
+            loadUsers();
+        }
+
+        async function deleteUser(uid, name) {
+            if (!confirm(`🗑️ "${name}" dauerhaft löschen?`)) return;
+
+            await waitForFirebase();
+            const { doc, deleteDoc } = window._firebaseFns;
+            const db = window._db;
+
+            await deleteDoc(doc(db, 'users', uid));
+            showToast(`🗑️ ${name} wurde gelöscht.`);
+            loadUsers();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // ✅ "Zur Website" → index.html (Hauptseite, nicht Login)
+        function goHome() { window.location.href = 'index.html'; }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'start.html';
+        }
+
+        document.addEventListener('firebaseReady', loadUsers);
+        if (window._firebaseReady) loadUsers();
+    </script>
+
+</body>
+</html>
