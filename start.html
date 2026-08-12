@@ -141,7 +141,6 @@
                 display: block;
             }
 
-        /* Alle normalen Inputs */
         .login-box input[type="text"],
         .login-box input[type="email"],
         .login-box input[type="password"] {
@@ -165,7 +164,6 @@
             border-color: #a8d8ea;
         }
 
-        /* ── REMEMBER ME ──────────────────────────────── */
         .remember-row {
             display: flex;
             align-items: center;
@@ -176,7 +174,6 @@
             text-align: left;
         }
 
-            /* Verstecke native Checkbox */
             .remember-row input[type="checkbox"] {
                 display: none;
             }
@@ -211,7 +208,6 @@
             font-size: 14px;
             font-weight: 500;
         }
-        /* ─────────────────────────────────────────────── */
 
         .login-btn {
             width: 100%;
@@ -314,7 +310,6 @@
             <input type="text" id="login-user" placeholder="Benutzername oder E-Mail" />
             <input type="password" id="login-pass" placeholder="Passwort" />
 
-            <!-- ✅ ANGEMELDET BLEIBEN -->
             <label class="remember-row">
                 <input type="checkbox" id="remember-me" />
                 <span class="custom-checkbox"></span>
@@ -356,41 +351,39 @@
         const EMAILJS_TEMPLATE_REQUEST = 'template_yh83gp9';
         const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
 
-        // ── Schlüssel die wir speichern ───────────────────────────
         const SESSION_KEYS = [
             'kati_logged_in', 'kati_role',
             'kati_uid', 'kati_name', 'kati_email'
         ];
 
-        // ── Speichert in localStorage UND sessionStorage ──────────
-        // persistent = true  → localStorage (bleibt nach Browser-Schließen)
-        // persistent = false → nur sessionStorage (weg beim Tab-Schließen)
         function saveSession(key, value, persistent) {
-            sessionStorage.setItem(key, value);          // immer
+            sessionStorage.setItem(key, value);
             if (persistent) localStorage.setItem(key, value);
         }
 
-        // ── Beim Laden: localStorage → sessionStorage übertragen ──
-        // Damit Mentlberg.html (das sessionStorage liest) funktioniert
+        // ✅ FIX: Nur normale User aus localStorage wiederherstellen, niemals Admin
         (function checkPersistentLogin() {
             const stored = localStorage.getItem('kati_logged_in');
             if (stored === 'true') {
+                const role = localStorage.getItem('kati_role');
+                // ✅ Admin wird NIEMALS aus localStorage wiederhergestellt
+                if (role === 'admin') {
+                    localStorage.clear();
+                    return;
+                }
                 SESSION_KEYS.forEach(k => {
                     const v = localStorage.getItem(k);
                     if (v) sessionStorage.setItem(k, v);
                 });
-                const role = localStorage.getItem('kati_role');
-                window.location.href = role === 'admin' ? 'admin.html' : 'Mentlberg.html';
+                window.location.href = 'Mentlberg.html';
                 return;
             }
-            // Fallback: normaler sessionStorage-Check
             if (sessionStorage.getItem('kati_logged_in') === 'true') {
                 const role = sessionStorage.getItem('kati_role');
                 window.location.href = role === 'admin' ? 'admin.html' : 'Mentlberg.html';
             }
         })();
 
-        // ── Hilfsfunktionen ───────────────────────────────────────
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach((b, i) => {
                 b.classList.toggle('active',
@@ -420,17 +413,14 @@
             });
         }
 
-        // ── Benutzername → E-Mail aus Firestore ──────────────────
         async function getEmailByUsername(username) {
             const { collection, query, where, getDocs } = window._firebaseFns;
             const db = window._db;
 
-            // Exakter Match
             const q = query(collection(db, 'users'), where('name', '==', username));
             const snap = await getDocs(q);
             if (!snap.empty) return snap.docs[0].data().email;
 
-            // Fallback: case-insensitive
             const all = await getDocs(collection(db, 'users'));
             for (const d of all.docs) {
                 const data = d.data();
@@ -440,11 +430,10 @@
             return null;
         }
 
-        // ── LOGIN ─────────────────────────────────────────────────
         async function doLogin() {
             const userInput = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
-            const remember = document.getElementById('remember-me').checked; // ✅
+            const remember = document.getElementById('remember-me').checked;
             const btn = document.getElementById('login-btn');
 
             if (!userInput || !pass) {
@@ -452,11 +441,11 @@
                 return;
             }
 
-            // ── Admin-Login ───────────────────────────────────────
+            // ✅ FIX: Admin wird IMMER nur in sessionStorage gespeichert (remember = false)
             if (userInput === ADMIN_USER && pass === ADMIN_PASS) {
-                saveSession('kati_logged_in', 'true', remember);
-                saveSession('kati_role', 'admin', remember);
-                saveSession('kati_name', 'Kati (Admin)', remember);
+                saveSession('kati_logged_in', 'true', false);
+                saveSession('kati_role', 'admin', false);
+                saveSession('kati_name', 'Kati (Admin)', false);
                 window.location.href = 'admin.html';
                 return;
             }
@@ -470,7 +459,6 @@
                 const auth = window._auth;
                 const db = window._db;
 
-                // Benutzername oder E-Mail?
                 let emailToUse = userInput;
                 if (!userInput.includes('@')) {
                     const found = await getEmailByUsername(userInput);
@@ -511,7 +499,6 @@
                 }
 
                 if (data.status === 'approved') {
-                    // ✅ Mit "remember" in localStorage, sonst nur sessionStorage
                     saveSession('kati_logged_in', 'true', remember);
                     saveSession('kati_role', 'user', remember);
                     saveSession('kati_uid', uid, remember);
@@ -535,7 +522,6 @@
             btn.textContent = 'Anmelden';
         }
 
-        // ── REGISTER ──────────────────────────────────────────────
         async function doRegister() {
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim();
@@ -648,7 +634,6 @@
             btn.textContent = 'Registrieren';
         }
 
-        // ── Enter-Taste ───────────────────────────────────────────
         document.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 const activeTab = document.querySelector('.tab-content.active').id;
