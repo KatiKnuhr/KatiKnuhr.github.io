@@ -6,7 +6,6 @@
     <title>Willkommen – Kati Knuhr</title>
     <link rel="icon" type="image/jpeg" href="Ice.jpeg">
 
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import {
@@ -45,7 +44,6 @@
         document.dispatchEvent(new Event('firebaseReady'));
     </script>
 
-    <!-- EmailJS -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>emailjs.init("0pUv4sx0wjheKsoPj");</script>
 
@@ -74,7 +72,6 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
         }
 
-        /* ── LOGIN BOX ── */
         .login-box {
             position: relative;
             z-index: 2;
@@ -105,7 +102,6 @@
                 font-style: italic;
             }
 
-        /* ── TABS ── */
         .tab-switcher {
             display: flex;
             background: rgba(255,255,255,0.1);
@@ -143,7 +139,6 @@
                 display: block;
             }
 
-        /* ── INPUTS ── */
         .input-group {
             position: relative;
             margin-bottom: 14px;
@@ -172,7 +167,6 @@
                     background: rgba(255,255,255,0.2);
                 }
 
-        /* ── REMEMBER ME ── */
         .remember-row {
             display: flex;
             align-items: center;
@@ -218,7 +212,6 @@
             font-weight: 500;
         }
 
-        /* ── BUTTON ── */
         .login-btn {
             width: 100%;
             padding: 14px;
@@ -245,7 +238,6 @@
                 transform: none;
             }
 
-        /* ── MESSAGES ── */
         .msg {
             font-size: 14px;
             margin-top: 14px;
@@ -330,33 +322,22 @@
             <button class="tab-btn" onclick="switchTab('register')">📝 Registrieren</button>
         </div>
 
-        <!-- ── LOGIN TAB ── -->
+        <!-- LOGIN TAB -->
         <div class="tab-content active" id="tab-login">
-
             <div class="input-group">
-                <input type="text"
-                       id="login-user"
-                       placeholder="Benutzername oder E-Mail"
-                       autocomplete="username"
-                       onkeydown="loginFieldKey(event, 'login-user')" />
+                <input type="text" id="login-user" placeholder="Benutzername oder E-Mail"
+                       autocomplete="username" onkeydown="loginFieldKey(event, 'login-user')" />
             </div>
-
             <div class="input-group">
-                <input type="password"
-                       id="login-pass"
-                       placeholder="Passwort"
-                       autocomplete="current-password"
-                       onkeydown="loginFieldKey(event, 'login-pass')" />
+                <input type="password" id="login-pass" placeholder="Passwort"
+                       autocomplete="current-password" onkeydown="loginFieldKey(event, 'login-pass')" />
             </div>
-
             <label class="remember-row">
                 <input type="checkbox" id="remember-me" />
                 <span class="custom-checkbox"></span>
                 <span class="remember-label">Angemeldet bleiben</span>
             </label>
-
             <button class="login-btn" id="login-btn" onclick="doLogin()">Anmelden</button>
-
             <div class="msg error" id="login-error"></div>
             <div class="pending-banner" id="pending-banner">
                 ⏳ Dein Account wartet noch auf Genehmigung.<br>
@@ -368,43 +349,25 @@
             </div>
         </div>
 
-        <!-- ── REGISTER TAB ── -->
+        <!-- REGISTER TAB -->
         <div class="tab-content" id="tab-register">
-
             <div class="input-group">
-                <input type="text"
-                       id="reg-name"
-                       placeholder="Benutzername"
-                       autocomplete="username"
-                       onkeydown="registerFieldKey(event, 'reg-name')" />
+                <input type="text" id="reg-name" placeholder="Benutzername"
+                       autocomplete="username" onkeydown="registerFieldKey(event, 'reg-name')" />
             </div>
-
             <div class="input-group">
-                <input type="email"
-                       id="reg-email"
-                       placeholder="E-Mail Adresse"
-                       autocomplete="email"
-                       onkeydown="registerFieldKey(event, 'reg-email')" />
+                <input type="email" id="reg-email" placeholder="E-Mail Adresse"
+                       autocomplete="email" onkeydown="registerFieldKey(event, 'reg-email')" />
             </div>
-
             <div class="input-group">
-                <input type="password"
-                       id="reg-pass"
-                       placeholder="Passwort (min. 6 Zeichen)"
-                       autocomplete="new-password"
-                       onkeydown="registerFieldKey(event, 'reg-pass')" />
+                <input type="password" id="reg-pass" placeholder="Passwort (min. 6 Zeichen)"
+                       autocomplete="new-password" onkeydown="registerFieldKey(event, 'reg-pass')" />
             </div>
-
             <div class="input-group">
-                <input type="password"
-                       id="reg-pass2"
-                       placeholder="Passwort wiederholen"
-                       autocomplete="new-password"
-                       onkeydown="registerFieldKey(event, 'reg-pass2')" />
+                <input type="password" id="reg-pass2" placeholder="Passwort wiederholen"
+                       autocomplete="new-password" onkeydown="registerFieldKey(event, 'reg-pass2')" />
             </div>
-
             <button class="login-btn" id="reg-btn" onclick="doRegister()">Registrieren</button>
-
             <div class="msg error" id="reg-error"></div>
             <div class="msg success" id="reg-success"></div>
         </div>
@@ -413,46 +376,32 @@
     </div>
 
     <script>
-        /* ── CONSTANTS ── */
         const ADMIN_USER = 'kati';
         const ADMIN_PASS = 'ibk';
         const OWNER_EMAIL = 'julianknuhr92@gmail.com';
         const EMAILJS_SERVICE_ID = 'service_8zqqtp2';
         const EMAILJS_TEMPLATE_REQUEST = 'template_yh83gp9';
-        const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
 
-        const SESSION_KEYS = [
-            'kati_logged_in', 'kati_role',
-            'kati_uid', 'kati_name', 'kati_email'
-        ];
-
-        /* ── FIELD ORDER ── */
+        const SESSION_KEYS = ['kati_logged_in', 'kati_role', 'kati_uid', 'kati_name', 'kati_email', 'kati_permissions'];
         const LOGIN_FIELDS = ['login-user', 'login-pass'];
         const REGISTER_FIELDS = ['reg-name', 'reg-email', 'reg-pass', 'reg-pass2'];
 
         function loginFieldKey(e, fieldId) {
             if (e.key !== 'Enter') return;
             e.preventDefault();
-            if (fieldId === 'login-user') {
-                document.getElementById('login-pass').focus();
-            } else if (fieldId === 'login-pass') {
-                doLogin();
-            }
+            if (fieldId === 'login-user') document.getElementById('login-pass').focus();
+            else if (fieldId === 'login-pass') doLogin();
         }
 
         function registerFieldKey(e, fieldId) {
             if (e.key !== 'Enter') return;
             e.preventDefault();
             const idx = REGISTER_FIELDS.indexOf(fieldId);
-            const last = REGISTER_FIELDS.length - 1;
-            if (idx < last) {
+            if (idx < REGISTER_FIELDS.length - 1)
                 document.getElementById(REGISTER_FIELDS[idx + 1]).focus();
-            } else {
-                doRegister();
-            }
+            else doRegister();
         }
 
-        /* ── SESSION HELPERS ── */
         function saveSession(key, value, persistent) {
             sessionStorage.setItem(key, value);
             if (persistent) localStorage.setItem(key, value);
@@ -477,7 +426,6 @@
             }
         })();
 
-        /* ── TABS ── */
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach((b, i) => {
                 b.classList.toggle('active',
@@ -486,8 +434,7 @@
             document.getElementById('tab-login').classList.toggle('active', tab === 'login');
             document.getElementById('tab-register').classList.toggle('active', tab === 'register');
             hideAllMessages();
-            const firstField = tab === 'login' ? 'login-user' : 'reg-name';
-            setTimeout(() => document.getElementById(firstField).focus(), 50);
+            setTimeout(() => document.getElementById(tab === 'login' ? 'login-user' : 'reg-name').focus(), 50);
         }
 
         function hideAllMessages() {
@@ -509,15 +456,12 @@
             });
         }
 
-        /* ── USERNAME → EMAIL LOOKUP ── */
         async function getEmailByUsername(username) {
             const { collection, query, where, getDocs } = window._firebaseFns;
             const db = window._db;
-
             const q = query(collection(db, 'users'), where('name', '==', username));
             const snap = await getDocs(q);
             if (!snap.empty) return snap.docs[0].data().email;
-
             const all = await getDocs(collection(db, 'users'));
             for (const d of all.docs) {
                 const data = d.data();
@@ -601,19 +545,24 @@
                     return;
                 }
                 if (data.status === 'approved') {
+                    /* ── NEU: Berechtigungen speichern ── */
+                    const permissions = data.permissions || {};
+                    const permsJson = JSON.stringify(permissions);
+
                     saveSession('kati_logged_in', 'true', remember);
                     saveSession('kati_role', 'user', remember);
                     saveSession('kati_uid', uid, remember);
                     saveSession('kati_name', data.name || userInput, remember);
                     saveSession('kati_email', emailToUse, remember);
+                    saveSession('kati_permissions', permsJson, remember);
+
                     window.location.href = 'Mentlberg.html';
                     return;
                 }
 
             } catch (err) {
                 let msg = '❌ Anmeldung fehlgeschlagen.';
-                if (['auth/user-not-found', 'auth/wrong-password', 'auth/invalid-credential']
-                    .includes(err.code))
+                if (['auth/user-not-found', 'auth/wrong-password', 'auth/invalid-credential'].includes(err.code))
                     msg = '❌ Falscher Benutzername oder Passwort.';
                 else if (err.code === 'auth/too-many-requests')
                     msg = '⚠️ Zu viele Versuche. Bitte warte kurz.';
@@ -646,18 +595,15 @@
             }
             if (pass.length < 6) {
                 showMsg('reg-error', '❌ Passwort muss mindestens 6 Zeichen haben.');
-                document.getElementById('reg-pass').focus();
-                return;
+                document.getElementById('reg-pass').focus(); return;
             }
             if (pass !== pass2) {
                 showMsg('reg-error', '❌ Passwörter stimmen nicht überein.');
-                document.getElementById('reg-pass2').focus();
-                return;
+                document.getElementById('reg-pass2').focus(); return;
             }
             if (!email.includes('@')) {
                 showMsg('reg-error', '❌ Bitte eine gültige E-Mail eingeben.');
-                document.getElementById('reg-email').focus();
-                return;
+                document.getElementById('reg-email').focus(); return;
             }
 
             btn.disabled = true;
@@ -685,7 +631,6 @@
                             const userCred = await signInWithEmailAndPassword(auth, email, pass);
                             uid = userCred.user.uid;
                             const existingDoc = await getDoc(doc(db, 'users', uid));
-
                             if (!existingDoc.exists()) {
                                 needsFirestoreDoc = true;
                             } else {
@@ -693,21 +638,16 @@
                                 if (d.status === 'reregister' && d.reregisterAllowed) {
                                     needsFirestoreDoc = true;
                                 } else if (d.status === 'rejected') {
-                                    showMsg('reg-error',
-                                        '❌ Dein Account wurde gesperrt. Erneute Registrierung nicht möglich.');
-                                    btn.disabled = false; btn.textContent = 'Registrieren';
-                                    return;
+                                    showMsg('reg-error', '❌ Dein Account wurde gesperrt. Erneute Registrierung nicht möglich.');
+                                    btn.disabled = false; btn.textContent = 'Registrieren'; return;
                                 } else {
                                     showMsg('reg-error', '❌ Diese E-Mail ist bereits registriert.');
-                                    btn.disabled = false; btn.textContent = 'Registrieren';
-                                    return;
+                                    btn.disabled = false; btn.textContent = 'Registrieren'; return;
                                 }
                             }
                         } catch {
-                            showMsg('reg-error',
-                                '❌ Diese E-Mail ist bereits registriert. Bitte melde dich an.');
-                            btn.disabled = false; btn.textContent = 'Registrieren';
-                            return;
+                            showMsg('reg-error', '❌ Diese E-Mail ist bereits registriert. Bitte melde dich an.');
+                            btn.disabled = false; btn.textContent = 'Registrieren'; return;
                         }
                     } else { throw authErr; }
                 }
@@ -717,6 +657,7 @@
                         uid, name, email,
                         status: 'pending',
                         reregisterAllowed: false,
+                        permissions: {},
                         createdAt: serverTimestamp()
                     });
                 }
@@ -734,7 +675,6 @@
                 showMsg('reg-success',
                     '✅ Registrierung erfolgreich! Kati prüft deine Anfrage – du erhältst eine E-Mail.',
                     'success');
-
                 REGISTER_FIELDS.forEach(id => document.getElementById(id).value = '');
                 document.getElementById('reg-name').focus();
 
@@ -749,11 +689,9 @@
             btn.textContent = 'Registrieren';
         }
 
-        /* ── AUTO-FOCUS on load ── */
         window.addEventListener('load', () => {
             document.getElementById('login-user').focus();
         });
     </script>
-
 </body>
 </html>

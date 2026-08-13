@@ -27,16 +27,13 @@
             color: #333;
         }
 
-        /* ══════════════════════════════════════════
-           SHARED MAIN-HEADER
-        ══════════════════════════════════════════ */
         .main-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(18, 52, 70, 0.85);
+            background: rgba(18,52,70,0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(168,216,234,0.18);
@@ -46,7 +43,6 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            /* On hero: slightly more transparent */
             transition: background 0.3s;
         }
 
@@ -196,9 +192,7 @@
                 background: rgba(255,255,255,0.20);
             }
 
-        /* ══════════════════════════════════════════
-           PAGE CONTENT
-        ══════════════════════════════════════════ */
+        /* PAGE */
         .hero {
             position: relative;
             height: 100vh;
@@ -292,7 +286,7 @@
         }
 
         @keyframes bounce {
-            0%, 100% {
+            0%,100% {
                 transform: translateX(-50%) translateY(0);
             }
 
@@ -332,7 +326,7 @@
 
         .preview-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3,1fr);
             gap: 30px;
         }
 
@@ -389,7 +383,7 @@
                 }
 
         footer {
-            background: linear-gradient(135deg, #1a4a5e, #2c6e8a);
+            background: linear-gradient(135deg,#1a4a5e,#2c6e8a);
             color: white;
             text-align: center;
             padding: 40px 20px;
@@ -453,12 +447,8 @@
         }
     </script>
 
-    <!-- ══════════════════════════════════════════════════════
-         SHARED MAIN-HEADER
-    ══════════════════════════════════════════════════════ -->
     <header class="main-header">
         <span class="header-title">⛰️ Mentlberg-WG</span>
-
         <ul class="owner-nav" id="owner-nav">
             <li><a href="index.html" class="active">🏠 Home</a></li>
             <li><a href="ueber.html">👤 Über mich</a></li>
@@ -466,14 +456,7 @@
             <li><a href="galerie.html">🖼️ Galerie</a></li>
             <li><a href="Mentlberg.html">⛰️ Mentlberg</a></li>
         </ul>
-
-        <ul class="classic-nav" id="classic-nav">
-            <li><a href="index.html" class="active">Home</a></li>
-            <li><a href="ueber.html">Über mich</a></li>
-            <li><a href="hobbys.html">Hobbys</a></li>
-            <li><a href="galerie.html">Galerie</a></li>
-        </ul>
-
+        <ul class="classic-nav" id="classic-nav"></ul>
         <div class="header-right">
             <span class="hdr-chip" id="user-chip">👤 ...</span>
             <button class="hdr-btn" onclick="logout()">🔓 Abmelden</button>
@@ -536,10 +519,28 @@
         const currentUser = sessionStorage.getItem('kati_name') || 'Gast';
         const currentEmail = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
         const currentRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role') || '';
-        const isOwner = (
-            currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase() ||
-            currentRole === 'admin'
-        );
+        const isOwner = (currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase() || currentRole === 'admin');
+
+        const PAGE_MAP = [
+            { key: 'home', label: '🏠 Home', href: 'index.html' },
+            { key: 'uebermich', label: '👤 Über mich', href: 'ueber.html' },
+            { key: 'hobbys', label: '🎿 Hobbys', href: 'hobbys.html' },
+            { key: 'galerie', label: '🖼️ Galerie', href: 'galerie.html' },
+            { key: 'mentlberg', label: '⛰️ Mentlberg', href: 'Mentlberg.html' },
+        ];
+
+        function getPermissions() {
+            try { return JSON.parse(sessionStorage.getItem('kati_permissions') || '{}'); }
+            catch (e) { return {}; }
+        }
+
+        // Permission check for non-owners
+        if (!isOwner) {
+            const perms = getPermissions();
+            if (!perms.home) {
+                window.location.href = 'Mentlberg.html';
+            }
+        }
 
         const chip = document.getElementById('user-chip');
         chip.textContent = '👤 ' + currentUser;
@@ -550,6 +551,19 @@
             chip.classList.add('admin-clickable');
             chip.title = '🛡️ Admin-Panel öffnen';
             chip.addEventListener('click', () => { window.location.href = 'admin.html'; });
+        } else {
+            const perms = getPermissions();
+            const classicNav = document.getElementById('classic-nav');
+            PAGE_MAP.forEach(p => {
+                if (!perms[p.key]) return;
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = p.href;
+                a.textContent = p.label;
+                if (p.key === 'home') a.classList.add('active');
+                li.appendChild(a);
+                classicNav.appendChild(li);
+            });
         }
 
         function logout() {
@@ -558,6 +572,5 @@
             window.location.href = 'start.html';
         }
     </script>
-
 </body>
 </html>

@@ -27,16 +27,13 @@
             color: #333;
         }
 
-        /* ══════════════════════════════════════════
-           SHARED MAIN-HEADER
-        ══════════════════════════════════════════ */
         .main-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(18, 52, 70, 0.97);
+            background: rgba(18,52,70,0.97);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(168,216,234,0.18);
@@ -162,6 +159,7 @@
             cursor: pointer;
             transition: background .22s, border-color .22s;
             text-decoration: none;
+            border: none;
         }
 
         .hdr-chip {
@@ -193,7 +191,7 @@
                 background: rgba(255,255,255,0.20);
             }
 
-        /* ── PAGE CONTENT ── */
+        /* PAGE */
         .page-hero {
             height: 40vh;
             margin-top: 58px;
@@ -288,7 +286,7 @@
             }
 
         footer {
-            background: linear-gradient(135deg, #1a4a5e, #2c6e8a);
+            background: linear-gradient(135deg,#1a4a5e,#2c6e8a);
             color: white;
             text-align: center;
             padding: 40px 20px;
@@ -349,34 +347,23 @@
         }
     </script>
 
-    <!-- SHARED HEADER -->
     <header class="main-header">
         <span class="header-title">⛰️ Mentlberg-WG</span>
-
         <ul class="owner-nav" id="owner-nav">
             <li><a href="index.html">🏠 Home</a></li>
-            <li><a href="uebermich.html">👤 Über mich</a></li>
+            <li><a href="ueber.html">👤 Über mich</a></li>
             <li><a href="hobbys.html" class="active">🎿 Hobbys</a></li>
             <li><a href="galerie.html">🖼️ Galerie</a></li>
             <li><a href="Mentlberg.html">⛰️ Mentlberg</a></li>
         </ul>
-
-        <ul class="classic-nav" id="classic-nav">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="ueber.html">Über mich</a></li>
-            <li><a href="hobbys.html" class="active">Hobbys</a></li>
-            <li><a href="galerie.html">Galerie</a></li>
-        </ul>
-
+        <ul class="classic-nav" id="classic-nav"></ul>
         <div class="header-right">
             <span class="hdr-chip" id="user-chip">👤 ...</span>
             <button class="hdr-btn" onclick="logout()">🔓 Abmelden</button>
         </div>
     </header>
 
-    <div class="page-hero">
-        <h1>Meine Hobbys</h1>
-    </div>
+    <div class="page-hero"><h1>Meine Hobbys</h1></div>
 
     <div class="content">
         <div class="hobby-section">
@@ -426,10 +413,7 @@
         </div>
     </div>
 
-    <footer>
-        <h3>Kati Knuhr</h3>
-        <p>© 2026 – Made with ❤️ and lots of adventures</p>
-    </footer>
+    <footer><h3>Kati Knuhr</h3><p>© 2026 – Made with ❤️ and lots of adventures</p></footer>
 
     <script>
         const OWNER_EMAIL = 'katharinakn@outlook.de';
@@ -437,6 +421,24 @@
         const currentEmail = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
         const currentRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role') || '';
         const isOwner = (currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase() || currentRole === 'admin');
+
+        const PAGE_MAP = [
+            { key: 'home', label: '🏠 Home', href: 'index.html' },
+            { key: 'uebermich', label: '👤 Über mich', href: 'ueber.html' },
+            { key: 'hobbys', label: '🎿 Hobbys', href: 'hobbys.html' },
+            { key: 'galerie', label: '🖼️ Galerie', href: 'galerie.html' },
+            { key: 'mentlberg', label: '⛰️ Mentlberg', href: 'Mentlberg.html' },
+        ];
+
+        function getPermissions() {
+            try { return JSON.parse(sessionStorage.getItem('kati_permissions') || '{}'); }
+            catch (e) { return {}; }
+        }
+
+        if (!isOwner) {
+            const perms = getPermissions();
+            if (!perms.hobbys) { window.location.href = 'Mentlberg.html'; }
+        }
 
         const chip = document.getElementById('user-chip');
         chip.textContent = '👤 ' + currentUser;
@@ -447,6 +449,19 @@
             chip.classList.add('admin-clickable');
             chip.title = '🛡️ Admin-Panel öffnen';
             chip.addEventListener('click', () => { window.location.href = 'admin.html'; });
+        } else {
+            const perms = getPermissions();
+            const classicNav = document.getElementById('classic-nav');
+            PAGE_MAP.forEach(p => {
+                if (!perms[p.key]) return;
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = p.href;
+                a.textContent = p.label;
+                if (p.key === 'hobbys') a.classList.add('active');
+                li.appendChild(a);
+                classicNav.appendChild(li);
+            });
         }
 
         function logout() {

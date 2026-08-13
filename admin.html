@@ -49,13 +49,11 @@
             min-height: 100vh;
         }
 
-        /* ══════════════════════════════════════════
-           SHARED MAIN-HEADER (same as other pages)
-        ══════════════════════════════════════════ */
+        /* ══ HEADER ══ */
         .main-header {
             position: relative;
             z-index: 10;
-            background: rgba(18, 52, 70, 0.97);
+            background: rgba(18,52,70,0.97);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(168,216,234,0.18);
@@ -150,18 +148,6 @@
             cursor: default;
         }
 
-            .hdr-chip.admin-clickable {
-                cursor: pointer;
-                border-color: rgba(168,216,234,0.55);
-                background: rgba(168,216,234,0.20);
-            }
-
-                .hdr-chip.admin-clickable:hover {
-                    background: rgba(168,216,234,0.35);
-                    border-color: rgba(168,216,234,0.75);
-                    color: #fff;
-                }
-            /* Active/current page chip on admin page */
             .hdr-chip.admin-active {
                 background: rgba(255,215,0,0.20);
                 border-color: rgba(255,215,0,0.55);
@@ -179,9 +165,9 @@
                 background: rgba(255,255,255,0.20);
             }
 
-        /* ── CONTENT ── */
+        /* ══ CONTENT ══ */
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -221,6 +207,7 @@
                 margin-top: 4px;
             }
 
+        /* ══ TABLE ══ */
         .user-table {
             background: white;
             border-radius: 16px;
@@ -246,7 +233,7 @@
             }
 
             .user-table td {
-                padding: 16px 20px;
+                padding: 14px 20px;
                 border-bottom: 1px solid #f0f0f0;
                 font-size: 14px;
                 vertical-align: middle;
@@ -260,6 +247,7 @@
                 background: #f8fafc;
             }
 
+        /* ══ STATUS BADGES ══ */
         .status-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -289,22 +277,26 @@
             color: #7d3200;
         }
 
+        /* ══ ACTION BUTTONS ══ */
         .action-btns {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
         }
 
-        .btn-approve {
+        .btn-approve, .btn-reject, .btn-delete, .btn-reregister, .btn-perms {
             padding: 6px 14px;
             border-radius: 50px;
             border: none;
-            background: #28a745;
-            color: white;
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
+            color: white;
+        }
+
+        .btn-approve {
+            background: #28a745;
         }
 
             .btn-approve:hover {
@@ -313,15 +305,7 @@
             }
 
         .btn-reject {
-            padding: 6px 14px;
-            border-radius: 50px;
-            border: none;
             background: #dc3545;
-            color: white;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
         }
 
             .btn-reject:hover {
@@ -330,15 +314,7 @@
             }
 
         .btn-delete {
-            padding: 6px 14px;
-            border-radius: 50px;
-            border: none;
             background: #6c757d;
-            color: white;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
         }
 
             .btn-delete:hover {
@@ -347,15 +323,7 @@
             }
 
         .btn-reregister {
-            padding: 6px 14px;
-            border-radius: 50px;
-            border: none;
             background: #fd7e14;
-            color: white;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
         }
 
             .btn-reregister:hover {
@@ -363,6 +331,88 @@
                 transform: scale(1.05);
             }
 
+        .btn-perms {
+            background: #6f42c1;
+        }
+
+            .btn-perms:hover {
+                background: #5a32a3;
+                transform: scale(1.05);
+            }
+
+        /* ══ PERMISSIONS DROPDOWN ══ */
+        .perms-row td {
+            background: #f4f0ff !important;
+            padding: 0 !important;
+        }
+
+        .perms-panel {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+            .perms-panel h4 {
+                font-size: 14px;
+                color: #6f42c1;
+                font-weight: 700;
+                margin-bottom: 4px;
+            }
+
+        .perms-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .perm-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+            .perm-toggle input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+                accent-color: #6f42c1;
+                cursor: pointer;
+            }
+
+            .perm-toggle.checked {
+                border-color: #6f42c1;
+                background: #ede7ff;
+                color: #4a2a9a;
+            }
+
+        .perms-save-btn {
+            align-self: flex-start;
+            padding: 8px 22px;
+            border-radius: 50px;
+            border: none;
+            background: #6f42c1;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+            .perms-save-btn:hover {
+                background: #5a32a3;
+            }
+
+        /* ══ MISC ══ */
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -407,10 +457,6 @@
                 gap: 8px;
             }
 
-            .header-title {
-                font-size: 17px;
-            }
-
             .owner-nav a {
                 font-size: 10px;
                 padding: 5px 10px;
@@ -446,7 +492,6 @@
 <body>
 
     <script>
-        // Zugriffsschutz
         const OWNER_EMAIL = 'katharinakn@outlook.de';
         const _role = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role') || '';
         const _email = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
@@ -454,13 +499,9 @@
         if (!_isOwner) { window.location.href = 'start.html'; }
     </script>
 
-    <!-- ══════════════════════════════════════════════════════
-         SHARED MAIN-HEADER
-    ══════════════════════════════════════════════════════ -->
     <header class="main-header">
         <span class="header-title">⛰️ Mentlberg-WG</span>
 
-        <!-- Nav-Links (immer sichtbar auf admin.html, weil nur Admins hier landen) -->
         <ul class="owner-nav">
             <li><a href="index.html">🏠 Home</a></li>
             <li><a href="uebermich.html">👤 Über mich</a></li>
@@ -470,7 +511,6 @@
         </ul>
 
         <div class="header-right">
-            <!-- Chip zeigt "Admin-Panel" als aktive Seite, nicht klickbar -->
             <span class="hdr-chip admin-active" id="user-chip">🛡️ Admin-Panel</span>
             <button class="hdr-btn" onclick="goBack()">← Zurück</button>
             <button class="hdr-btn" onclick="logout()">🔓 Abmelden</button>
@@ -521,9 +561,14 @@
         const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
         const EMAILJS_TEMPLATE_REREGISTER = 'template_o78ci8o';
 
-        // Populate user chip with actual name
-        const currentUser = sessionStorage.getItem('kati_name') || 'Admin';
-        // (chip already shows "🛡️ Admin-Panel" – leave it)
+        // All pages that can be toggled per user
+        const ALL_PAGES = [
+            { key: 'home', label: '🏠 Home', href: 'index.html' },
+            { key: 'uebermich', label: '👤 Über mich', href: 'uebermich.html' },
+            { key: 'hobbys', label: '🎿 Hobbys', href: 'hobbys.html' },
+            { key: 'galerie', label: '🖼️ Galerie', href: 'galerie.html' },
+            { key: 'mentlberg', label: '⛰️ Mentlberg', href: 'Mentlberg.html' },
+        ];
 
         function waitForFirebase() {
             return new Promise(resolve => {
@@ -532,6 +577,7 @@
             });
         }
 
+        // ── LOAD USERS ──────────────────────────────────────────────
         async function loadUsers() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('user-table-el').style.display = 'none';
@@ -539,9 +585,7 @@
 
             await waitForFirebase();
             const { collection, getDocs } = window._firebaseFns;
-            const db = window._db;
-
-            const snapshot = await getDocs(collection(db, 'users'));
+            const snapshot = await getDocs(collection(window._db, 'users'));
             const users = [];
             snapshot.forEach(d => users.push({ id: d.id, ...d.data() }));
 
@@ -558,13 +602,13 @@
                 return;
             }
 
-            const tbody = document.getElementById('user-tbody');
-            tbody.innerHTML = '';
-
             users.sort((a, b) => {
                 const order = { pending: 0, approved: 1, rejected: 2, reregister: 3 };
                 return (order[a.status] || 0) - (order[b.status] || 0);
             });
+
+            const tbody = document.getElementById('user-tbody');
+            tbody.innerHTML = '';
 
             users.forEach(user => {
                 const date = user.createdAt?.toDate
@@ -579,41 +623,127 @@
 
                 let actions = '';
                 if (user.status === 'pending') {
-                    actions = `<div class="action-btns">
+                    actions = `
                             <button class="btn-approve" onclick="approveUser('${user.id}','${user.email}','${user.name}')">✅ Genehmigen</button>
-                            <button class="btn-reject"  onclick="rejectUser('${user.id}','${user.name}')">❌ Ablehnen</button>
-                        </div>`;
+                            <button class="btn-reject"  onclick="rejectUser('${user.id}','${user.name}')">❌ Ablehnen</button>`;
                 } else if (user.status === 'approved') {
-                    actions = `<div class="action-btns">
+                    actions = `
                             <button class="btn-reject" onclick="rejectUser('${user.id}','${user.name}')">🚫 Sperren</button>
-                            <button class="btn-delete" onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>
-                        </div>`;
+                            <button class="btn-delete" onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>`;
                 } else if (user.status === 'reregister') {
-                    actions = `<div class="action-btns">
+                    actions = `
                             <button class="btn-approve" onclick="approveUser('${user.id}','${user.email}','${user.name}')">✅ Direkt freischalten</button>
-                            <button class="btn-delete"  onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>
-                        </div>`;
+                            <button class="btn-delete"  onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>`;
                 } else {
-                    actions = `<div class="action-btns">
+                    actions = `
                             <button class="btn-approve"    onclick="approveUser('${user.id}','${user.email}','${user.name}')">♻️ Reaktivieren</button>
                             <button class="btn-reregister" onclick="allowReregister('${user.id}','${user.email}','${user.name}')">🔄 Neu einladen</button>
-                            <button class="btn-delete"     onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>
-                        </div>`;
+                            <button class="btn-delete"     onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>`;
                 }
 
+                // Always add permissions button (except for owner themselves)
+                const isOwnerRow = user.email?.toLowerCase() === 'katharinakn@outlook.de';
+                const permsBtn = isOwnerRow
+                    ? `<span style="font-size:11px;color:#aaa;padding:6px 10px;">👑 Owner</span>`
+                    : `<button class="btn-perms" onclick="togglePermsPanel('${user.id}')">🔑 Berechtigungen</button>`;
+
                 tbody.innerHTML += `
-                        <tr>
+                        <tr id="row-${user.id}">
                             <td><strong>${user.name || '–'}</strong></td>
                             <td>${user.email || '–'}</td>
                             <td>${statusLabels[user.status] || user.status}</td>
                             <td>${date}</td>
-                            <td>${actions}</td>
+                            <td>
+                                <div class="action-btns">
+                                    ${actions}
+                                    ${permsBtn}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="perms-row" id="perms-${user.id}" style="display:none;">
+                            <td colspan="5">
+                                ${buildPermsPanel(user)}
+                            </td>
                         </tr>`;
             });
 
             document.getElementById('user-table-el').style.display = 'table';
+
+            // Attach checkbox listeners after DOM is built
+            users.forEach(user => {
+                ALL_PAGES.forEach(page => {
+                    const cb = document.getElementById(`perm-${user.id}-${page.key}`);
+                    if (cb) {
+                        cb.addEventListener('change', () => {
+                            const label = cb.closest('.perm-toggle');
+                            if (label) label.classList.toggle('checked', cb.checked);
+                        });
+                    }
+                });
+            });
         }
 
+        // ── BUILD PERMISSIONS PANEL HTML ────────────────────────────
+        function buildPermsPanel(user) {
+            // permissions field: object like { home: true, galerie: false, ... }
+            // default: all false (hidden)
+            const perms = user.permissions || {};
+
+            const toggles = ALL_PAGES.map(page => {
+                const checked = perms[page.key] === true;
+                return `
+                        <label class="perm-toggle ${checked ? 'checked' : ''}" for="perm-${user.id}-${page.key}">
+                            <input type="checkbox"
+                                   id="perm-${user.id}-${page.key}"
+                                   ${checked ? 'checked' : ''} />
+                            ${page.label}
+                        </label>`;
+            }).join('');
+
+            return `
+                    <div class="perms-panel">
+                        <h4>🔑 Seitenberechtigungen für <em>${user.name || user.email}</em></h4>
+                        <p style="font-size:12px;color:#888;margin-top:-8px;">
+                            Aktivierte Seiten sind für diesen Benutzer im Menü sichtbar. Standard: alles verborgen.
+                        </p>
+                        <div class="perms-grid">
+                            ${toggles}
+                        </div>
+                        <button class="perms-save-btn" onclick="savePermissions('${user.id}','${user.name}')">
+                            💾 Speichern
+                        </button>
+                    </div>`;
+        }
+
+        // ── TOGGLE PERMISSIONS PANEL ─────────────────────────────────
+        function togglePermsPanel(uid) {
+            const row = document.getElementById(`perms-${uid}`);
+            if (!row) return;
+            const isOpen = row.style.display !== 'none';
+            // Close all open panels first
+            document.querySelectorAll('.perms-row').forEach(r => r.style.display = 'none');
+            if (!isOpen) row.style.display = 'table-row';
+        }
+
+        // ── SAVE PERMISSIONS ─────────────────────────────────────────
+        async function savePermissions(uid, name) {
+            await waitForFirebase();
+            const { doc, updateDoc } = window._firebaseFns;
+
+            const permissions = {};
+            ALL_PAGES.forEach(page => {
+                const cb = document.getElementById(`perm-${uid}-${page.key}`);
+                permissions[page.key] = cb ? cb.checked : false;
+            });
+
+            await updateDoc(doc(window._db, 'users', uid), { permissions });
+            showToast(`🔑 Berechtigungen für ${name} gespeichert!`);
+            // Close panel
+            const row = document.getElementById(`perms-${uid}`);
+            if (row) row.style.display = 'none';
+        }
+
+        // ── USER ACTIONS ─────────────────────────────────────────────
         async function approveUser(uid, email, name) {
             if (!confirm(`✅ "${name}" freischalten?`)) return;
             await waitForFirebase();
@@ -662,6 +792,7 @@
             loadUsers();
         }
 
+        // ── HELPERS ──────────────────────────────────────────────────
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
@@ -670,12 +801,8 @@
         }
 
         function goBack() {
-            // Go back to previous page, or fallback to index
-            if (document.referrer && document.referrer !== window.location.href) {
-                history.back();
-            } else {
-                window.location.href = 'index.html';
-            }
+            if (document.referrer && document.referrer !== window.location.href) history.back();
+            else window.location.href = 'index.html';
         }
 
         function logout() {
