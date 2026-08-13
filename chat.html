@@ -41,7 +41,6 @@
             box-sizing: border-box;
         }
 
-        /* ── ROOT LAYOUT ─────────────────────────────────────────── */
         html, body {
             height: 100%;
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -50,7 +49,6 @@
             overflow: hidden;
         }
 
-        /* ── APP SHELL ───────────────────────────────────────────── */
         .app {
             display: flex;
             flex-direction: column;
@@ -132,16 +130,14 @@
             color: #e9edef;
         }
 
-        /* ── MAIN BODY ───────────────────────────────────────────── */
+        /* ── MAIN ────────────────────────────────────────────────── */
         .main {
             display: flex;
             flex: 1;
             overflow: hidden;
         }
 
-        /* ══════════════════════════════════════════════════════════
-           SIDEBAR  (WhatsApp-style)
-        ══════════════════════════════════════════════════════════ */
+        /* ── SIDEBAR ─────────────────────────────────────────────── */
         .sidebar {
             width: 360px;
             min-width: 300px;
@@ -154,7 +150,6 @@
             flex-shrink: 0;
         }
 
-        /* Sidebar header */
         .sidebar-top {
             display: flex;
             align-items: center;
@@ -170,7 +165,6 @@
                 color: #e9edef;
             }
 
-        /* Search */
         .search-wrap {
             padding: 8px 12px;
             background: #111b21;
@@ -204,7 +198,6 @@
                     color: #8696a0;
                 }
 
-        /* Contact list */
         .contact-list {
             flex: 1;
             overflow-y: auto;
@@ -219,7 +212,6 @@
                 border-radius: 5px;
             }
 
-        /* Section label */
         .section-label {
             padding: 8px 16px 4px;
             font-size: 12px;
@@ -229,7 +221,6 @@
             letter-spacing: .8px;
         }
 
-        /* Contact item */
         .contact-item {
             display: flex;
             align-items: center;
@@ -331,9 +322,7 @@
             margin-left: 6px;
         }
 
-        /* ══════════════════════════════════════════════════════════
-           CHAT AREA
-        ══════════════════════════════════════════════════════════ */
+        /* ── CHAT AREA ───────────────────────────────────────────── */
         .chat-area {
             flex: 1;
             display: flex;
@@ -342,7 +331,6 @@
             position: relative;
         }
 
-            /* Wallpaper */
             .chat-area::before {
                 content: '';
                 position: absolute;
@@ -355,7 +343,6 @@
                 pointer-events: none;
             }
 
-        /* Placeholder */
         .chat-placeholder {
             flex: 1;
             display: flex;
@@ -384,7 +371,6 @@
                 opacity: .7;
             }
 
-        /* Chat header */
         .chat-header {
             display: none;
             align-items: center;
@@ -474,7 +460,6 @@
                 border-radius: 5px;
             }
 
-        /* Date divider */
         .date-divider {
             display: flex;
             justify-content: center;
@@ -491,7 +476,6 @@
                 border-radius: 8px;
             }
 
-        /* Message row */
         .message-row {
             display: flex;
             align-items: flex-end;
@@ -507,7 +491,6 @@
                 margin-top: 8px;
             }
 
-        /* Tiny avatar beside message */
         .msg-avatar {
             width: 26px;
             height: 26px;
@@ -528,7 +511,6 @@
                 visibility: hidden;
             }
 
-        /* Bubble */
         .bubble-wrap {
             display: flex;
             flex-direction: column;
@@ -557,7 +539,6 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* Tail */
         .message-row:not(.own) .message-bubble {
             background: #202c33;
             color: #e9edef;
@@ -605,7 +586,6 @@
                 display: flex;
             }
 
-        /* Emoji picker */
         .emoji-picker {
             display: none;
             background: #233138;
@@ -709,7 +689,6 @@
             width: 100%;
         }
 
-        /* Input row */
         .input-row {
             display: flex;
             align-items: flex-end;
@@ -796,7 +775,6 @@
                 transform: none;
             }
 
-        /* ── SPINNER ─────────────────────────────────────────────── */
         .spinner {
             text-align: center;
             padding: 30px;
@@ -844,7 +822,6 @@
 
     <div class="app">
 
-        <!-- ── TOP-BAR ──────────────────────────────────────────────── -->
         <div class="topbar">
             <div class="topbar-left">
                 <a href="Mentlberg.html" class="back-btn">← Zurück</a>
@@ -856,15 +833,12 @@
             </div>
         </div>
 
-        <!-- ── MAIN ─────────────────────────────────────────────────── -->
         <div class="main">
 
-            <!-- SIDEBAR -->
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-top">
                     <h2>💬 Chats</h2>
                 </div>
-
                 <div class="search-wrap">
                     <div class="search-box">
                         <span>🔍</span>
@@ -873,23 +847,19 @@
                                oninput="filterContacts(this.value)" />
                     </div>
                 </div>
-
                 <div class="contact-list" id="contact-list">
                     <div class="spinner">⏳ Lade Chats...</div>
                 </div>
             </div>
 
-            <!-- CHAT AREA -->
             <div class="chat-area" id="chat-area">
 
-                <!-- Placeholder -->
                 <div class="chat-placeholder" id="chat-placeholder">
                     <div class="ph-icon">💬</div>
                     <h3>Mentlberg-WG Chat</h3>
                     <p>Wähle einen Chat aus der Liste</p>
                 </div>
 
-                <!-- Chat header -->
                 <div class="chat-header" id="chat-header">
                     <button class="back-to-contacts" onclick="showSidebar()">‹</button>
                     <div class="chat-header-avatar" id="chat-header-avatar">?</div>
@@ -899,25 +869,19 @@
                     </div>
                 </div>
 
-                <!-- Messages -->
                 <div class="messages-container" id="messages-container"></div>
 
-                <!-- Input -->
                 <div class="input-area" id="input-area">
-
-                    <!-- Emoji Picker -->
                     <div class="emoji-picker" id="emoji-picker">
                         <div class="emoji-tabs" id="emoji-tabs"></div>
                         <div class="emoji-cat-label" id="emoji-cat-label">Zuletzt verwendet</div>
                         <div class="emoji-grid" id="emoji-grid"></div>
                     </div>
-
                     <div class="input-row">
                         <button class="input-icon-btn" id="emoji-toggle-btn"
                                 onclick="toggleEmojiPicker()" title="Emoji">
                             😊
                         </button>
-
                         <div class="msg-input-wrap">
                             <textarea id="msg-input"
                                       placeholder="Nachricht schreiben..."
@@ -925,7 +889,6 @@
                                       onkeydown="handleKey(event)"
                                       oninput="autoResize(this)"></textarea>
                         </div>
-
                         <button class="send-btn" id="send-btn"
                                 onclick="sendMessage()" title="Senden">
                             ➤
@@ -933,9 +896,9 @@
                     </div>
                 </div>
 
-            </div><!-- /chat-area -->
-        </div><!-- /main -->
-    </div><!-- /app -->
+            </div>
+        </div>
+    </div>
 
     <script>
         /* ── AUTH ──────────────────────────────────────────────────────── */
@@ -948,7 +911,6 @@
             window.location.href = 'start.html';
         }
 
-        /* Topbar */
         const topbarAvatar = document.getElementById('topbar-avatar');
         const topbarName = document.getElementById('topbar-name');
         topbarAvatar.textContent = myName ? myName.charAt(0).toUpperCase() : '?';
@@ -963,7 +925,7 @@
         let unsubMessages = null;
         let allUsers = [];
         let unreadListeners = {};
-        let allContactData = []; // for search
+        let allContactData = [];
 
         function waitForFirebase() {
             return new Promise(r => {
@@ -1050,7 +1012,6 @@
             }
         ];
 
-        /* ── RECENT EMOJIS ─────────────────────────────────────────────── */
         const RECENT_KEY = 'kati_recent_emojis';
         const RECENT_MAX = 32;
 
@@ -1067,7 +1028,6 @@
             if (activeCategory === 0) renderEmojiGrid(0);
         }
 
-        /* ── EMOJI PICKER ──────────────────────────────────────────────── */
         let activeCategory = 0;
         let emojiPickerOpen = false;
 
@@ -1096,8 +1056,7 @@
         }
 
         function updateCatLabel(idx) {
-            document.getElementById('emoji-cat-label').textContent =
-                EMOJI_CATEGORIES[idx].name;
+            document.getElementById('emoji-cat-label').textContent = EMOJI_CATEGORIES[idx].name;
         }
 
         function renderEmojiGrid(idx) {
@@ -1181,7 +1140,6 @@
             list.innerHTML = '';
             allContactData = [];
 
-            /* Group */
             list.appendChild(makeSectionLabel('Gruppen'));
             const groupItem = createContactItem({
                 id: 'group_all', name: '🏠 Mentlberg-WG',
@@ -1190,7 +1148,6 @@
             list.appendChild(groupItem);
             allContactData.push({ id: 'group_all', name: 'Mentlberg-WG', el: groupItem });
 
-            /* Privat */
             const me = myId();
             const others = users.filter(u => u.uid !== me);
             if (others.length) {
@@ -1231,13 +1188,12 @@
                 </div>
                 <div class="contact-row2">
                     <span class="contact-preview" id="preview-${id}">${sub}</span>
-                    <span class="unread-badge" id="unread-${id}">0</span>
+                    <span class="unread-badge"   id="unread-${id}">0</span>
                 </div>
             </div>`;
             return div;
         }
 
-        /* Search */
         function filterContacts(q) {
             const term = q.toLowerCase().trim();
             allContactData.forEach(({ name, el }) => {
@@ -1245,7 +1201,7 @@
             });
         }
 
-        /* ── Unread ─────────────────────────────────────────────────────── */
+        /* ── Unread counts ──────────────────────────────────────────────── */
         function listenUnreadCounts() {
             const { collection, query, orderBy, onSnapshot } = window._firebaseFns;
             const db = window._db;
@@ -1276,7 +1232,6 @@
                     if (timeEl && latest.createdAt) {
                         timeEl.textContent = formatTime(latest.createdAt.toDate());
                     }
-
                     if (chatId !== currentChatId && unreadEl) {
                         let count = 0;
                         snap.docs.forEach(d => {
@@ -1294,7 +1249,11 @@
 
         /* ── Open Chat ──────────────────────────────────────────────────── */
         function openChat(chatId, chatName, isGroup) {
-            if (unsubMessages) { unsubMessages(); unsubMessages = null; }
+            /* ✅ FIX: Alten Listener sauber beenden */
+            if (unsubMessages) {
+                unsubMessages();
+                unsubMessages = null;
+            }
 
             currentChatId = chatId;
             currentChatName = chatName;
@@ -1321,12 +1280,10 @@
             document.getElementById('messages-container').innerHTML =
                 '<div class="spinner">⏳ Lade Nachrichten...</div>';
 
-            /* Close emoji picker */
             emojiPickerOpen = false;
             document.getElementById('emoji-picker').classList.remove('open');
             document.getElementById('emoji-toggle-btn').classList.remove('active');
 
-            /* Mobile: show chat */
             document.getElementById('sidebar').classList.add('hidden-mobile');
             document.getElementById('chat-area').classList.add('visible-mobile');
 
@@ -1334,20 +1291,31 @@
             document.getElementById('msg-input').focus();
         }
 
-        /* ── Messages ───────────────────────────────────────────────────── */
+        /* ══════════════════════════════════════════════════════════════════
+           ✅ FIXED: listenMessages
+        ══════════════════════════════════════════════════════════════════ */
         function listenMessages(chatId) {
             const { collection, query, orderBy, onSnapshot, doc, updateDoc } =
                 window._firebaseFns;
             const db = window._db;
             const me = myId();
 
+            /* ✅ Alten Listener nochmal sicherstellen */
+            if (unsubMessages) {
+                unsubMessages();
+                unsubMessages = null;
+            }
+
             const q = query(
                 collection(db, 'chats', chatId, 'messages'),
                 orderBy('createdAt', 'asc')
             );
 
-            unsubMessages = onSnapshot(q, snap => {
+            /* ✅ includeMetadataChanges: false → nur echte Server-Updates */
+            unsubMessages = onSnapshot(q, { includeMetadataChanges: false }, snap => {
                 const container = document.getElementById('messages-container');
+                if (!container) return;
+
                 const wasAtBottom =
                     container.scrollHeight - container.scrollTop - container.clientHeight < 80;
 
@@ -1365,8 +1333,13 @@
 
                 snap.docs.forEach(d => {
                     const data = d.data();
+
+                    /* ✅ FIX: Nachrichten ohne Timestamp überspringen
+                       (passiert kurz nach dem Senden, bevor Server-Timestamp gesetzt ist) */
+                    if (!data.createdAt) return;
+
                     const isOwn = data.senderUid === me;
-                    const ts = data.createdAt ? data.createdAt.toDate() : new Date();
+                    const ts = data.createdAt.toDate();
 
                     const dateStr = ts.toLocaleDateString('de-DE',
                         { day: '2-digit', month: 'long', year: 'numeric' });
@@ -1383,10 +1356,9 @@
                     }
 
                     const showAvatar = data.senderUid !== lastSenderUid;
-                    const isGroupStart = showAvatar;
                     lastSenderUid = data.senderUid;
 
-                    /* Mark as read */
+                    /* ✅ Als gelesen markieren */
                     if (!isOwn) {
                         const readBy = data.readBy || [];
                         if (!readBy.includes(me)) {
@@ -1399,7 +1371,7 @@
                     const row = document.createElement('div');
                     row.className = 'message-row' +
                         (isOwn ? ' own' : '') +
-                        (isGroupStart ? ' group-start' : '');
+                        (showAvatar ? ' group-start' : '');
 
                     const avatarEl = `
                     <div class="msg-avatar ${showAvatar && !isOwn ? '' : 'hidden'}">
@@ -1498,9 +1470,14 @@
             document.getElementById('chat-area').classList.remove('visible-mobile');
         }
 
-        /* ── Boot ───────────────────────────────────────────────────────── */
-        document.addEventListener('firebaseReady', loadContacts);
-        if (window._firebaseReady) loadContacts();
+        /* ══════════════════════════════════════════════════════════════════
+           ✅ FIXED BOOT — kein doppelter Aufruf mehr
+        ══════════════════════════════════════════════════════════════════ */
+        if (window._firebaseReady) {
+            loadContacts();
+        } else {
+            document.addEventListener('firebaseReady', loadContacts, { once: true });
+        }
     </script>
 </body>
 </html>
