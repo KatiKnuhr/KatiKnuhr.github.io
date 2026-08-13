@@ -6,7 +6,6 @@
     <title>Mentlberg-WG</title>
     <link rel="icon" type="image/jpeg" href="Ice.jpeg">
 
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import {
@@ -59,6 +58,159 @@
             z-index: 0;
         }
 
+        /* ══════════════════════════════════════════
+           SHARED MAIN-HEADER
+        ══════════════════════════════════════════ */
+        .main-header {
+            position: relative;
+            z-index: 10;
+            background: rgba(18, 52, 70, 0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(168,216,234,0.18);
+            padding: 0 28px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .header-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.5);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .owner-nav {
+            display: none;
+            list-style: none;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+            .owner-nav.visible {
+                display: flex;
+            }
+
+            .owner-nav a {
+                color: rgba(255,255,255,0.68);
+                text-decoration: none;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                padding: 7px 15px;
+                border-radius: 50px;
+                border: 1px solid rgba(255,255,255,0.14);
+                background: rgba(255,255,255,0.07);
+                transition: background 0.22s, color 0.22s, border-color 0.22s;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+                .owner-nav a:hover {
+                    background: rgba(168,216,234,0.18);
+                    border-color: rgba(168,216,234,0.35);
+                    color: #a8d8ea;
+                }
+
+                .owner-nav a.active {
+                    background: rgba(168,216,234,0.25);
+                    border-color: rgba(168,216,234,0.55);
+                    color: #a8d8ea;
+                }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .hdr-chip, .hdr-btn {
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background .22s, border-color .22s;
+            text-decoration: none;
+        }
+
+        /* User-Chip – klickbar für Admin */
+        .hdr-chip {
+            background: rgba(168,216,234,0.12);
+            border: 1px solid rgba(168,216,234,0.28);
+            color: rgba(255,255,255,0.88);
+            cursor: default;
+        }
+
+            .hdr-chip.admin-clickable {
+                cursor: pointer;
+                border-color: rgba(168,216,234,0.55);
+                background: rgba(168,216,234,0.20);
+            }
+
+                .hdr-chip.admin-clickable:hover {
+                    background: rgba(168,216,234,0.35);
+                    border-color: rgba(168,216,234,0.75);
+                    color: #fff;
+                }
+
+        .hdr-btn {
+            border: 1px solid rgba(255,255,255,0.22);
+            background: rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.85);
+            position: relative;
+        }
+
+            .hdr-btn:hover {
+                background: rgba(255,255,255,0.20);
+            }
+
+            .hdr-btn.chat {
+                background: rgba(168,216,234,0.14);
+                border-color: rgba(168,216,234,0.38);
+                color: #a8d8ea;
+            }
+
+                .hdr-btn.chat:hover {
+                    background: rgba(168,216,234,0.28);
+                }
+
+        .chat-dot {
+            position: absolute;
+            top: 3px;
+            right: 4px;
+            width: 7px;
+            height: 7px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            display: none;
+        }
+
+        /* ══════════════════════════════════════════
+           CONTENT
+        ══════════════════════════════════════════ */
         .content {
             position: relative;
             z-index: 1;
@@ -67,151 +219,6 @@
             padding: 28px 16px 80px;
         }
 
-        /* ── KATI NAV BAR (only for katharinakn@outlook.de) ── */
-        .kati-navbar {
-            display: none; /* hidden by default, shown via JS */
-            position: relative;
-            z-index: 10;
-            background: rgba(44, 90, 110, 0.92);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(168,216,234,0.25);
-            padding: 0 32px;
-            height: 52px;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-            .kati-navbar.visible {
-                display: flex;
-            }
-
-        .kati-nav-links {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            list-style: none;
-            margin: 0 auto;
-        }
-
-            .kati-nav-links a {
-                color: rgba(255,255,255,0.82);
-                text-decoration: none;
-                font-size: 13px;
-                font-weight: 700;
-                letter-spacing: 1.2px;
-                text-transform: uppercase;
-                padding: 6px 14px;
-                border-radius: 50px;
-                transition: background 0.22s, color 0.22s;
-            }
-
-                .kati-nav-links a:hover,
-                .kati-nav-links a.active {
-                    background: rgba(168,216,234,0.22);
-                    color: #a8d8ea;
-                }
-
-                .kati-nav-links a.active {
-                    border-bottom: 2px solid #a8d8ea;
-                    border-radius: 0;
-                    padding-bottom: 4px;
-                }
-
-        .kati-nav-logout {
-            padding: 6px 16px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.32);
-            background: rgba(255,255,255,0.10);
-            color: #fff;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background .22s;
-            white-space: nowrap;
-        }
-
-            .kati-nav-logout:hover {
-                background: rgba(255,255,255,0.22);
-            }
-
-        /* ── HEADER ─────────────────────────────────────── */
-        .page-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .title {
-            color: #fff;
-            font-size: 30px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 12px rgba(0,0,0,0.6);
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .user-chip {
-            background: rgba(255,255,255,0.13);
-            border: 1px solid rgba(255,255,255,0.28);
-            color: #fff;
-            padding: 7px 16px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .btn-header {
-            padding: 7px 16px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.32);
-            background: rgba(255,255,255,0.12);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background .22s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-            .btn-header:hover {
-                background: rgba(255,255,255,0.26);
-            }
-
-        .btn-chat {
-            background: rgba(168,216,234,0.18);
-            border-color: rgba(168,216,234,0.45);
-            color: #a8d8ea;
-            position: relative;
-        }
-
-            .btn-chat:hover {
-                background: rgba(168,216,234,0.32);
-            }
-
-        .chat-dot {
-            position: absolute;
-            top: 4px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            background: #ff4d4d;
-            border-radius: 50%;
-            display: none;
-        }
-
-        /* ── MONTH NAV ──────────────────────────────────── */
         .month-nav {
             display: flex;
             align-items: center;
@@ -245,7 +252,6 @@
             text-shadow: 1px 1px 6px rgba(0,0,0,0.5);
         }
 
-        /* ── LEGEND ─────────────────────────────────────── */
         .legend {
             display: flex;
             gap: 20px;
@@ -286,7 +292,6 @@
             border: 1px solid rgba(255,255,255,0.28);
         }
 
-        /* ── CALENDAR WRAP ──────────────────────────────── */
         .calendar-wrap {
             background: rgba(255,255,255,0.07);
             backdrop-filter: blur(16px);
@@ -297,7 +302,6 @@
             overflow-x: auto;
         }
 
-        /* ── TABLE ──────────────────────────────────────── */
         .cal-table {
             width: 100%;
             border-collapse: separate;
@@ -326,14 +330,13 @@
 
         .room-head-inner {
             display: flex;
-            flex-direction: row;
             align-items: center;
             justify-content: center;
             gap: 6px;
         }
 
         .room-head-name {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 800;
             color: #fff;
             white-space: nowrap;
@@ -342,9 +345,9 @@
         .room-rename-btn {
             background: none;
             border: none;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.45);
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             padding: 0;
             transition: color .2s;
             line-height: 1;
@@ -445,7 +448,6 @@
             font-size: 11px;
             color: rgba(255,255,255,0.95);
             font-weight: 600;
-            text-align: left;
             line-height: 1.35;
             word-break: break-word;
             width: 100%;
@@ -456,7 +458,6 @@
             border-top: 1px solid rgba(255,255,255,0.09) !important;
         }
 
-        /* ── OVERVIEW ───────────────────────────────────── */
         .overview-section {
             background: rgba(255,255,255,0.07);
             backdrop-filter: blur(14px);
@@ -573,6 +574,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: background .2s;
+            font-family: inherit;
         }
 
             .btn-ov-edit:hover {
@@ -589,6 +591,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: background .2s;
+            font-family: inherit;
         }
 
             .btn-ov-del:hover {
@@ -601,7 +604,6 @@
             padding: 6px 0;
         }
 
-        /* ── ENTRY PANEL ────────────────────────────────── */
         .entry-panel {
             background: rgba(255,255,255,0.10);
             backdrop-filter: blur(16px);
@@ -697,6 +699,7 @@
             font-weight: 700;
             cursor: pointer;
             transition: all .22s;
+            font-family: inherit;
         }
 
             .btn-save:hover {
@@ -714,13 +717,13 @@
             font-weight: 600;
             cursor: pointer;
             transition: background .22s;
+            font-family: inherit;
         }
 
             .btn-cancel:hover {
                 background: rgba(255,255,255,0.10);
             }
 
-        /* ── TOAST ──────────────────────────────────────── */
         .toast {
             position: fixed;
             bottom: 28px;
@@ -743,7 +746,6 @@
                 opacity: 1;
             }
 
-        /* ── MODAL ──────────────────────────────────────── */
         .modal-bg {
             position: fixed;
             inset: 0;
@@ -784,6 +786,7 @@
                 font-size: 15px;
                 outline: none;
                 margin-bottom: 16px;
+                font-family: inherit;
             }
 
                 .modal input:focus {
@@ -796,14 +799,33 @@
             justify-content: center;
         }
 
-        /* ── RESPONSIVE ─────────────────────────────────── */
+        @media (max-width: 820px) {
+            .main-header {
+                height: auto;
+                padding: 10px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .header-title {
+                font-size: 17px;
+            }
+
+            .owner-nav a {
+                font-size: 10px;
+                padding: 5px 10px;
+                letter-spacing: 0.5px;
+            }
+
+            .hdr-chip, .hdr-btn {
+                font-size: 11px;
+                padding: 5px 11px;
+            }
+        }
+
         @media (max-width: 600px) {
             .form-row {
                 grid-template-columns: 1fr;
-            }
-
-            .title {
-                font-size: 22px;
             }
 
             .cell-inner {
@@ -811,25 +833,18 @@
             }
 
             .room-head-name {
-                font-size: 13px;
+                font-size: 12px;
             }
 
-            .kati-navbar {
-                padding: 0 12px;
-                flex-wrap: wrap;
-                height: auto;
-                padding: 8px 12px;
+            .owner-nav {
+                justify-content: center;
+                width: 100%;
+                order: 3;
             }
 
-            .kati-nav-links {
-                gap: 2px;
+            .header-right {
+                order: 2;
             }
-
-                .kati-nav-links a {
-                    font-size: 11px;
-                    padding: 5px 8px;
-                    letter-spacing: 0.5px;
-                }
         }
     </style>
 </head>
@@ -843,44 +858,34 @@
 
     <div class="overlay"></div>
 
-    <!-- ✅ KATI OWNER NAVBAR – only shown for katharinakn@outlook.de -->
-    <nav class="kati-navbar" id="kati-navbar">
-        <ul class="kati-nav-links">
-            <li><a href="index.html">HOME</a></li>
-            <li><a href="uebermich.html">ÜBER MICH</a></li>
-            <li><a href="hobbys.html">HOBBYS</a></li>
-            <li><a href="galerie.html">GALERIE</a></li>
-            <li><a href="Mentlberg.html" class="active">MENTLBERG</a></li>
+    <header class="main-header">
+        <span class="header-title">⛰️ Mentlberg-WG</span>
+
+        <ul class="owner-nav" id="owner-nav">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li><a href="uebermich.html">👤 Über mich</a></li>
+            <li><a href="hobbys.html">🎿 Hobbys</a></li>
+            <li><a href="galerie.html">🖼️ Galerie</a></li>
+            <li><a href="Mentlberg.html" class="active">⛰️ Mentlberg</a></li>
         </ul>
-        <button class="kati-nav-logout" onclick="logout()">🔓 Abmelden</button>
-    </nav>
+
+        <div class="header-right">
+            <span class="hdr-chip" id="user-chip">👤 ...</span>
+            <a href="chat.html" class="hdr-btn chat">
+                💬 Chat
+                <span class="chat-dot" id="chat-dot"></span>
+            </a>
+            <button class="hdr-btn" onclick="logout()">🔓 Abmelden</button>
+        </div>
+    </header>
 
     <div class="content">
-
-        <!-- HEADER -->
-        <div class="page-header">
-            <h1 class="title">⛰️ Mentlberg-WG</h1>
-            <div class="header-right">
-                <span class="user-chip" id="user-chip">👤 ...</span>
-
-                <!-- CHAT BUTTON -->
-                <a href="chat.html" class="btn-header btn-chat">
-                    💬 Chat
-                    <span class="chat-dot" id="chat-dot"></span>
-                </a>
-
-                <button class="btn-header" onclick="logout()">🔓 Abmelden</button>
-            </div>
-        </div>
-
-        <!-- MONTH NAV -->
         <div class="month-nav">
             <button onclick="changeMonth(-1)">‹</button>
             <div class="month-label" id="month-label">–</div>
             <button onclick="changeMonth(1)">›</button>
         </div>
 
-        <!-- LEGEND -->
         <div class="legend">
             <div class="legend-item"><div class="legend-dot ld-belegt"></div> Belegt</div>
             <div class="legend-item"><div class="legend-dot ld-frei"></div> Zimmer frei</div>
@@ -888,7 +893,6 @@
             <div class="legend-item"><div class="legend-dot ld-leer"></div> Kein Eintrag</div>
         </div>
 
-        <!-- CALENDAR -->
         <div class="calendar-wrap">
             <table class="cal-table" id="cal-table">
                 <thead id="cal-thead"></thead>
@@ -896,7 +900,6 @@
             </table>
         </div>
 
-        <!-- ENTRY PANEL -->
         <div class="entry-panel" id="entry-panel">
             <div class="panel-title" id="panel-title">📅 Neuer Eintrag</div>
             <div class="form-row">
@@ -922,7 +925,7 @@
                 </div>
                 <div class="form-group form-full">
                     <label>Notiz (z.B. wer übernachtet, wer weg ist…)</label>
-                    <textarea id="f-note" placeholder="Mäx nur zu Besuch..."></textarea>
+                    <textarea id="f-note" placeholder="z.B. Max nur zu Besuch..."></textarea>
                 </div>
             </div>
             <div class="btn-row">
@@ -931,18 +934,14 @@
             </div>
         </div>
 
-        <!-- MONTH OVERVIEW -->
         <div class="overview-section">
             <div class="overview-title" id="overview-title">📋 Alle Einträge – Monat</div>
             <div id="overview-body"></div>
         </div>
-
     </div>
 
-    <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
-    <!-- MODAL -->
     <div class="modal-bg" id="modal-bg">
         <div class="modal">
             <h3>✏️ Zimmer umbenennen</h3>
@@ -955,32 +954,45 @@
     </div>
 
     <script>
-        // ══ OWNER EMAIL ══════════════════════════════════════════
         const OWNER_EMAIL = 'katharinakn@outlook.de';
 
-        // ══ STATE ════════════════════════════════════════════════
         const currentUser = sessionStorage.getItem('kati_name') || 'Unbekannt';
         const currentEmail = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
+        const currentRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role') || '';
 
-        document.getElementById('user-chip').textContent = '👤 ' + currentUser;
+        const isOwner = (
+            currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase() ||
+            currentRole === 'admin'
+        );
 
-        // ✅ Show owner navbar only for katharinakn@outlook.de
-        if (currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase()) {
-            document.getElementById('kati-navbar').classList.add('visible');
+        // User-Chip
+        const chip = document.getElementById('user-chip');
+        chip.textContent = '👤 ' + currentUser;
+        if (isOwner) {
+            chip.classList.add('admin-clickable');
+            chip.title = '🛡️ Admin-Panel öffnen';
+            chip.style.cursor = 'pointer';
+            chip.addEventListener('click', () => {
+                window.location.href = 'admin.html';
+            });
         }
 
+        // Owner-Nav
+        if (isOwner) {
+            document.getElementById('owner-nav').classList.add('visible');
+        }
+
+        // ── STATE ──
         const DEFAULT_ROOMS = ['Zimmer 1', 'Zimmer 2', 'Zimmer 3', 'Zimmer 4'];
         let rooms = [...DEFAULT_ROOMS];
         let currentDate = new Date();
         let allEntries = [];
         let editingEntryId = null;
-        let editingRoomIndex = null;
+        let editingRoomIdx = null;
 
-        const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+        const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         const WD_SHORT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
-        // ══ FIREBASE ═════════════════════════════════════════════
         function waitForFirebase() {
             return new Promise(r => {
                 if (window._firebaseReady) r();
@@ -988,7 +1000,6 @@
             });
         }
 
-        // ══ INIT ═════════════════════════════════════════════════
         async function init() {
             await waitForFirebase();
             await loadRoomNames();
@@ -998,22 +1009,20 @@
             checkUnreadMessages();
         }
 
-        // ══ UNREAD DOT ═══════════════════════════════════════════
         async function checkUnreadMessages() {
             try {
                 const { collection, getDocs } = window._firebaseFns;
-                const myId = sessionStorage.getItem('kati_uid') || localStorage.getItem('kati_uid') || 'admin';
                 const myRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role');
-                const meId = myRole === 'admin' ? 'admin' : myId;
+                const myId = myRole === 'admin'
+                    ? 'admin'
+                    : (sessionStorage.getItem('kati_uid') || localStorage.getItem('kati_uid') || 'admin');
 
                 const chatIds = ['group_all'];
-
                 const usersSnap = await getDocs(collection(window._db, 'users'));
                 usersSnap.forEach(d => {
                     const data = d.data();
-                    if (data.status === 'approved' && d.id !== meId) {
-                        const cid = [meId, d.id].sort().join('__');
-                        chatIds.push(cid);
+                    if (data.status === 'approved' && d.id !== myId) {
+                        chatIds.push([myId, d.id].sort().join('__'));
                     }
                 });
 
@@ -1022,29 +1031,22 @@
                     const snap = await getDocs(collection(window._db, 'chats', chatId, 'messages'));
                     snap.forEach(d => {
                         const data = d.data();
-                        if (data.senderUid !== meId) {
+                        if (data.senderUid !== myId) {
                             const readBy = data.readBy || [];
-                            if (!readBy.includes(meId)) totalUnread++;
+                            if (!readBy.includes(myId)) totalUnread++;
                         }
                     });
                 }
-
-                if (totalUnread > 0) {
-                    document.getElementById('chat-dot').style.display = 'block';
-                }
-            } catch (e) {
-                // silently ignore
-            }
+                if (totalUnread > 0) document.getElementById('chat-dot').style.display = 'block';
+            } catch (e) { }
         }
 
-        // ══ ROOM NAMES ═══════════════════════════════════════════
         async function loadRoomNames() {
             const { doc, getDoc } = window._firebaseFns;
             const snap = await getDoc(doc(window._db, 'settings', 'rooms'));
             if (snap.exists()) {
                 const d = snap.data();
-                rooms = [d.room0 || DEFAULT_ROOMS[0], d.room1 || DEFAULT_ROOMS[1],
-                d.room2 || DEFAULT_ROOMS[2], d.room3 || DEFAULT_ROOMS[3]];
+                rooms = [d.room0 || DEFAULT_ROOMS[0], d.room1 || DEFAULT_ROOMS[1], d.room2 || DEFAULT_ROOMS[2], d.room3 || DEFAULT_ROOMS[3]];
             }
         }
 
@@ -1053,39 +1055,33 @@
             sel.innerHTML = '';
             rooms.forEach((name, i) => {
                 const opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = name;
+                opt.value = i; opt.textContent = name;
                 sel.appendChild(opt);
             });
         }
 
         function openRenameModal(index) {
-            editingRoomIndex = index;
+            editingRoomIdx = index;
             document.getElementById('modal-input').value = rooms[index];
             document.getElementById('modal-bg').classList.add('open');
         }
-
-        function closeModal() {
-            document.getElementById('modal-bg').classList.remove('open');
-        }
+        function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
 
         async function saveRoomName() {
             const newName = document.getElementById('modal-input').value.trim();
             if (!newName) return;
-            rooms[editingRoomIndex] = newName;
+            rooms[editingRoomIdx] = newName;
             const { doc, setDoc } = window._firebaseFns;
             await setDoc(doc(window._db, 'settings', 'rooms'), {
-                room0: rooms[0], room1: rooms[1],
-                room2: rooms[2], room3: rooms[3]
+                room0: rooms[0], room1: rooms[1], room2: rooms[2], room3: rooms[3]
             });
             closeModal();
             populateRoomSelect();
             renderCalendar();
             renderOverview();
-            showToast(`✅ Umbenannt zu "${newName}"`);
+            showToast(`✅ Umbenannt zu „${newName}"`);
         }
 
-        // ══ MONTH NAV ════════════════════════════════════════════
         function changeMonth(dir) {
             currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + dir, 1);
             closePanel();
@@ -1093,7 +1089,6 @@
             renderOverview();
         }
 
-        // ══ CALENDAR ═════════════════════════════════════════════
         function renderCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
@@ -1101,14 +1096,11 @@
 
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const today = new Date();
-            const todayD = today.getDate();
-            const isThisMonth = (today.getMonth() === month && today.getFullYear() === year);
+            const isThisMonth = today.getMonth() === month && today.getFullYear() === year;
 
-            // THEAD
             const thead = document.getElementById('cal-thead');
             thead.innerHTML = '';
             const headRow = document.createElement('tr');
-
             const thEmpty = document.createElement('th');
             thEmpty.className = 'th-day-label';
             thEmpty.textContent = 'Tag';
@@ -1119,47 +1111,39 @@
                 th.innerHTML = `
                         <div class="room-head-inner">
                             <span class="room-head-name">🚪 ${name}</span>
-                            <button class="room-rename-btn"
-                                    onclick="openRenameModal(${rIdx})"
-                                    title="Umbenennen">✏️</button>
+                            <button class="room-rename-btn" onclick="openRenameModal(${rIdx})" title="Umbenennen">✏️</button>
                         </div>`;
                 headRow.appendChild(th);
             });
             thead.appendChild(headRow);
 
-            // TBODY
             const tbody = document.getElementById('cal-tbody');
             tbody.innerHTML = '';
 
             for (let d = 1; d <= 31; d++) {
                 const tr = document.createElement('tr');
-                const isValidDay = d <= daysInMonth;
-                const isToday = isThisMonth && isValidDay && d === todayD;
+                const isValid = d <= daysInMonth;
+                const isToday = isThisMonth && isValid && d === today.getDate();
 
                 if (isToday) tr.classList.add('today-row');
                 if (d % 7 === 1 && d > 1) tr.classList.add('week-sep');
 
-                // Day label
                 const tdDay = document.createElement('td');
                 tdDay.className = 'td-day';
-                if (isValidDay) {
+                if (isValid) {
                     const wd = new Date(year, month, d).getDay();
-                    tdDay.innerHTML =
-                        `<span class="day-num">${d}</span>` +
-                        `<span class="day-wd">${WD_SHORT[wd]}</span>`;
+                    tdDay.innerHTML = `<span class="day-num">${d}</span><span class="day-wd">${WD_SHORT[wd]}</span>`;
                 } else {
-                    tdDay.innerHTML =
-                        `<span class="day-num" style="opacity:.18">${d}</span>`;
+                    tdDay.innerHTML = `<span class="day-num" style="opacity:.15">${d}</span>`;
                 }
                 tr.appendChild(tdDay);
 
-                // Room cells
                 rooms.forEach((roomName, rIdx) => {
                     const td = document.createElement('td');
                     td.className = 'cal-cell';
 
-                    if (!isValidDay) {
-                        td.innerHTML = `<div class="cell-inner" style="opacity:.10;cursor:default;"></div>`;
+                    if (!isValid) {
+                        td.innerHTML = `<div class="cell-inner" style="opacity:.08;cursor:default;"></div>`;
                         tr.appendChild(td);
                         return;
                     }
@@ -1167,18 +1151,12 @@
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     const entry = getEntryForRoomDay(rIdx, d, month, year);
                     const status = entry ? entry.type : 'leer';
-                    const noteText = (entry && entry.note) ? entry.note : '';
+                    const note = entry?.note || '';
 
-                    td.innerHTML = `
-                            <div class="cell-inner st-${status}">
-                                <div class="cell-note">${noteText}</div>
-                            </div>`;
-
+                    td.innerHTML = `<div class="cell-inner st-${status}"><div class="cell-note">${note}</div></div>`;
                     td.title = entry
-                        ? `${typeLabel(entry.type)}${entry.note ? ' · ' + entry.note : ''}\n` +
-                        `✏️ ${entry.lastEditedBy || ''}` +
-                        `${entry.lastEditedAt?.toDate
-                            ? ' · ' + entry.lastEditedAt.toDate().toLocaleString('de-DE') : ''}`
+                        ? `${typeLabel(entry.type)}${entry.note ? ' · ' + entry.note : ''}\n✏️ ${entry.lastEditedBy || ''}` +
+                        (entry.lastEditedAt?.toDate ? ' · ' + entry.lastEditedAt.toDate().toLocaleString('de-DE') : '')
                         : `${roomName} – ${d}. ${MONTH_NAMES[month]}: kein Eintrag`;
 
                     td.addEventListener('click', () => openPanel(rIdx, dateStr));
@@ -1197,7 +1175,6 @@
             }) || null;
         }
 
-        // ══ PANEL ════════════════════════════════════════════════
         function openPanel(roomIdx, dateStr) {
             editingEntryId = null;
             document.getElementById('f-room').value = roomIdx;
@@ -1220,8 +1197,7 @@
             document.getElementById('f-to').value = e.to;
             document.getElementById('f-type').value = e.type;
             document.getElementById('f-note').value = e.note || '';
-            document.getElementById('panel-title').textContent =
-                `✏️ Eintrag bearbeiten – ${rooms[e.roomIndex]}`;
+            document.getElementById('panel-title').textContent = `✏️ Eintrag bearbeiten – ${rooms[e.roomIndex]}`;
             document.getElementById('entry-panel').classList.add('open');
             document.getElementById('entry-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -1231,7 +1207,6 @@
             editingEntryId = null;
         }
 
-        // ══ SAVE / DELETE ═════════════════════════════════════════
         async function saveEntry() {
             const roomIdx = parseInt(document.getElementById('f-room').value);
             const from = document.getElementById('f-from').value;
@@ -1271,7 +1246,6 @@
             await loadEntries();
         }
 
-        // ══ LOAD ══════════════════════════════════════════════════
         async function loadEntries() {
             const { collection, getDocs, query, orderBy } = window._firebaseFns;
             const q = query(collection(window._db, 'calendar_entries'), orderBy('from'));
@@ -1282,22 +1256,20 @@
             renderOverview();
         }
 
-        // ══ OVERVIEW ══════════════════════════════════════════════
         function renderOverview() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
-
-            document.getElementById('overview-title').textContent =
-                `📋 Alle Einträge – ${MONTH_NAMES[month]} ${year}`;
+            document.getElementById('overview-title').textContent = `📋 Alle Einträge – ${MONTH_NAMES[month]} ${year}`;
 
             const body = document.getElementById('overview-body');
             body.innerHTML = '';
 
             rooms.forEach((roomName, rIdx) => {
+                const mStart = new Date(year, month, 1);
+                const mEnd = new Date(year, month + 1, 0);
+
                 const roomEntries = allEntries.filter(e => {
                     if (e.roomIndex !== rIdx) return false;
-                    const mStart = new Date(year, month, 1);
-                    const mEnd = new Date(year, month + 1, 0);
                     return new Date(e.from) <= mEnd && new Date(e.to) >= mStart;
                 });
 
@@ -1317,7 +1289,7 @@
                         let metaStr = '';
                         if (entry.lastEditedBy) {
                             const ts = entry.lastEditedAt?.toDate ? entry.lastEditedAt.toDate() : null;
-                            metaStr = `✏️ ${entry.lastEditedBy}${ts ? ' · ' + ts.toLocaleString('de-DE') : ''}`;
+                            metaStr = `✏️ ${entry.lastEditedBy}` + (ts ? ' · ' + ts.toLocaleString('de-DE') : '');
                         }
 
                         const card = document.createElement('div');
@@ -1336,39 +1308,32 @@
                         section.appendChild(card);
                     });
                 }
-
                 body.appendChild(section);
             });
         }
 
-        // ══ HELPERS ═══════════════════════════════════════════════
         function typeLabel(t) {
             return { belegt: '🔴 Belegt', frei: '🟢 Frei', besuch: '🟠 Besuch' }[t] || t;
         }
-
         function formatDate(str) {
             if (!str) return '–';
             const [y, m, d] = str.split('-');
             return `${d}.${m}.${y}`;
         }
-
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3500);
         }
-
         function logout() {
             sessionStorage.clear();
             localStorage.clear();
             window.location.href = 'start.html';
         }
 
-        // ══ START ═════════════════════════════════════════════════
         document.addEventListener('firebaseReady', init);
         if (window._firebaseReady) init();
     </script>
-
 </body>
 </html>

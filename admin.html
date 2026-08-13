@@ -9,16 +9,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import {
-            getFirestore,
-            collection,
-            getDocs,
-            doc,
-            updateDoc,
-            deleteDoc
+            getFirestore, collection, getDocs, doc, updateDoc, deleteDoc
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        import {
-            getAuth
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDHCOxeQufkdx0sYIxTKPnAdrzcvErOrEA",
@@ -41,12 +34,10 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script>
-        emailjs.init("0pUv4sx0wjheKsoPj");
-    </script>
+    <script>emailjs.init("0pUv4sx0wjheKsoPj");</script>
 
     <style>
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -58,41 +49,137 @@
             min-height: 100vh;
         }
 
-        header {
-            background: linear-gradient(135deg, #1a4a5e, #2c6e8a);
-            color: white;
-            padding: 20px 40px;
+        /* ══════════════════════════════════════════
+           SHARED MAIN-HEADER (same as other pages)
+        ══════════════════════════════════════════ */
+        .main-header {
+            position: relative;
+            z-index: 10;
+            background: rgba(18, 52, 70, 0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(168,216,234,0.18);
+            padding: 0 28px;
+            height: 58px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-        }
-
-            header h1 {
-                font-size: 24px;
-                letter-spacing: 2px;
-            }
-
-        .header-btns {
-            display: flex;
             gap: 12px;
         }
 
-        .btn-sm {
-            padding: 8px 18px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.5);
-            background: rgba(255,255,255,0.15);
-            color: white;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+        .header-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.5);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
         }
 
-            .btn-sm:hover {
-                background: rgba(255,255,255,0.3);
+        .owner-nav {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+            .owner-nav a {
+                color: rgba(255,255,255,0.68);
+                text-decoration: none;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                padding: 7px 15px;
+                border-radius: 50px;
+                border: 1px solid rgba(255,255,255,0.14);
+                background: rgba(255,255,255,0.07);
+                transition: background 0.22s, color 0.22s, border-color 0.22s;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 5px;
             }
 
+                .owner-nav a:hover {
+                    background: rgba(168,216,234,0.18);
+                    border-color: rgba(168,216,234,0.35);
+                    color: #a8d8ea;
+                }
+
+                .owner-nav a.active {
+                    background: rgba(168,216,234,0.25);
+                    border-color: rgba(168,216,234,0.55);
+                    color: #a8d8ea;
+                }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .hdr-chip, .hdr-btn {
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background .22s, border-color .22s;
+            text-decoration: none;
+        }
+
+        .hdr-chip {
+            background: rgba(168,216,234,0.12);
+            border: 1px solid rgba(168,216,234,0.28);
+            color: rgba(255,255,255,0.88);
+            cursor: default;
+        }
+
+            .hdr-chip.admin-clickable {
+                cursor: pointer;
+                border-color: rgba(168,216,234,0.55);
+                background: rgba(168,216,234,0.20);
+            }
+
+                .hdr-chip.admin-clickable:hover {
+                    background: rgba(168,216,234,0.35);
+                    border-color: rgba(168,216,234,0.75);
+                    color: #fff;
+                }
+            /* Active/current page chip on admin page */
+            .hdr-chip.admin-active {
+                background: rgba(255,215,0,0.20);
+                border-color: rgba(255,215,0,0.55);
+                color: #ffd700;
+                cursor: default;
+            }
+
+        .hdr-btn {
+            border: 1px solid rgba(255,255,255,0.22);
+            background: rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.85);
+        }
+
+            .hdr-btn:hover {
+                background: rgba(255,255,255,0.20);
+            }
+
+        /* ── CONTENT ── */
         .container {
             max-width: 1000px;
             margin: 40px auto;
@@ -312,36 +399,85 @@
             font-size: 16px;
         }
 
+        @media (max-width: 820px) {
+            .main-header {
+                height: auto;
+                padding: 10px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .header-title {
+                font-size: 17px;
+            }
+
+            .owner-nav a {
+                font-size: 10px;
+                padding: 5px 10px;
+            }
+
+            .hdr-chip, .hdr-btn {
+                font-size: 11px;
+                padding: 5px 11px;
+            }
+        }
+
         @media (max-width: 768px) {
             .stats-row {
                 grid-template-columns: 1fr;
             }
 
-            header {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
-
             .user-table {
                 overflow-x: auto;
+            }
+
+            .owner-nav {
+                justify-content: center;
+                width: 100%;
+                order: 3;
+            }
+
+            .header-right {
+                order: 2;
             }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🛡️ Admin Panel – Kati Knuhr</h1>
-        <div class="header-btns">
-            <button class="btn-sm" onclick="loadUsers()">🔄 Aktualisieren</button>
-            <button class="btn-sm" onclick="goHome()">🏠 Zur Website</button>
-            <button class="btn-sm" onclick="logout()">🔓 Abmelden</button>
+    <script>
+        // Zugriffsschutz
+        const OWNER_EMAIL = 'katharinakn@outlook.de';
+        const _role = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role') || '';
+        const _email = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
+        const _isOwner = (_role === 'admin' || _email.toLowerCase() === OWNER_EMAIL.toLowerCase());
+        if (!_isOwner) { window.location.href = 'start.html'; }
+    </script>
+
+    <!-- ══════════════════════════════════════════════════════
+         SHARED MAIN-HEADER
+    ══════════════════════════════════════════════════════ -->
+    <header class="main-header">
+        <span class="header-title">⛰️ Mentlberg-WG</span>
+
+        <!-- Nav-Links (immer sichtbar auf admin.html, weil nur Admins hier landen) -->
+        <ul class="owner-nav">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li><a href="uebermich.html">👤 Über mich</a></li>
+            <li><a href="hobbys.html">🎿 Hobbys</a></li>
+            <li><a href="galerie.html">🖼️ Galerie</a></li>
+            <li><a href="Mentlberg.html">⛰️ Mentlberg</a></li>
+        </ul>
+
+        <div class="header-right">
+            <!-- Chip zeigt "Admin-Panel" als aktive Seite, nicht klickbar -->
+            <span class="hdr-chip admin-active" id="user-chip">🛡️ Admin-Panel</span>
+            <button class="hdr-btn" onclick="goBack()">← Zurück</button>
+            <button class="hdr-btn" onclick="logout()">🔓 Abmelden</button>
         </div>
     </header>
 
     <div class="container">
-
         <div class="stats-row">
             <div class="stat-card">
                 <div class="number" id="stat-total">–</div>
@@ -376,7 +512,6 @@
                 🎉 Noch keine Benutzer registriert.
             </div>
         </div>
-
     </div>
 
     <div class="toast" id="toast"></div>
@@ -386,13 +521,12 @@
         const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
         const EMAILJS_TEMPLATE_REREGISTER = 'template_o78ci8o';
 
-        // ✅ Zugriffsschutz
-        if (sessionStorage.getItem('kati_role') !== 'admin') {
-            window.location.href = 'start.html';
-        }
+        // Populate user chip with actual name
+        const currentUser = sessionStorage.getItem('kati_name') || 'Admin';
+        // (chip already shows "🛡️ Admin-Panel" – leave it)
 
         function waitForFirebase() {
-            return new Promise((resolve) => {
+            return new Promise(resolve => {
                 if (window._firebaseReady) resolve();
                 else document.addEventListener('firebaseReady', resolve, { once: true });
             });
@@ -434,8 +568,7 @@
 
             users.forEach(user => {
                 const date = user.createdAt?.toDate
-                    ? user.createdAt.toDate().toLocaleDateString('de-DE')
-                    : '–';
+                    ? user.createdAt.toDate().toLocaleDateString('de-DE') : '–';
 
                 const statusLabels = {
                     pending: '<span class="status-badge status-pending">⏳ Ausstehend</span>',
@@ -446,30 +579,26 @@
 
                 let actions = '';
                 if (user.status === 'pending') {
-                    actions = `
-                            <div class="action-btns">
-                                <button class="btn-approve" onclick="approveUser('${user.id}', '${user.email}', '${user.name}')">✅ Genehmigen</button>
-                                <button class="btn-reject"  onclick="rejectUser('${user.id}', '${user.name}')">❌ Ablehnen</button>
-                            </div>`;
+                    actions = `<div class="action-btns">
+                            <button class="btn-approve" onclick="approveUser('${user.id}','${user.email}','${user.name}')">✅ Genehmigen</button>
+                            <button class="btn-reject"  onclick="rejectUser('${user.id}','${user.name}')">❌ Ablehnen</button>
+                        </div>`;
                 } else if (user.status === 'approved') {
-                    actions = `
-                            <div class="action-btns">
-                                <button class="btn-reject" onclick="rejectUser('${user.id}', '${user.name}')">🚫 Sperren</button>
-                                <button class="btn-delete" onclick="deleteUser('${user.id}', '${user.name}')">🗑️ Löschen</button>
-                            </div>`;
+                    actions = `<div class="action-btns">
+                            <button class="btn-reject" onclick="rejectUser('${user.id}','${user.name}')">🚫 Sperren</button>
+                            <button class="btn-delete" onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>
+                        </div>`;
                 } else if (user.status === 'reregister') {
-                    actions = `
-                            <div class="action-btns">
-                                <button class="btn-approve" onclick="approveUser('${user.id}', '${user.email}', '${user.name}')">✅ Direkt freischalten</button>
-                                <button class="btn-delete"  onclick="deleteUser('${user.id}', '${user.name}')">🗑️ Löschen</button>
-                            </div>`;
+                    actions = `<div class="action-btns">
+                            <button class="btn-approve" onclick="approveUser('${user.id}','${user.email}','${user.name}')">✅ Direkt freischalten</button>
+                            <button class="btn-delete"  onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>
+                        </div>`;
                 } else {
-                    actions = `
-                            <div class="action-btns">
-                                <button class="btn-approve"    onclick="approveUser('${user.id}', '${user.email}', '${user.name}')">♻️ Reaktivieren</button>
-                                <button class="btn-reregister" onclick="allowReregister('${user.id}', '${user.email}', '${user.name}')">🔄 Neu einladen</button>
-                                <button class="btn-delete"     onclick="deleteUser('${user.id}', '${user.name}')">🗑️ Löschen</button>
-                            </div>`;
+                    actions = `<div class="action-btns">
+                            <button class="btn-approve"    onclick="approveUser('${user.id}','${user.email}','${user.name}')">♻️ Reaktivieren</button>
+                            <button class="btn-reregister" onclick="allowReregister('${user.id}','${user.email}','${user.name}')">🔄 Neu einladen</button>
+                            <button class="btn-delete"     onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>
+                        </div>`;
                 }
 
                 tbody.innerHTML += `
@@ -487,79 +616,48 @@
 
         async function approveUser(uid, email, name) {
             if (!confirm(`✅ "${name}" freischalten?`)) return;
-
             await waitForFirebase();
             const { doc, updateDoc } = window._firebaseFns;
-            const db = window._db;
-
-            await updateDoc(doc(db, 'users', uid), {
-                status: 'approved',
-                reregisterAllowed: false
-            });
-
+            await updateDoc(doc(window._db, 'users', uid), { status: 'approved', reregisterAllowed: false });
             try {
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ACTIVATED, {
-                    to_email: email,
-                    to_name: name,
+                    to_email: email, to_name: name,
                     login_link: 'https://katiknuhr.github.io/start.html'
                 });
-            } catch (e) {
-                console.warn('E-Mail konnte nicht gesendet werden:', e);
-            }
-
+            } catch (e) { console.warn('E-Mail Fehler:', e); }
             showToast(`✅ ${name} wurde freigeschaltet!`);
             loadUsers();
         }
 
         async function rejectUser(uid, name) {
             if (!confirm(`❌ "${name}" ablehnen/sperren?`)) return;
-
             await waitForFirebase();
             const { doc, updateDoc } = window._firebaseFns;
-            const db = window._db;
-
-            await updateDoc(doc(db, 'users', uid), {
-                status: 'rejected',
-                reregisterAllowed: false
-            });
+            await updateDoc(doc(window._db, 'users', uid), { status: 'rejected', reregisterAllowed: false });
             showToast(`🚫 ${name} wurde gesperrt.`);
             loadUsers();
         }
 
         async function allowReregister(uid, email, name) {
             if (!confirm(`🔄 "${name}" darf sich erneut registrieren?`)) return;
-
             await waitForFirebase();
             const { doc, updateDoc } = window._firebaseFns;
-            const db = window._db;
-
-            await updateDoc(doc(db, 'users', uid), {
-                status: 'reregister',
-                reregisterAllowed: true
-            });
-
+            await updateDoc(doc(window._db, 'users', uid), { status: 'reregister', reregisterAllowed: true });
             try {
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REREGISTER, {
-                    to_email: email,
-                    to_name: name,
+                    to_email: email, to_name: name,
                     login_link: 'https://katiknuhr.github.io/start.html'
                 });
-            } catch (e) {
-                console.warn('E-Mail konnte nicht gesendet werden:', e);
-            }
-
+            } catch (e) { console.warn('E-Mail Fehler:', e); }
             showToast(`🔄 ${name} wurde zur erneuten Registrierung eingeladen!`);
             loadUsers();
         }
 
         async function deleteUser(uid, name) {
             if (!confirm(`🗑️ "${name}" dauerhaft löschen?`)) return;
-
             await waitForFirebase();
             const { doc, deleteDoc } = window._firebaseFns;
-            const db = window._db;
-
-            await deleteDoc(doc(db, 'users', uid));
+            await deleteDoc(doc(window._db, 'users', uid));
             showToast(`🗑️ ${name} wurde gelöscht.`);
             loadUsers();
         }
@@ -571,9 +669,15 @@
             setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        function goHome() { window.location.href = 'index.html'; }
+        function goBack() {
+            // Go back to previous page, or fallback to index
+            if (document.referrer && document.referrer !== window.location.href) {
+                history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
 
-        // ✅ FIX: Beide Storages leeren beim Logout
         function logout() {
             sessionStorage.clear();
             localStorage.clear();
@@ -583,6 +687,5 @@
         document.addEventListener('firebaseReady', loadUsers);
         if (window._firebaseReady) loadUsers();
     </script>
-
 </body>
 </html>

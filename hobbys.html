@@ -1,7 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="de">
 <head>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z106BT6HR8"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -14,8 +13,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hobbys – Kati Knuhr</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏔️</text></svg>">
+
     <style>
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -27,70 +27,179 @@
             color: #333;
         }
 
-        nav {
+        /* ══════════════════════════════════════════
+           SHARED MAIN-HEADER
+        ══════════════════════════════════════════ */
+        .main-header {
             position: fixed;
             top: 0;
-            width: 100%;
-            background: rgba(44, 110, 138, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            padding: 18px 0;
+            left: 0;
+            right: 0;
             z-index: 100;
+            background: rgba(18, 52, 70, 0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(168,216,234,0.18);
+            padding: 0 28px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
 
-            nav a {
-                color: white;
-                text-decoration: none;
-                font-size: 16px;
-                font-weight: 600;
-                letter-spacing: 1px;
-                text-transform: uppercase;
-                transition: color 0.3s;
+        .header-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.5);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .owner-nav {
+            display: none;
+            list-style: none;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+            .owner-nav.visible {
+                display: flex;
             }
 
-                nav a:hover {
+            .owner-nav a {
+                color: rgba(255,255,255,0.68);
+                text-decoration: none;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                padding: 7px 15px;
+                border-radius: 50px;
+                border: 1px solid rgba(255,255,255,0.14);
+                background: rgba(255,255,255,0.07);
+                transition: background 0.22s, color 0.22s, border-color 0.22s;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+                .owner-nav a:hover {
+                    background: rgba(168,216,234,0.18);
+                    border-color: rgba(168,216,234,0.35);
                     color: #a8d8ea;
                 }
 
-                nav a.active {
-                    border-bottom: 2px solid #a8d8ea;
-                    padding-bottom: 4px;
+                .owner-nav a.active {
+                    background: rgba(168,216,234,0.25);
+                    border-color: rgba(168,216,234,0.55);
+                    color: #a8d8ea;
                 }
 
-        .nav-login {
-            position: absolute;
-            left: 24px;
-            top: 50%;
-            transform: translateY(-50%);
+        .classic-nav {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .nav-login-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            padding: 8px 18px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            letter-spacing: 0.5px;
-            transition: all 0.3s;
-            backdrop-filter: blur(6px);
-        }
-
-            .nav-login-btn:hover {
-                background: rgba(255, 255, 255, 0.35);
-                transform: scale(1.05);
+            .classic-nav a {
+                color: rgba(255,255,255,0.68);
+                text-decoration: none;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                padding: 7px 15px;
+                border-radius: 50px;
+                border: 1px solid rgba(255,255,255,0.14);
+                background: rgba(255,255,255,0.07);
+                transition: background 0.22s, color 0.22s;
+                white-space: nowrap;
             }
 
+                .classic-nav a:hover {
+                    background: rgba(255,255,255,0.15);
+                    color: #fff;
+                }
+
+                .classic-nav a.active {
+                    background: rgba(168,216,234,0.25);
+                    border-color: rgba(168,216,234,0.55);
+                    color: #a8d8ea;
+                }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .hdr-chip, .hdr-btn {
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background .22s, border-color .22s;
+            text-decoration: none;
+        }
+
+        .hdr-chip {
+            background: rgba(168,216,234,0.12);
+            border: 1px solid rgba(168,216,234,0.28);
+            color: rgba(255,255,255,0.88);
+            cursor: default;
+        }
+
+            .hdr-chip.admin-clickable {
+                cursor: pointer;
+                border-color: rgba(168,216,234,0.55);
+                background: rgba(168,216,234,0.20);
+            }
+
+                .hdr-chip.admin-clickable:hover {
+                    background: rgba(168,216,234,0.35);
+                    border-color: rgba(168,216,234,0.75);
+                    color: #fff;
+                }
+
+        .hdr-btn {
+            border: 1px solid rgba(255,255,255,0.22);
+            background: rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.85);
+        }
+
+            .hdr-btn:hover {
+                background: rgba(255,255,255,0.20);
+            }
+
+        /* ── PAGE CONTENT ── */
         .page-hero {
             height: 40vh;
+            margin-top: 58px;
             background-image: url('Medien/Skitour.jpeg');
             background-position: center center;
             background-size: cover;
-            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -192,6 +301,35 @@
                 margin-top: 8px;
             }
 
+        @media (max-width: 820px) {
+            .main-header {
+                height: auto;
+                padding: 10px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .owner-nav a, .classic-nav a {
+                font-size: 10px;
+                padding: 5px 10px;
+            }
+
+            .hdr-chip, .hdr-btn {
+                font-size: 11px;
+                padding: 5px 11px;
+            }
+
+            .owner-nav, .classic-nav {
+                justify-content: center;
+                width: 100%;
+                order: 3;
+            }
+
+            .header-right {
+                order: 2;
+            }
+        }
+
         @media (max-width: 768px) {
             .hobby-section {
                 grid-template-columns: 1fr;
@@ -200,19 +338,6 @@
                 .hobby-section.reverse {
                     direction: ltr;
                 }
-
-            nav {
-                gap: 16px;
-            }
-
-                nav a {
-                    font-size: 13px;
-                }
-
-            .nav-login-btn {
-                font-size: 11px;
-                padding: 6px 12px;
-            }
         }
     </style>
 </head>
@@ -224,102 +349,81 @@
         }
     </script>
 
-    <nav>
-        <div class="nav-login">
-            <button class="nav-login-btn" onclick="logout()">🔓 Abmelden</button>
+    <!-- SHARED HEADER -->
+    <header class="main-header">
+        <span class="header-title">⛰️ Mentlberg-WG</span>
+
+        <ul class="owner-nav" id="owner-nav">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li><a href="uebermich.html">👤 Über mich</a></li>
+            <li><a href="hobbys.html" class="active">🎿 Hobbys</a></li>
+            <li><a href="galerie.html">🖼️ Galerie</a></li>
+            <li><a href="Mentlberg.html">⛰️ Mentlberg</a></li>
+        </ul>
+
+        <ul class="classic-nav" id="classic-nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="ueber.html">Über mich</a></li>
+            <li><a href="hobbys.html" class="active">Hobbys</a></li>
+            <li><a href="galerie.html">Galerie</a></li>
+        </ul>
+
+        <div class="header-right">
+            <span class="hdr-chip" id="user-chip">👤 ...</span>
+            <button class="hdr-btn" onclick="logout()">🔓 Abmelden</button>
         </div>
-        <a href="index.html">Home</a>
-        <a href="ueber.html">Über mich</a>
-        <a href="hobbys.html" class="active">Hobbys</a>
-        <a href="galerie.html">Galerie</a>
-    </nav>
+    </header>
 
     <div class="page-hero">
         <h1>Meine Hobbys</h1>
     </div>
 
     <div class="content">
-
         <div class="hobby-section">
             <img src="Medien/Skitour2.jpeg" alt="Skifahren" />
             <div class="hobby-text">
                 <div class="icon">🎿</div>
                 <h2>Skifahren & Skitouren</h2>
-                <p>
-                    Schnee, Berge und Geschwindigkeit – Skifahren ist meine große Leidenschaft.
-                    Ob auf der Piste oder auf einer langen Skitour durch unberührte Hänge:
-                    Der Winter ist meine liebste Jahreszeit!
-                </p>
-                <span class="tag">Piste</span>
-                <span class="tag">Skitour</span>
-                <span class="tag">Tirol</span>
+                <p>Schnee, Berge und Geschwindigkeit – Skifahren ist meine große Leidenschaft. Ob auf der Piste oder auf einer langen Skitour durch unberührte Hänge: Der Winter ist meine liebste Jahreszeit!</p>
+                <span class="tag">Piste</span><span class="tag">Skitour</span><span class="tag">Tirol</span>
             </div>
         </div>
-
         <div class="hobby-section reverse">
             <img src="Medien/TerrexLauf.jpeg" alt="Wandern & Laufen" />
             <div class="hobby-text">
                 <div class="icon">🥾</div>
                 <h2>Wandern & Trailrunning</h2>
-                <p>
-                    Die Berge rund um Innsbruck sind mein Spielplatz.
-                    Ob gemütliche Wanderung oder schneller Trailrun –
-                    in der Natur finde ich meinen Ausgleich und meine Energie.
-                </p>
-                <span class="tag">Alpen</span>
-                <span class="tag">Trail</span>
-                <span class="tag">Natur</span>
+                <p>Die Berge rund um Innsbruck sind mein Spielplatz. Ob gemütliche Wanderung oder schneller Trailrun – in der Natur finde ich meinen Ausgleich und meine Energie.</p>
+                <span class="tag">Alpen</span><span class="tag">Trail</span><span class="tag">Natur</span>
             </div>
         </div>
-
         <div class="hobby-section">
             <img src="Medien/BikeTour.jpeg" alt="Radfahren" />
             <div class="hobby-text">
                 <div class="icon">🚴</div>
                 <h2>Radfahren</h2>
-                <p>
-                    Auf zwei Rädern durch die schönsten Landschaften –
-                    Radtouren sind für mich pure Freiheit.
-                    Von kurzen Ausfahrten bis zu mehrtägigen Bikepacking-Abenteuern.
-                </p>
-                <span class="tag">MTB</span>
-                <span class="tag">Bikepacking</span>
-                <span class="tag">Alpen</span>
+                <p>Auf zwei Rädern durch die schönsten Landschaften – Radtouren sind für mich pure Freiheit. Von kurzen Ausfahrten bis zu mehrtägigen Bikepacking-Abenteuern.</p>
+                <span class="tag">MTB</span><span class="tag">Bikepacking</span><span class="tag">Alpen</span>
             </div>
         </div>
-
         <div class="hobby-section reverse">
             <img src="Medien/Surfen.jpeg" alt="Surfen" />
             <div class="hobby-text">
                 <div class="icon">🏄</div>
                 <h2>Surfen</h2>
-                <p>
-                    Wellen reiten im Atlantik – am liebsten in Spanien oder Portugal!
-                    Das Surfen ist mein perfekter Gegenpol zu den Bergen:
-                    Salz, Sonne, Meer und das Gefühl, auf dem Wasser zu fliegen. 🌊
-                </p>
-                <span class="tag">Atlantik</span>
-                <span class="tag">Spanien</span>
-                <span class="tag">Portugal</span>
+                <p>Wellen reiten im Atlantik – am liebsten in Spanien oder Portugal! Das Surfen ist mein perfekter Gegenpol zu den Bergen: Salz, Sonne, Meer und das Gefühl, auf dem Wasser zu fliegen. 🌊</p>
+                <span class="tag">Atlantik</span><span class="tag">Spanien</span><span class="tag">Portugal</span>
             </div>
         </div>
-
         <div class="hobby-section">
             <img src="Medien/Campen.jpeg" alt="Camping" />
             <div class="hobby-text">
                 <div class="icon">🏕️</div>
                 <h2>Camping & Reisen</h2>
-                <p>
-                    Zelt aufschlagen, Feuer machen, Sterne schauen –
-                    Camping ist für mich die schönste Art zu reisen.
-                    Besonders in Spanien und Portugal fühle ich mich wie zu Hause. 🌅
-                </p>
-                <span class="tag">Camping</span>
-                <span class="tag">Spanien</span>
-                <span class="tag">Portugal</span>
+                <p>Zelt aufschlagen, Feuer machen, Sterne schauen – Camping ist für mich die schönste Art zu reisen. Besonders in Spanien und Portugal fühle ich mich wie zu Hause. 🌅</p>
+                <span class="tag">Camping</span><span class="tag">Spanien</span><span class="tag">Portugal</span>
             </div>
         </div>
-
     </div>
 
     <footer>
@@ -328,11 +432,28 @@
     </footer>
 
     <script>
+        const OWNER_EMAIL = 'katharinakn@outlook.de';
+        const currentUser = sessionStorage.getItem('kati_name') || 'Gast';
+        const currentEmail = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
+        const currentRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role') || '';
+        const isOwner = (currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase() || currentRole === 'admin');
+
+        const chip = document.getElementById('user-chip');
+        chip.textContent = '👤 ' + currentUser;
+
+        if (isOwner) {
+            document.getElementById('owner-nav').classList.add('visible');
+            document.getElementById('classic-nav').style.display = 'none';
+            chip.classList.add('admin-clickable');
+            chip.title = '🛡️ Admin-Panel öffnen';
+            chip.addEventListener('click', () => { window.location.href = 'admin.html'; });
+        }
+
         function logout() {
-            sessionStorage.removeItem('kati_logged_in');
+            sessionStorage.clear();
+            localStorage.clear();
             window.location.href = 'Mentlberg.html';
         }
     </script>
-
 </body>
 </html>
