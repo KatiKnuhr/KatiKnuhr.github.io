@@ -74,7 +74,7 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
         }
 
-        /* ── LOGIN BOX ──────────────────────────────────────────── */
+        /* ── LOGIN BOX ── */
         .login-box {
             position: relative;
             z-index: 2;
@@ -105,7 +105,7 @@
                 font-style: italic;
             }
 
-        /* ── TABS ───────────────────────────────────────────────── */
+        /* ── TABS ── */
         .tab-switcher {
             display: flex;
             background: rgba(255,255,255,0.1);
@@ -143,7 +143,7 @@
                 display: block;
             }
 
-        /* ── INPUTS ─────────────────────────────────────────────── */
+        /* ── INPUTS ── */
         .input-group {
             position: relative;
             margin-bottom: 14px;
@@ -172,7 +172,7 @@
                     background: rgba(255,255,255,0.2);
                 }
 
-        /* ── REMEMBER ME ────────────────────────────────────────── */
+        /* ── REMEMBER ME ── */
         .remember-row {
             display: flex;
             align-items: center;
@@ -218,7 +218,7 @@
             font-weight: 500;
         }
 
-        /* ── BUTTON ─────────────────────────────────────────────── */
+        /* ── BUTTON ── */
         .login-btn {
             width: 100%;
             padding: 14px;
@@ -245,7 +245,7 @@
                 transform: none;
             }
 
-        /* ── MESSAGES ───────────────────────────────────────────── */
+        /* ── MESSAGES ── */
         .msg {
             font-size: 14px;
             margin-top: 14px;
@@ -305,31 +305,6 @@
             text-align: left;
         }
 
-        /* ── KEYBOARD HINT ──────────────────────────────────────── */
-        .kbd-hint {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 10px;
-            color: rgba(255,255,255,0.3);
-            font-size: 12px;
-        }
-
-        .kbd {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.22);
-            border-radius: 5px;
-            padding: 2px 7px;
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.5);
-            letter-spacing: .3px;
-        }
-
         @media (max-width: 480px) {
             .login-box {
                 padding: 36px 24px;
@@ -355,7 +330,7 @@
             <button class="tab-btn" onclick="switchTab('register')">📝 Registrieren</button>
         </div>
 
-        <!-- ── LOGIN TAB ──────────────────────────────────────────── -->
+        <!-- ── LOGIN TAB ── -->
         <div class="tab-content active" id="tab-login">
 
             <div class="input-group">
@@ -382,11 +357,6 @@
 
             <button class="login-btn" id="login-btn" onclick="doLogin()">Anmelden</button>
 
-            <div class="kbd-hint">
-                <span class="kbd">Tab</span> nächstes Feld &nbsp;·&nbsp;
-                <span class="kbd">Enter</span> anmelden
-            </div>
-
             <div class="msg error" id="login-error"></div>
             <div class="pending-banner" id="pending-banner">
                 ⏳ Dein Account wartet noch auf Genehmigung.<br>
@@ -398,7 +368,7 @@
             </div>
         </div>
 
-        <!-- ── REGISTER TAB ───────────────────────────────────────── -->
+        <!-- ── REGISTER TAB ── -->
         <div class="tab-content" id="tab-register">
 
             <div class="input-group">
@@ -435,11 +405,6 @@
 
             <button class="login-btn" id="reg-btn" onclick="doRegister()">Registrieren</button>
 
-            <div class="kbd-hint">
-                <span class="kbd">Tab</span> nächstes Feld &nbsp;·&nbsp;
-                <span class="kbd">Enter</span> registrieren
-            </div>
-
             <div class="msg error" id="reg-error"></div>
             <div class="msg success" id="reg-success"></div>
         </div>
@@ -448,7 +413,7 @@
     </div>
 
     <script>
-        /* ── CONSTANTS ──────────────────────────────────────────────────── */
+        /* ── CONSTANTS ── */
         const ADMIN_USER = 'kati';
         const ADMIN_PASS = 'ibk';
         const OWNER_EMAIL = 'julianknuhr92@gmail.com';
@@ -461,19 +426,13 @@
             'kati_uid', 'kati_name', 'kati_email'
         ];
 
-        /* ── LOGIN FIELD ORDER ──────────────────────────────────────────── */
+        /* ── FIELD ORDER ── */
         const LOGIN_FIELDS = ['login-user', 'login-pass'];
         const REGISTER_FIELDS = ['reg-name', 'reg-email', 'reg-pass', 'reg-pass2'];
 
-        /**
-         * Called on keydown inside a LOGIN field.
-         * - Username field  → Enter moves to password field
-         * - Password field  → Enter submits the form
-         */
         function loginFieldKey(e, fieldId) {
             if (e.key !== 'Enter') return;
             e.preventDefault();
-
             if (fieldId === 'login-user') {
                 document.getElementById('login-pass').focus();
             } else if (fieldId === 'login-pass') {
@@ -481,18 +440,11 @@
             }
         }
 
-        /**
-         * Called on keydown inside a REGISTER field.
-         * - Any field except the last → Enter moves to next field
-         * - Last field (pass2)        → Enter submits the form
-         */
         function registerFieldKey(e, fieldId) {
             if (e.key !== 'Enter') return;
             e.preventDefault();
-
             const idx = REGISTER_FIELDS.indexOf(fieldId);
             const last = REGISTER_FIELDS.length - 1;
-
             if (idx < last) {
                 document.getElementById(REGISTER_FIELDS[idx + 1]).focus();
             } else {
@@ -500,7 +452,7 @@
             }
         }
 
-        /* ── SESSION HELPERS ────────────────────────────────────────────── */
+        /* ── SESSION HELPERS ── */
         function saveSession(key, value, persistent) {
             sessionStorage.setItem(key, value);
             if (persistent) localStorage.setItem(key, value);
@@ -525,7 +477,7 @@
             }
         })();
 
-        /* ── TABS ───────────────────────────────────────────────────────── */
+        /* ── TABS ── */
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach((b, i) => {
                 b.classList.toggle('active',
@@ -534,7 +486,6 @@
             document.getElementById('tab-login').classList.toggle('active', tab === 'login');
             document.getElementById('tab-register').classList.toggle('active', tab === 'register');
             hideAllMessages();
-
             const firstField = tab === 'login' ? 'login-user' : 'reg-name';
             setTimeout(() => document.getElementById(firstField).focus(), 50);
         }
@@ -558,7 +509,7 @@
             });
         }
 
-        /* ── USERNAME → EMAIL LOOKUP ────────────────────────────────────── */
+        /* ── USERNAME → EMAIL LOOKUP ── */
         async function getEmailByUsername(username) {
             const { collection, query, where, getDocs } = window._firebaseFns;
             const db = window._db;
@@ -576,7 +527,7 @@
             return null;
         }
 
-        /* ── LOGIN ──────────────────────────────────────────────────────── */
+        /* ── LOGIN ── */
         async function doLogin() {
             const userInput = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
@@ -673,7 +624,7 @@
             btn.textContent = 'Anmelden';
         }
 
-        /* ── REGISTER ───────────────────────────────────────────────────── */
+        /* ── REGISTER ── */
         async function doRegister() {
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim();
@@ -798,7 +749,7 @@
             btn.textContent = 'Registrieren';
         }
 
-        /* ── AUTO-FOCUS on load ─────────────────────────────────────────── */
+        /* ── AUTO-FOCUS on load ── */
         window.addEventListener('load', () => {
             document.getElementById('login-user').focus();
         });

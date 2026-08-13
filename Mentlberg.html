@@ -26,6 +26,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
         window._db = db;
         window._firebaseFns = {
             collection, addDoc, getDocs, doc,
@@ -58,13 +59,11 @@
             z-index: 0;
         }
 
-        /* ══════════════════════════════════════════
-           SHARED MAIN-HEADER
-        ══════════════════════════════════════════ */
+        /* ── HEADER ── */
         .main-header {
             position: relative;
             z-index: 10;
-            background: rgba(18, 52, 70, 0.97);
+            background: rgba(18,52,70,0.97);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(168,216,234,0.18);
@@ -115,7 +114,7 @@
                 border-radius: 50px;
                 border: 1px solid rgba(255,255,255,0.14);
                 background: rgba(255,255,255,0.07);
-                transition: background 0.22s, color 0.22s, border-color 0.22s;
+                transition: background .22s, color .22s, border-color .22s;
                 white-space: nowrap;
                 display: flex;
                 align-items: center;
@@ -156,7 +155,6 @@
             text-decoration: none;
         }
 
-        /* User-Chip – klickbar für Admin */
         .hdr-chip {
             background: rgba(168,216,234,0.12);
             border: 1px solid rgba(168,216,234,0.28);
@@ -208,9 +206,7 @@
             display: none;
         }
 
-        /* ══════════════════════════════════════════
-           CONTENT
-        ══════════════════════════════════════════ */
+        /* ── CONTENT ── */
         .content {
             position: relative;
             z-index: 1;
@@ -292,6 +288,7 @@
             border: 1px solid rgba(255,255,255,0.28);
         }
 
+        /* ── CALENDAR ── */
         .calendar-wrap {
             background: rgba(255,255,255,0.07);
             backdrop-filter: blur(16px);
@@ -348,14 +345,16 @@
             color: rgba(255,255,255,0.45);
             cursor: pointer;
             font-size: 13px;
-            padding: 0;
+            padding: 2px 4px;
             transition: color .2s;
             line-height: 1;
             flex-shrink: 0;
+            border-radius: 4px;
         }
 
             .room-rename-btn:hover {
                 color: #fff;
+                background: rgba(255,255,255,0.1);
             }
 
         .cal-table tbody tr {
@@ -407,7 +406,6 @@
         .cell-inner {
             border-radius: 8px;
             min-height: 36px;
-            height: 100%;
             width: 100%;
             display: flex;
             align-items: flex-start;
@@ -458,6 +456,7 @@
             border-top: 1px solid rgba(255,255,255,0.09) !important;
         }
 
+        /* ── OVERVIEW ── */
         .overview-section {
             background: rgba(255,255,255,0.07);
             backdrop-filter: blur(14px);
@@ -604,6 +603,7 @@
             padding: 6px 0;
         }
 
+        /* ── ENTRY PANEL ── */
         .entry-panel {
             background: rgba(255,255,255,0.10);
             backdrop-filter: blur(16px);
@@ -724,6 +724,7 @@
                 background: rgba(255,255,255,0.10);
             }
 
+        /* ── TOAST ── */
         .toast {
             position: fixed;
             bottom: 28px;
@@ -738,7 +739,7 @@
             transform: translateY(100px);
             opacity: 0;
             transition: all .4s;
-            z-index: 999;
+            z-index: 9999;
         }
 
             .toast.show {
@@ -746,11 +747,12 @@
                 opacity: 1;
             }
 
+        /* ── MODAL ── */
         .modal-bg {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.65);
-            z-index: 200;
+            z-index: 500;
             display: none;
             align-items: center;
             justify-content: center;
@@ -799,6 +801,15 @@
             justify-content: center;
         }
 
+        /* ── LOADING ── */
+        .cal-loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255,255,255,0.45);
+            font-size: 14px;
+        }
+
+        /* ── RESPONSIVE ── */
         @media (max-width: 820px) {
             .main-header {
                 height: auto;
@@ -860,7 +871,6 @@
 
     <header class="main-header">
         <span class="header-title">⛰️ Mentlberg-WG</span>
-
         <ul class="owner-nav" id="owner-nav">
             <li><a href="index.html">🏠 Home</a></li>
             <li><a href="uebermich.html">👤 Über mich</a></li>
@@ -868,7 +878,6 @@
             <li><a href="galerie.html">🖼️ Galerie</a></li>
             <li><a href="Mentlberg.html" class="active">⛰️ Mentlberg</a></li>
         </ul>
-
         <div class="header-right">
             <span class="hdr-chip" id="user-chip">👤 ...</span>
             <a href="chat.html" class="hdr-btn chat">
@@ -882,7 +891,7 @@
     <div class="content">
         <div class="month-nav">
             <button onclick="changeMonth(-1)">‹</button>
-            <div class="month-label" id="month-label">–</div>
+            <div class="month-label" id="month-label">Lädt…</div>
             <button onclick="changeMonth(1)">›</button>
         </div>
 
@@ -894,7 +903,8 @@
         </div>
 
         <div class="calendar-wrap">
-            <table class="cal-table" id="cal-table">
+            <div class="cal-loading" id="cal-loading">⏳ Kalender wird geladen…</div>
+            <table class="cal-table" id="cal-table" style="display:none;">
                 <thead id="cal-thead"></thead>
                 <tbody id="cal-tbody"></tbody>
             </table>
@@ -942,6 +952,7 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- RENAME MODAL -->
     <div class="modal-bg" id="modal-bg">
         <div class="modal">
             <h3>✏️ Zimmer umbenennen</h3>
@@ -954,6 +965,9 @@
     </div>
 
     <script>
+        /* ══════════════════════════════════════════════════════
+           CONSTANTS & SESSION
+        ══════════════════════════════════════════════════════ */
         const OWNER_EMAIL = 'katharinakn@outlook.de';
 
         const currentUser = sessionStorage.getItem('kati_name') || 'Unbekannt';
@@ -965,50 +979,512 @@
             currentRole === 'admin'
         );
 
-        // User-Chip
+        /* ── User chip ── */
         const chip = document.getElementById('user-chip');
         chip.textContent = '👤 ' + currentUser;
         if (isOwner) {
             chip.classList.add('admin-clickable');
             chip.title = '🛡️ Admin-Panel öffnen';
-            chip.style.cursor = 'pointer';
-            chip.addEventListener('click', () => {
-                window.location.href = 'admin.html';
-            });
+            chip.addEventListener('click', () => { window.location.href = 'admin.html'; });
         }
+        if (isOwner) document.getElementById('owner-nav').classList.add('visible');
 
-        // Owner-Nav
-        if (isOwner) {
-            document.getElementById('owner-nav').classList.add('visible');
-        }
-
-        // ── STATE ──
+        /* ══════════════════════════════════════════════════════
+           STATE
+        ══════════════════════════════════════════════════════ */
         const DEFAULT_ROOMS = ['Zimmer 1', 'Zimmer 2', 'Zimmer 3', 'Zimmer 4'];
         let rooms = [...DEFAULT_ROOMS];
         let currentDate = new Date();
         let allEntries = [];
         let editingEntryId = null;
         let editingRoomIdx = null;
+        let _initDone = false;
 
-        const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+        const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         const WD_SHORT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
+        /* ══════════════════════════════════════════════════════
+           FIREBASE WAIT
+        ══════════════════════════════════════════════════════ */
         function waitForFirebase() {
-            return new Promise(r => {
-                if (window._firebaseReady) r();
-                else document.addEventListener('firebaseReady', r, { once: true });
+            return new Promise(resolve => {
+                if (window._firebaseReady) { resolve(); return; }
+                document.addEventListener('firebaseReady', resolve, { once: true });
             });
         }
 
+        /* ══════════════════════════════════════════════════════
+           INIT
+        ══════════════════════════════════════════════════════ */
         async function init() {
+            if (_initDone) return;
+            _initDone = true;
+
             await waitForFirebase();
-            await loadRoomNames();
+
+            try {
+                await loadRoomNames();
+            } catch (e) {
+                console.warn('loadRoomNames failed, using defaults', e);
+            }
+
             populateRoomSelect();
-            renderCalendar();
-            await loadEntries();
+            showCalendarTable();
+
+            try {
+                await loadEntries();   // renders calendar + overview after load
+            } catch (e) {
+                console.error('loadEntries failed', e);
+                showToast('⚠️ Fehler beim Laden der Einträge.');
+                renderCalendar();
+                renderOverview();
+            }
+
             checkUnreadMessages();
         }
 
+        /* Start init safely after DOM is ready */
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            // Small timeout ensures the module script above has run
+            setTimeout(init, 0);
+        }
+
+        function showCalendarTable() {
+            document.getElementById('cal-loading').style.display = 'none';
+            document.getElementById('cal-table').style.display = '';
+        }
+
+        /* ══════════════════════════════════════════════════════
+           ROOM NAMES
+        ══════════════════════════════════════════════════════ */
+        async function loadRoomNames() {
+            const { doc, getDoc } = window._firebaseFns;
+            const snap = await getDoc(doc(window._db, 'settings', 'rooms'));
+            if (snap.exists()) {
+                const d = snap.data();
+                rooms = [
+                    d.room0 || DEFAULT_ROOMS[0],
+                    d.room1 || DEFAULT_ROOMS[1],
+                    d.room2 || DEFAULT_ROOMS[2],
+                    d.room3 || DEFAULT_ROOMS[3]
+                ];
+            }
+        }
+
+        function populateRoomSelect() {
+            const sel = document.getElementById('f-room');
+            sel.innerHTML = '';
+            rooms.forEach((name, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = name;
+                sel.appendChild(opt);
+            });
+        }
+
+        /* ── Rename modal ── */
+        window.openRenameModal = function (index) {
+            editingRoomIdx = index;
+            document.getElementById('modal-input').value = rooms[index];
+            document.getElementById('modal-bg').classList.add('open');
+            setTimeout(() => document.getElementById('modal-input').focus(), 50);
+        };
+
+        window.closeModal = function () {
+            document.getElementById('modal-bg').classList.remove('open');
+        };
+
+        /* Close modal on backdrop click */
+        document.getElementById('modal-bg').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        /* Enter key in modal input */
+        document.getElementById('modal-input').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') saveRoomName();
+        });
+
+        window.saveRoomName = async function () {
+            const newName = document.getElementById('modal-input').value.trim();
+            if (!newName) { showToast('⚠️ Bitte einen Namen eingeben!'); return; }
+
+            rooms[editingRoomIdx] = newName;
+
+            try {
+                const { doc, setDoc } = window._firebaseFns;
+                await setDoc(doc(window._db, 'settings', 'rooms'), {
+                    room0: rooms[0],
+                    room1: rooms[1],
+                    room2: rooms[2],
+                    room3: rooms[3]
+                });
+                closeModal();
+                populateRoomSelect();
+                renderCalendar();
+                renderOverview();
+                showToast(`✅ Umbenannt zu „${newName}"`);
+            } catch (e) {
+                console.error('saveRoomName error', e);
+                showToast('❌ Fehler beim Speichern!');
+            }
+        };
+
+        /* ══════════════════════════════════════════════════════
+           MONTH NAVIGATION
+        ══════════════════════════════════════════════════════ */
+        window.changeMonth = function (dir) {
+            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + dir, 1);
+            closePanel();
+            renderCalendar();
+            renderOverview();
+        };
+
+        /* ══════════════════════════════════════════════════════
+           CALENDAR RENDER
+        ══════════════════════════════════════════════════════ */
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('month-label').textContent = `${MONTH_NAMES[month]} ${year}`;
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const isThisMonth = today.getMonth() === month && today.getFullYear() === year;
+
+            /* thead */
+            const thead = document.getElementById('cal-thead');
+            thead.innerHTML = '';
+            const headRow = document.createElement('tr');
+
+            const thEmpty = document.createElement('th');
+            thEmpty.className = 'th-day-label';
+            thEmpty.textContent = 'Tag';
+            headRow.appendChild(thEmpty);
+
+            rooms.forEach((name, rIdx) => {
+                const th = document.createElement('th');
+                const btn = document.createElement('button');
+                btn.className = 'room-rename-btn';
+                btn.title = 'Umbenennen';
+                btn.textContent = '✏️';
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openRenameModal(rIdx);
+                });
+
+                const inner = document.createElement('div');
+                inner.className = 'room-head-inner';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'room-head-name';
+                nameSpan.textContent = `🚪 ${name}`;
+
+                inner.appendChild(nameSpan);
+                inner.appendChild(btn);
+                th.appendChild(inner);
+                headRow.appendChild(th);
+            });
+            thead.appendChild(headRow);
+
+            /* tbody */
+            const tbody = document.getElementById('cal-tbody');
+            tbody.innerHTML = '';
+
+            for (let d = 1; d <= 31; d++) {
+                const tr = document.createElement('tr');
+                const isValid = d <= daysInMonth;
+                const isToday = isThisMonth && isValid && d === today.getDate();
+
+                if (isToday) tr.classList.add('today-row');
+                if (d % 7 === 1 && d > 1) tr.classList.add('week-sep');
+
+                /* day label */
+                const tdDay = document.createElement('td');
+                tdDay.className = 'td-day';
+                if (isValid) {
+                    const wd = new Date(year, month, d).getDay();
+                    const numSpan = document.createElement('span');
+                    numSpan.className = 'day-num';
+                    numSpan.textContent = d;
+                    const wdSpan = document.createElement('span');
+                    wdSpan.className = 'day-wd';
+                    wdSpan.textContent = WD_SHORT[wd];
+                    tdDay.appendChild(numSpan);
+                    tdDay.appendChild(wdSpan);
+                } else {
+                    const numSpan = document.createElement('span');
+                    numSpan.className = 'day-num';
+                    numSpan.style.opacity = '0.15';
+                    numSpan.textContent = d;
+                    tdDay.appendChild(numSpan);
+                }
+                tr.appendChild(tdDay);
+
+                /* room cells */
+                rooms.forEach((roomName, rIdx) => {
+                    const td = document.createElement('td');
+                    td.className = 'cal-cell';
+
+                    if (!isValid) {
+                        const ghost = document.createElement('div');
+                        ghost.className = 'cell-inner';
+                        ghost.style.opacity = '0.08';
+                        ghost.style.cursor = 'default';
+                        td.appendChild(ghost);
+                        tr.appendChild(td);
+                        return;
+                    }
+
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const entry = getEntryForRoomDay(rIdx, d, month, year);
+                    const status = entry ? entry.type : 'leer';
+                    const note = entry ? (entry.note || '') : '';
+
+                    const inner = document.createElement('div');
+                    inner.className = `cell-inner st-${status}`;
+
+                    const noteDiv = document.createElement('div');
+                    noteDiv.className = 'cell-note';
+                    noteDiv.textContent = note;
+                    inner.appendChild(noteDiv);
+                    td.appendChild(inner);
+
+                    /* tooltip */
+                    if (entry) {
+                        let tip = `${typeLabel(entry.type)}`;
+                        if (entry.note) tip += ` · ${entry.note}`;
+                        if (entry.lastEditedBy) tip += `\n✏️ ${entry.lastEditedBy}`;
+                        if (entry.lastEditedAt?.toDate) {
+                            tip += ' · ' + entry.lastEditedAt.toDate().toLocaleString('de-DE');
+                        }
+                        td.title = tip;
+                    } else {
+                        td.title = `${roomName} – ${d}. ${MONTH_NAMES[month]}: kein Eintrag`;
+                    }
+
+                    /* click → open panel */
+                    td.addEventListener('click', () => openPanel(rIdx, dateStr));
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            }
+        }
+
+        function getEntryForRoomDay(roomIdx, day, month, year) {
+            const date = new Date(year, month, day);
+            date.setHours(0, 0, 0, 0);
+            return allEntries.find(e => {
+                if (e.roomIndex !== roomIdx) return false;
+                const from = new Date(e.from + 'T00:00:00');
+                const to = new Date(e.to + 'T00:00:00');
+                return date >= from && date <= to;
+            }) || null;
+        }
+
+        /* ══════════════════════════════════════════════════════
+           ENTRY PANEL
+        ══════════════════════════════════════════════════════ */
+        window.openPanel = function (roomIdx, dateStr) {
+            editingEntryId = null;
+            document.getElementById('f-room').value = roomIdx;
+            document.getElementById('f-from').value = dateStr;
+            document.getElementById('f-to').value = dateStr;
+            document.getElementById('f-type').value = 'belegt';
+            document.getElementById('f-note').value = '';
+            document.getElementById('panel-title').textContent =
+                `📅 Neuer Eintrag – ${rooms[roomIdx]} – ${formatDate(dateStr)}`;
+            document.getElementById('entry-panel').classList.add('open');
+            document.getElementById('entry-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        window.openEditPanel = function (entryId) {
+            const e = allEntries.find(x => x.id === entryId);
+            if (!e) return;
+            editingEntryId = entryId;
+            document.getElementById('f-room').value = e.roomIndex;
+            document.getElementById('f-from').value = e.from;
+            document.getElementById('f-to').value = e.to;
+            document.getElementById('f-type').value = e.type;
+            document.getElementById('f-note').value = e.note || '';
+            document.getElementById('panel-title').textContent =
+                `✏️ Eintrag bearbeiten – ${rooms[e.roomIndex]}`;
+            document.getElementById('entry-panel').classList.add('open');
+            document.getElementById('entry-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        window.closePanel = function () {
+            document.getElementById('entry-panel').classList.remove('open');
+            editingEntryId = null;
+        };
+
+        window.saveEntry = async function () {
+            const roomIdx = parseInt(document.getElementById('f-room').value);
+            const from = document.getElementById('f-from').value;
+            const to = document.getElementById('f-to').value;
+            const type = document.getElementById('f-type').value;
+            const note = document.getElementById('f-note').value.trim();
+
+            if (!from || !to) { showToast('⚠️ Bitte Von- und Bis-Datum ausfüllen!'); return; }
+            if (from > to) { showToast('⚠️ Startdatum muss vor Enddatum liegen!'); return; }
+
+            const { collection, addDoc, doc, updateDoc, serverTimestamp } = window._firebaseFns;
+
+            const payload = {
+                roomIndex: roomIdx,
+                roomName: rooms[roomIdx],
+                from,
+                to,
+                type,
+                note,
+                lastEditedBy: currentUser,
+                lastEditedAt: serverTimestamp()
+            };
+
+            try {
+                if (editingEntryId) {
+                    await updateDoc(doc(window._db, 'calendar_entries', editingEntryId), payload);
+                    showToast('✅ Eintrag aktualisiert!');
+                } else {
+                    await addDoc(collection(window._db, 'calendar_entries'), payload);
+                    showToast('✅ Eintrag gespeichert!');
+                }
+                editingEntryId = null;
+                closePanel();
+                await loadEntries();
+            } catch (e) {
+                console.error('saveEntry error', e);
+                showToast('❌ Fehler beim Speichern!');
+            }
+        };
+
+        window.deleteEntry = async function (id) {
+            if (!confirm('🗑️ Eintrag wirklich löschen?')) return;
+            try {
+                const { doc, deleteDoc } = window._firebaseFns;
+                await deleteDoc(doc(window._db, 'calendar_entries', id));
+                showToast('🗑️ Eintrag gelöscht.');
+                await loadEntries();
+            } catch (e) {
+                console.error('deleteEntry error', e);
+                showToast('❌ Fehler beim Löschen!');
+            }
+        };
+
+        /* ══════════════════════════════════════════════════════
+           LOAD ENTRIES FROM FIRESTORE
+        ══════════════════════════════════════════════════════ */
+        async function loadEntries() {
+            const { collection, getDocs, query, orderBy } = window._firebaseFns;
+            try {
+                const q = query(collection(window._db, 'calendar_entries'), orderBy('from'));
+                const snap = await getDocs(q);
+                allEntries = [];
+                snap.forEach(d => allEntries.push({ id: d.id, ...d.data() }));
+            } catch (e) {
+                /* If composite index missing, fall back to unordered fetch */
+                console.warn('Ordered query failed, falling back:', e);
+                const snap = await getDocs(collection(window._db, 'calendar_entries'));
+                allEntries = [];
+                snap.forEach(d => allEntries.push({ id: d.id, ...d.data() }));
+                allEntries.sort((a, b) => a.from.localeCompare(b.from));
+            }
+            renderCalendar();
+            renderOverview();
+        }
+
+        /* ══════════════════════════════════════════════════════
+           OVERVIEW RENDER
+        ══════════════════════════════════════════════════════ */
+        function renderOverview() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('overview-title').textContent =
+                `📋 Alle Einträge – ${MONTH_NAMES[month]} ${year}`;
+
+            const body = document.getElementById('overview-body');
+            body.innerHTML = '';
+
+            rooms.forEach((roomName, rIdx) => {
+                const mStart = new Date(year, month, 1);
+                const mEnd = new Date(year, month + 1, 0);
+                mStart.setHours(0, 0, 0, 0);
+                mEnd.setHours(23, 59, 59, 999);
+
+                const roomEntries = allEntries.filter(e => {
+                    if (e.roomIndex !== rIdx) return false;
+                    const eFrom = new Date(e.from + 'T00:00:00');
+                    const eTo = new Date(e.to + 'T00:00:00');
+                    return eFrom <= mEnd && eTo >= mStart;
+                });
+
+                const section = document.createElement('div');
+                section.className = 'overview-room';
+
+                const roomTitle = document.createElement('div');
+                roomTitle.className = 'overview-room-name';
+                roomTitle.textContent = `🚪 ${roomName}`;
+                section.appendChild(roomTitle);
+
+                if (roomEntries.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.className = 'no-ov-entries';
+                    empty.textContent = 'Keine Einträge diesen Monat.';
+                    section.appendChild(empty);
+                } else {
+                    roomEntries.forEach(entry => {
+                        const sameDay = entry.from === entry.to;
+                        const dateStr = sameDay
+                            ? formatDate(entry.from)
+                            : `${formatDate(entry.from)} → ${formatDate(entry.to)}`;
+
+                        let metaStr = '';
+                        if (entry.lastEditedBy) {
+                            const ts = entry.lastEditedAt?.toDate ? entry.lastEditedAt.toDate() : null;
+                            metaStr = `✏️ ${entry.lastEditedBy}` + (ts ? ' · ' + ts.toLocaleString('de-DE') : '');
+                        }
+
+                        const card = document.createElement('div');
+                        card.className = `ov-entry-card type-${entry.type}`;
+
+                        const info = document.createElement('div');
+                        info.className = 'ov-info';
+                        info.innerHTML = `
+                                <div class="ov-badge type-${entry.type}">${typeLabel(entry.type)}</div>
+                                <div class="ov-dates">${dateStr}</div>
+                                ${entry.note ? `<div class="ov-note">📝 ${escapeHtml(entry.note)}</div>` : ''}
+                                <div class="ov-meta">${escapeHtml(metaStr)}</div>`;
+
+                        const actions = document.createElement('div');
+                        actions.className = 'ov-actions';
+
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'btn-ov-edit';
+                        editBtn.textContent = '✏️ Bearbeiten';
+                        editBtn.addEventListener('click', () => openEditPanel(entry.id));
+
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'btn-ov-del';
+                        delBtn.textContent = '🗑️';
+                        delBtn.addEventListener('click', () => deleteEntry(entry.id));
+
+                        actions.appendChild(editBtn);
+                        actions.appendChild(delBtn);
+                        card.appendChild(info);
+                        card.appendChild(actions);
+                        section.appendChild(card);
+                    });
+                }
+                body.appendChild(section);
+            });
+        }
+
+        /* ══════════════════════════════════════════════════════
+           UNREAD CHAT DOT
+        ══════════════════════════════════════════════════════ */
         async function checkUnreadMessages() {
             try {
                 const { collection, getDocs } = window._firebaseFns;
@@ -1031,309 +1507,45 @@
                     const snap = await getDocs(collection(window._db, 'chats', chatId, 'messages'));
                     snap.forEach(d => {
                         const data = d.data();
-                        if (data.senderUid !== myId) {
-                            const readBy = data.readBy || [];
-                            if (!readBy.includes(myId)) totalUnread++;
-                        }
+                        const readBy = data.readBy || [];
+                        if (data.senderUid !== myId && !readBy.includes(myId)) totalUnread++;
                     });
                 }
                 if (totalUnread > 0) document.getElementById('chat-dot').style.display = 'block';
-            } catch (e) { }
+            } catch (e) { /* silent */ }
         }
 
-        async function loadRoomNames() {
-            const { doc, getDoc } = window._firebaseFns;
-            const snap = await getDoc(doc(window._db, 'settings', 'rooms'));
-            if (snap.exists()) {
-                const d = snap.data();
-                rooms = [d.room0 || DEFAULT_ROOMS[0], d.room1 || DEFAULT_ROOMS[1], d.room2 || DEFAULT_ROOMS[2], d.room3 || DEFAULT_ROOMS[3]];
-            }
-        }
-
-        function populateRoomSelect() {
-            const sel = document.getElementById('f-room');
-            sel.innerHTML = '';
-            rooms.forEach((name, i) => {
-                const opt = document.createElement('option');
-                opt.value = i; opt.textContent = name;
-                sel.appendChild(opt);
-            });
-        }
-
-        function openRenameModal(index) {
-            editingRoomIdx = index;
-            document.getElementById('modal-input').value = rooms[index];
-            document.getElementById('modal-bg').classList.add('open');
-        }
-        function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
-
-        async function saveRoomName() {
-            const newName = document.getElementById('modal-input').value.trim();
-            if (!newName) return;
-            rooms[editingRoomIdx] = newName;
-            const { doc, setDoc } = window._firebaseFns;
-            await setDoc(doc(window._db, 'settings', 'rooms'), {
-                room0: rooms[0], room1: rooms[1], room2: rooms[2], room3: rooms[3]
-            });
-            closeModal();
-            populateRoomSelect();
-            renderCalendar();
-            renderOverview();
-            showToast(`✅ Umbenannt zu „${newName}"`);
-        }
-
-        function changeMonth(dir) {
-            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + dir, 1);
-            closePanel();
-            renderCalendar();
-            renderOverview();
-        }
-
-        function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            document.getElementById('month-label').textContent = `${MONTH_NAMES[month]} ${year}`;
-
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
-            const isThisMonth = today.getMonth() === month && today.getFullYear() === year;
-
-            const thead = document.getElementById('cal-thead');
-            thead.innerHTML = '';
-            const headRow = document.createElement('tr');
-            const thEmpty = document.createElement('th');
-            thEmpty.className = 'th-day-label';
-            thEmpty.textContent = 'Tag';
-            headRow.appendChild(thEmpty);
-
-            rooms.forEach((name, rIdx) => {
-                const th = document.createElement('th');
-                th.innerHTML = `
-                        <div class="room-head-inner">
-                            <span class="room-head-name">🚪 ${name}</span>
-                            <button class="room-rename-btn" onclick="openRenameModal(${rIdx})" title="Umbenennen">✏️</button>
-                        </div>`;
-                headRow.appendChild(th);
-            });
-            thead.appendChild(headRow);
-
-            const tbody = document.getElementById('cal-tbody');
-            tbody.innerHTML = '';
-
-            for (let d = 1; d <= 31; d++) {
-                const tr = document.createElement('tr');
-                const isValid = d <= daysInMonth;
-                const isToday = isThisMonth && isValid && d === today.getDate();
-
-                if (isToday) tr.classList.add('today-row');
-                if (d % 7 === 1 && d > 1) tr.classList.add('week-sep');
-
-                const tdDay = document.createElement('td');
-                tdDay.className = 'td-day';
-                if (isValid) {
-                    const wd = new Date(year, month, d).getDay();
-                    tdDay.innerHTML = `<span class="day-num">${d}</span><span class="day-wd">${WD_SHORT[wd]}</span>`;
-                } else {
-                    tdDay.innerHTML = `<span class="day-num" style="opacity:.15">${d}</span>`;
-                }
-                tr.appendChild(tdDay);
-
-                rooms.forEach((roomName, rIdx) => {
-                    const td = document.createElement('td');
-                    td.className = 'cal-cell';
-
-                    if (!isValid) {
-                        td.innerHTML = `<div class="cell-inner" style="opacity:.08;cursor:default;"></div>`;
-                        tr.appendChild(td);
-                        return;
-                    }
-
-                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                    const entry = getEntryForRoomDay(rIdx, d, month, year);
-                    const status = entry ? entry.type : 'leer';
-                    const note = entry?.note || '';
-
-                    td.innerHTML = `<div class="cell-inner st-${status}"><div class="cell-note">${note}</div></div>`;
-                    td.title = entry
-                        ? `${typeLabel(entry.type)}${entry.note ? ' · ' + entry.note : ''}\n✏️ ${entry.lastEditedBy || ''}` +
-                        (entry.lastEditedAt?.toDate ? ' · ' + entry.lastEditedAt.toDate().toLocaleString('de-DE') : '')
-                        : `${roomName} – ${d}. ${MONTH_NAMES[month]}: kein Eintrag`;
-
-                    td.addEventListener('click', () => openPanel(rIdx, dateStr));
-                    tr.appendChild(td);
-                });
-
-                tbody.appendChild(tr);
-            }
-        }
-
-        function getEntryForRoomDay(roomIdx, day, month, year) {
-            const date = new Date(year, month, day);
-            return allEntries.find(e => {
-                if (e.roomIndex !== roomIdx) return false;
-                return date >= new Date(e.from) && date <= new Date(e.to);
-            }) || null;
-        }
-
-        function openPanel(roomIdx, dateStr) {
-            editingEntryId = null;
-            document.getElementById('f-room').value = roomIdx;
-            document.getElementById('f-from').value = dateStr;
-            document.getElementById('f-to').value = dateStr;
-            document.getElementById('f-type').value = 'belegt';
-            document.getElementById('f-note').value = '';
-            document.getElementById('panel-title').textContent =
-                `📅 Neuer Eintrag – ${rooms[roomIdx]} – ${formatDate(dateStr)}`;
-            document.getElementById('entry-panel').classList.add('open');
-            document.getElementById('entry-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function openEditPanel(entryId) {
-            const e = allEntries.find(x => x.id === entryId);
-            if (!e) return;
-            editingEntryId = entryId;
-            document.getElementById('f-room').value = e.roomIndex;
-            document.getElementById('f-from').value = e.from;
-            document.getElementById('f-to').value = e.to;
-            document.getElementById('f-type').value = e.type;
-            document.getElementById('f-note').value = e.note || '';
-            document.getElementById('panel-title').textContent = `✏️ Eintrag bearbeiten – ${rooms[e.roomIndex]}`;
-            document.getElementById('entry-panel').classList.add('open');
-            document.getElementById('entry-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function closePanel() {
-            document.getElementById('entry-panel').classList.remove('open');
-            editingEntryId = null;
-        }
-
-        async function saveEntry() {
-            const roomIdx = parseInt(document.getElementById('f-room').value);
-            const from = document.getElementById('f-from').value;
-            const to = document.getElementById('f-to').value;
-            const type = document.getElementById('f-type').value;
-            const note = document.getElementById('f-note').value.trim();
-
-            if (!from || !to) { showToast('⚠️ Bitte Von- und Bis-Datum ausfüllen!'); return; }
-            if (from > to) { showToast('⚠️ Startdatum muss vor Enddatum liegen!'); return; }
-
-            const { collection, addDoc, doc, updateDoc, serverTimestamp } = window._firebaseFns;
-            const payload = {
-                roomIndex: roomIdx, roomName: rooms[roomIdx],
-                from, to, type, note,
-                lastEditedBy: currentUser,
-                lastEditedAt: serverTimestamp()
-            };
-
-            if (editingEntryId) {
-                await updateDoc(doc(window._db, 'calendar_entries', editingEntryId), payload);
-                showToast('✅ Eintrag aktualisiert!');
-            } else {
-                await addDoc(collection(window._db, 'calendar_entries'), payload);
-                showToast('✅ Eintrag gespeichert!');
-            }
-
-            editingEntryId = null;
-            closePanel();
-            await loadEntries();
-        }
-
-        async function deleteEntry(id) {
-            if (!confirm('🗑️ Eintrag wirklich löschen?')) return;
-            const { doc, deleteDoc } = window._firebaseFns;
-            await deleteDoc(doc(window._db, 'calendar_entries', id));
-            showToast('🗑️ Eintrag gelöscht.');
-            await loadEntries();
-        }
-
-        async function loadEntries() {
-            const { collection, getDocs, query, orderBy } = window._firebaseFns;
-            const q = query(collection(window._db, 'calendar_entries'), orderBy('from'));
-            const snap = await getDocs(q);
-            allEntries = [];
-            snap.forEach(d => allEntries.push({ id: d.id, ...d.data() }));
-            renderCalendar();
-            renderOverview();
-        }
-
-        function renderOverview() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            document.getElementById('overview-title').textContent = `📋 Alle Einträge – ${MONTH_NAMES[month]} ${year}`;
-
-            const body = document.getElementById('overview-body');
-            body.innerHTML = '';
-
-            rooms.forEach((roomName, rIdx) => {
-                const mStart = new Date(year, month, 1);
-                const mEnd = new Date(year, month + 1, 0);
-
-                const roomEntries = allEntries.filter(e => {
-                    if (e.roomIndex !== rIdx) return false;
-                    return new Date(e.from) <= mEnd && new Date(e.to) >= mStart;
-                });
-
-                const section = document.createElement('div');
-                section.className = 'overview-room';
-                section.innerHTML = `<div class="overview-room-name">🚪 ${roomName}</div>`;
-
-                if (roomEntries.length === 0) {
-                    section.innerHTML += `<div class="no-ov-entries">Keine Einträge diesen Monat.</div>`;
-                } else {
-                    roomEntries.forEach(entry => {
-                        const sameDay = entry.from === entry.to;
-                        const dateStr = sameDay
-                            ? formatDate(entry.from)
-                            : `${formatDate(entry.from)} → ${formatDate(entry.to)}`;
-
-                        let metaStr = '';
-                        if (entry.lastEditedBy) {
-                            const ts = entry.lastEditedAt?.toDate ? entry.lastEditedAt.toDate() : null;
-                            metaStr = `✏️ ${entry.lastEditedBy}` + (ts ? ' · ' + ts.toLocaleString('de-DE') : '');
-                        }
-
-                        const card = document.createElement('div');
-                        card.className = `ov-entry-card type-${entry.type}`;
-                        card.innerHTML = `
-                                <div class="ov-info">
-                                    <div class="ov-badge type-${entry.type}">${typeLabel(entry.type)}</div>
-                                    <div class="ov-dates">${dateStr}</div>
-                                    ${entry.note ? `<div class="ov-note">📝 ${entry.note}</div>` : ''}
-                                    <div class="ov-meta">${metaStr}</div>
-                                </div>
-                                <div class="ov-actions">
-                                    <button class="btn-ov-edit" onclick="openEditPanel('${entry.id}')">✏️ Bearbeiten</button>
-                                    <button class="btn-ov-del"  onclick="deleteEntry('${entry.id}')">🗑️</button>
-                                </div>`;
-                        section.appendChild(card);
-                    });
-                }
-                body.appendChild(section);
-            });
-        }
-
+        /* ══════════════════════════════════════════════════════
+           HELPERS
+        ══════════════════════════════════════════════════════ */
         function typeLabel(t) {
             return { belegt: '🔴 Belegt', frei: '🟢 Frei', besuch: '🟠 Besuch' }[t] || t;
         }
+
         function formatDate(str) {
             if (!str) return '–';
             const [y, m, d] = str.split('-');
             return `${d}.${m}.${y}`;
         }
-        function showToast(msg) {
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function showToast(msg, color) {
             const t = document.getElementById('toast');
             t.textContent = msg;
+            t.style.background = color || '#27ae60';
             t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3500);
         }
-        function logout() {
+
+        window.logout = function () {
             sessionStorage.clear();
             localStorage.clear();
             window.location.href = 'start.html';
-        }
-
-        document.addEventListener('firebaseReady', init);
-        if (window._firebaseReady) init();
+        };
     </script>
 </body>
 </html>
