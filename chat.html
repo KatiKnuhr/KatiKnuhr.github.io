@@ -18,7 +18,7 @@
             authDomain: "katiknuhr-91ba3.firebaseapp.com",
             projectId: "katiknuhr-91ba3",
             storageBucket: "katiknuhr-91ba3.firebasestorage.app",
-            messagingSenderId: "608861491092",
+            messagingSenderId: "608861491492",
             appId: "1:608861491092:web:73a0deb3c58cbd75c18981"
         };
 
@@ -905,7 +905,6 @@
         const myName = sessionStorage.getItem('kati_name') || localStorage.getItem('kati_name');
         const myUid = sessionStorage.getItem('kati_uid') || localStorage.getItem('kati_uid');
         const myRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role');
-        const myEmail = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
 
         if (!myName || (!myUid && myRole !== 'admin')) {
             window.location.href = 'start.html';
@@ -934,13 +933,8 @@
             });
         }
 
-        function getPrivateChatId(a, b) {
-            return [a, b].sort().join('__');
-        }
-
-        function myId() {
-            return myRole === 'admin' ? 'admin' : myUid;
-        }
+        function getPrivateChatId(a, b) { return [a, b].sort().join('__'); }
+        function myId() { return myRole === 'admin' ? 'admin' : myUid; }
 
         /* ══════════════════════════════════════════════════════════════════
            EMOJI DATA
@@ -1112,19 +1106,24 @@
         });
 
         /* ══════════════════════════════════════════════════════════════════
-           CONTACTS
+           ✅ FIXED: loadContacts — lädt ALLE User, nicht nur approved
         ══════════════════════════════════════════════════════════════════ */
         async function loadContacts() {
             await waitForFirebase();
-            const { collection, getDocs, where, query } = window._firebaseFns;
+            const { collection, getDocs } = window._firebaseFns;
             const db = window._db;
 
-            const snap = await getDocs(
-                query(collection(db, 'users'), where('status', '==', 'approved'))
-            );
+            /* ✅ FIX: Kein where-Filter mehr → alle User laden */
+            const snap = await getDocs(collection(db, 'users'));
 
             allUsers = [];
-            snap.forEach(d => allUsers.push({ uid: d.id, ...d.data() }));
+            snap.forEach(d => {
+                const data = d.data();
+                /* ✅ Nur approved User anzeigen (außer Admin sieht alle) */
+                if (myRole === 'admin' || data.status === 'approved') {
+                    allUsers.push({ uid: d.id, ...data });
+                }
+            });
 
             if (myRole === 'admin' && !allUsers.find(u => u.uid === 'admin')) {
                 allUsers.unshift({ uid: 'admin', name: 'Kati (Admin)', email: '' });
@@ -1150,6 +1149,7 @@
 
             const me = myId();
             const others = users.filter(u => u.uid !== me);
+
             if (others.length) {
                 list.appendChild(makeSectionLabel('Direktnachrichten'));
                 others.forEach(user => {
@@ -1157,7 +1157,7 @@
                     const item = createContactItem({
                         id: chatId, name: user.name,
                         sub: '🔒 Privater Chat', isGroup: false,
-                        initial: user.name.charAt(0)
+                        initial: user.name ? user.name.charAt(0) : '?'
                     });
                     list.appendChild(item);
                     allContactData.push({ id: chatId, name: user.name, el: item });
@@ -1178,19 +1178,19 @@
             div.id = 'contact-' + id;
             div.onclick = () => openChat(id, name, isGroup);
             div.innerHTML = `
-            <div class="contact-avatar ${isGroup ? 'group' : ''}">
-                ${isGroup ? '🏠' : (initial || '?')}
-            </div>
-            <div class="contact-body">
-                <div class="contact-row1">
-                    <span class="contact-name">${escapeHtml(name)}</span>
-                    <span class="contact-time" id="time-${id}"></span>
-                </div>
-                <div class="contact-row2">
-                    <span class="contact-preview" id="preview-${id}">${sub}</span>
-                    <span class="unread-badge"   id="unread-${id}">0</span>
-                </div>
-            </div>`;
+                    <div class="contact-avatar ${isGroup ? 'group' : ''}">
+                        ${isGroup ? '🏠' : (initial || '?')}
+                    </div>
+                    <div class="contact-body">
+                        <div class="contact-row1">
+                            <span class="contact-name">${escapeHtml(name)}</span>
+                            <span class="contact-time" id="time-${id}"></span>
+                        </div>
+                        <div class="contact-row2">
+                            <span class="contact-preview" id="preview-${id}">${sub}</span>
+                            <span class="unread-badge"   id="unread-${id}">0</span>
+                        </div>
+                    </div>`;
             return div;
         }
 
@@ -1249,11 +1249,7 @@
 
         /* ── Open Chat ──────────────────────────────────────────────────── */
         function openChat(chatId, chatName, isGroup) {
-            /* ✅ FIX: Alten Listener sauber beenden */
-            if (unsubMessages) {
-                unsubMessages();
-                unsubMessages = null;
-            }
+            if (unsubMessages) { unsubMessages(); unsubMessages = null; }
 
             currentChatId = chatId;
             currentChatName = chatName;
@@ -1291,27 +1287,20 @@
             document.getElementById('msg-input').focus();
         }
 
-        /* ══════════════════════════════════════════════════════════════════
-           ✅ FIXED: listenMessages
-        ══════════════════════════════════════════════════════════════════ */
+        /* ── Listen Messages ────────────────────────────────────────────── */
         function listenMessages(chatId) {
             const { collection, query, orderBy, onSnapshot, doc, updateDoc } =
                 window._firebaseFns;
             const db = window._db;
             const me = myId();
 
-            /* ✅ Alten Listener nochmal sicherstellen */
-            if (unsubMessages) {
-                unsubMessages();
-                unsubMessages = null;
-            }
+            if (unsubMessages) { unsubMessages(); unsubMessages = null; }
 
             const q = query(
                 collection(db, 'chats', chatId, 'messages'),
                 orderBy('createdAt', 'asc')
             );
 
-            /* ✅ includeMetadataChanges: false → nur echte Server-Updates */
             unsubMessages = onSnapshot(q, { includeMetadataChanges: false }, snap => {
                 const container = document.getElementById('messages-container');
                 if (!container) return;
@@ -1333,9 +1322,6 @@
 
                 snap.docs.forEach(d => {
                     const data = d.data();
-
-                    /* ✅ FIX: Nachrichten ohne Timestamp überspringen
-                       (passiert kurz nach dem Senden, bevor Server-Timestamp gesetzt ist) */
                     if (!data.createdAt) return;
 
                     const isOwn = data.senderUid === me;
@@ -1358,7 +1344,6 @@
                     const showAvatar = data.senderUid !== lastSenderUid;
                     lastSenderUid = data.senderUid;
 
-                    /* ✅ Als gelesen markieren */
                     if (!isOwn) {
                         const readBy = data.readBy || [];
                         if (!readBy.includes(me)) {
@@ -1374,27 +1359,27 @@
                         (showAvatar ? ' group-start' : '');
 
                     const avatarEl = `
-                    <div class="msg-avatar ${showAvatar && !isOwn ? '' : 'hidden'}">
-                        ${data.senderName ? data.senderName.charAt(0).toUpperCase() : '?'}
-                    </div>`;
+                            <div class="msg-avatar ${showAvatar && !isOwn ? '' : 'hidden'}">
+                                ${data.senderName ? data.senderName.charAt(0).toUpperCase() : '?'}
+                            </div>`;
 
                     const senderLabel = (!isOwn && showAvatar && currentChatId === 'group_all')
                         ? `<div class="msg-sender-name">${escapeHtml(data.senderName || 'Unbekannt')}</div>`
                         : '';
 
                     row.innerHTML = `
-                    ${!isOwn ? avatarEl : ''}
-                    <div class="bubble-wrap">
-                        ${senderLabel}
-                        <div class="message-bubble">
-                            ${escapeHtml(data.text || '')}
-                            <div class="msg-meta">
-                                <span class="msg-time">${formatTime(ts)}</span>
-                                ${isOwn ? '<span class="msg-ticks">✓✓</span>' : ''}
+                            ${!isOwn ? avatarEl : ''}
+                            <div class="bubble-wrap">
+                                ${senderLabel}
+                                <div class="message-bubble">
+                                    ${escapeHtml(data.text || '')}
+                                    <div class="msg-meta">
+                                        <span class="msg-time">${formatTime(ts)}</span>
+                                        ${isOwn ? '<span class="msg-ticks">✓✓</span>' : ''}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    ${isOwn ? avatarEl : ''}`;
+                            ${isOwn ? avatarEl : ''}`;
 
                     container.appendChild(row);
                 });
@@ -1470,9 +1455,7 @@
             document.getElementById('chat-area').classList.remove('visible-mobile');
         }
 
-        /* ══════════════════════════════════════════════════════════════════
-           ✅ FIXED BOOT — kein doppelter Aufruf mehr
-        ══════════════════════════════════════════════════════════════════ */
+        /* ── BOOT ───────────────────────────────────────────────────────── */
         if (window._firebaseReady) {
             loadContacts();
         } else {
