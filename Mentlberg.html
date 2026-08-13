@@ -870,13 +870,7 @@
 
     <header class="main-header">
         <span class="header-title">⛰️ Mentlberg-WG</span>
-        <ul class="owner-nav" id="owner-nav">
-            <li><a href="index.html">🏠 Home</a></li>
-            <li><a href="uebermich.html">👤 Über mich</a></li>
-            <li><a href="hobbys.html">🎿 Hobbys</a></li>
-            <li><a href="galerie.html">🖼️ Galerie</a></li>
-            <li><a href="Mentlberg.html" class="active">⛰️ Mentlberg</a></li>
-        </ul>
+        <ul class="owner-nav" id="owner-nav"></ul>
         <div class="header-right">
             <span class="hdr-chip" id="user-chip">👤 ...</span>
             <a href="chat.html" class="hdr-btn chat">
@@ -960,22 +954,120 @@
 
     <script>
         /* ══════════════════════════════════════════
-           SESSION
+           SESSION & PERMISSIONS
         ══════════════════════════════════════════ */
         const OWNER_EMAIL = 'katharinakn@outlook.de';
-        const currentUser = sessionStorage.getItem('kati_name') || 'Unbekannt';
+        const currentUser = sessionStorage.getItem('kati_name') || localStorage.getItem('kati_name') || 'Unbekannt';
         const currentEmail = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
         const currentRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role') || '';
+        const currentUid = sessionStorage.getItem('kati_uid') || localStorage.getItem('kati_uid') || '';
         const isOwner = currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase() || currentRole === 'admin';
 
-        const chip = document.getElementById('user-chip');
-        chip.textContent = '👤 ' + currentUser;
-        if (isOwner) {
-            chip.classList.add('admin-clickable');
-            chip.title = '🛡️ Admin-Panel öffnen';
-            chip.addEventListener('click', () => { window.location.href = 'admin.html'; });
+        /* Parse permissions from session/localStorage */
+        let perms = {};
+        try {
+            const raw = sessionStorage.getItem('kati_permissions')
+                || localStorage.getItem('kati_permissions')
+                || '{}';
+            perms = JSON.parse(raw);
+        } catch (e) { perms = {}; }
+
+        console.log('🔑 Permissions:', perms, '| isOwner:', isOwner);
+
+        /* ── All nav pages definition ── */
+        const NAV_PAGES = [
+            { key: 'home', href: 'index.html', icon: '🏠', label: 'Home' },
+            { key: 'uebermich', href: 'uebermich.html', icon: '👤', label: 'Über mich' },
+            { key: 'hobbys', href: 'hobbys.html', icon: '🎿', label: 'Hobbys' },
+            { key: 'galerie', href: 'galerie.html', icon: '🖼️', label: 'Galerie' },
+            { key: 'mentlberg', href: 'Mentlberg.html', icon: '⛰️', label: 'Mentlberg' },
+        ];
+
+        /* ── Build navigation ── */
+        (function buildNav() {
+            const nav = document.getElementById('owner-nav');
+            nav.innerHTML = '';
+
+            /* Decide which pages to show */
+            const visiblePages = isOwner
+                ? NAV_PAGES                                          /* admin sees all */
+                : NAV_PAGES.filter(p => perms[p.key] === true);     /* user sees only allowed */
+
+            if (visiblePages.length === 0) return; /* no nav at all */
+
+            visiblePages.forEach(page => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = page.href;
+                a.textContent = `${page.icon} ${page.label}`;
+                /* Mark current page as active */
+                const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+                if (page.href === currentFile) a.classList.add('active');
+                li.appendChild(a);
+                nav.appendChild(li);
+            });
+
+            nav.classList.add('visible');
+        })();
+
+        /* ── User chip ── */
+        (function setupChip() {
+            const chip = document.getElementById('user-chip');
+            chip.textContent = '👤 ' + currentUser;
+            if (isOwner) {
+                chip.classList.add('admin-clickable');
+                chip.title = '🛡️ Admin-Panel öffnen';
+                chip.addEventListener('click', () => { window.location.href = 'admin.html'; });
+            }
+        })();
+
+        /* ── Live-refresh permissions from Firestore (so changes take effect without re-login) ── */
+        async function refreshPermissionsFromFirestore() {
+            if (!currentUid || isOwner) return;
+            try {
+                await waitForFirebase();
+                const { doc, getDoc } = window._firebaseFns;
+                const snap = await getDoc(doc(window._db, 'users', currentUid));
+                if (!snap.exists()) return;
+                const data = snap.data();
+                const fresh = data.permissions || {};
+                const freshJson = JSON.stringify(fresh);
+
+                /* Update storage */
+                sessionStorage.setItem('kati_permissions', freshJson);
+                if (localStorage.getItem('kati_logged_in') === 'true')
+                    localStorage.setItem('kati_permissions', freshJson);
+
+                /* Rebuild nav if permissions changed */
+                if (freshJson !== JSON.stringify(perms)) {
+                    perms = fresh;
+                    console.log('🔄 Permissions aktualisiert:', perms);
+                    buildNavFromPerms();
+                }
+            } catch (e) {
+                console.warn('⚠️ Permission-Refresh fehlgeschlagen:', e);
+            }
         }
-        if (isOwner) document.getElementById('owner-nav').classList.add('visible');
+
+        function buildNavFromPerms() {
+            const nav = document.getElementById('owner-nav');
+            nav.innerHTML = '';
+            const visiblePages = isOwner
+                ? NAV_PAGES
+                : NAV_PAGES.filter(p => perms[p.key] === true);
+            if (visiblePages.length === 0) { nav.classList.remove('visible'); return; }
+            visiblePages.forEach(page => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = page.href;
+                a.textContent = `${page.icon} ${page.label}`;
+                const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+                if (page.href === currentFile) a.classList.add('active');
+                li.appendChild(a);
+                nav.appendChild(li);
+            });
+            nav.classList.add('visible');
+        }
 
         /* ══════════════════════════════════════════
            STATE
@@ -993,22 +1085,19 @@
         const WD_SHORT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
         /* ══════════════════════════════════════════
-           FIREBASE WAIT  – polls every 100ms, max 10s
+           FIREBASE WAIT
         ══════════════════════════════════════════ */
         function waitForFirebase() {
             return new Promise((resolve, reject) => {
-                if (window._firebaseReady && window._db && window._firebaseFns) {
-                    resolve(); return;
-                }
+                if (window._firebaseReady && window._db && window._firebaseFns) { resolve(); return; }
                 let tries = 0;
                 const iv = setInterval(() => {
                     tries++;
                     if (window._firebaseReady && window._db && window._firebaseFns) {
+                        clearInterval(iv); resolve();
+                    } else if (tries > 100) {
                         clearInterval(iv);
-                        resolve();
-                    } else if (tries > 100) {          // 10 seconds
-                        clearInterval(iv);
-                        reject(new Error('Firebase timeout – nicht geladen nach 10s'));
+                        reject(new Error('Firebase timeout'));
                     }
                 }, 100);
             });
@@ -1020,48 +1109,35 @@
         async function init() {
             if (_initDone) return;
             _initDone = true;
-            console.log('🚀 init() gestartet');
 
             try {
                 await waitForFirebase();
-                console.log('✅ Firebase bereit');
             } catch (e) {
-                console.error('❌ Firebase nicht bereit:', e);
                 showToast('❌ Firebase konnte nicht geladen werden!', true);
                 document.getElementById('cal-loading').textContent = '❌ Firebase Fehler – bitte Seite neu laden.';
                 return;
             }
 
-            // Load room names
-            try {
-                await loadRoomNames();
-                console.log('✅ Zimmernamen geladen:', rooms);
-            } catch (e) {
-                console.warn('⚠️ Zimmernamen Fehler (defaults verwendet):', e.code, e.message);
-            }
+            try { await loadRoomNames(); } catch (e) { console.warn('⚠️ Zimmernamen Fehler:', e.message); }
 
             populateRoomSelect();
-
-            // Show calendar
             document.getElementById('cal-loading').style.display = 'none';
             document.getElementById('cal-table').style.display = '';
             renderCalendar();
 
-            // Load entries
             try {
                 await loadEntries();
-                console.log('✅ Einträge geladen:', allEntries.length);
             } catch (e) {
-                console.error('❌ loadEntries Fehler:', e.code, e.message, e);
                 showToast('❌ Fehler: ' + (e.message || e.code || 'Unbekannt'), true);
                 renderCalendar();
                 renderOverview();
             }
 
+            /* Refresh permissions live from Firestore */
+            refreshPermissionsFromFirestore();
             checkUnreadMessages();
         }
 
-        // Start after DOM ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
@@ -1106,9 +1182,7 @@
         }
         window.openRenameModal = openRenameModal;
 
-        function closeModal() {
-            document.getElementById('modal-bg').classList.remove('open');
-        }
+        function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
         window.closeModal = closeModal;
 
         document.getElementById('modal-bg').addEventListener('click', function (e) {
@@ -1121,13 +1195,11 @@
         async function saveRoomName() {
             const newName = document.getElementById('modal-input').value.trim();
             if (!newName) { showToast('⚠️ Bitte einen Namen eingeben!', true); return; }
-
             rooms[editingRoomIdx] = newName;
             closeModal();
             populateRoomSelect();
             renderCalendar();
             renderOverview();
-
             try {
                 const { doc, setDoc } = window._firebaseFns;
                 await setDoc(doc(window._db, 'settings', 'rooms'), {
@@ -1135,9 +1207,7 @@
                     room2: rooms[2], room3: rooms[3]
                 });
                 showToast(`✅ Umbenannt zu „${newName}"`);
-                console.log('✅ Zimmernames gespeichert');
             } catch (e) {
-                console.error('❌ saveRoomName Fehler:', e.code, e.message);
                 showToast('❌ Name konnte nicht gespeichert werden: ' + (e.code || e.message), true);
             }
         }
@@ -1166,7 +1236,7 @@
             const today = new Date();
             const isThisMonth = today.getMonth() === month && today.getFullYear() === year;
 
-            // thead
+            /* thead */
             const thead = document.getElementById('cal-thead');
             thead.innerHTML = '';
             const headRow = document.createElement('tr');
@@ -1194,7 +1264,7 @@
             });
             thead.appendChild(headRow);
 
-            // tbody
+            /* tbody */
             const tbody = document.getElementById('cal-tbody');
             tbody.innerHTML = '';
 
@@ -1213,7 +1283,8 @@
                     const ws = document.createElement('span'); ws.className = 'day-wd'; ws.textContent = WD_SHORT[wd];
                     tdDay.appendChild(ns); tdDay.appendChild(ws);
                 } else {
-                    const ns = document.createElement('span'); ns.className = 'day-num'; ns.style.opacity = '0.15'; ns.textContent = d;
+                    const ns = document.createElement('span');
+                    ns.className = 'day-num'; ns.style.opacity = '0.15'; ns.textContent = d;
                     tdDay.appendChild(ns);
                 }
                 tr.appendChild(tdDay);
@@ -1223,7 +1294,8 @@
                     td.className = 'cal-cell';
                     if (!isValid) {
                         const g = document.createElement('div');
-                        g.className = 'cell-inner'; g.style.cssText = 'opacity:.08;cursor:default;';
+                        g.className = 'cell-inner';
+                        g.style.cssText = 'opacity:.08;cursor:default;';
                         td.appendChild(g); tr.appendChild(td); return;
                     }
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -1232,7 +1304,8 @@
                     const inner = document.createElement('div');
                     inner.className = `cell-inner st-${status}`;
                     const noteDiv = document.createElement('div');
-                    noteDiv.className = 'cell-note'; noteDiv.textContent = entry ? (entry.note || '') : '';
+                    noteDiv.className = 'cell-note';
+                    noteDiv.textContent = entry ? (entry.note || '') : '';
                     inner.appendChild(noteDiv);
                     td.appendChild(inner);
                     if (entry) {
@@ -1331,7 +1404,6 @@
                 closePanel();
                 await loadEntries();
             } catch (e) {
-                console.error('❌ saveEntry Fehler:', e.code, e.message);
                 showToast('❌ Speichern fehlgeschlagen: ' + (e.code || e.message), true);
             }
         }
@@ -1345,23 +1417,20 @@
                 showToast('🗑️ Eintrag gelöscht.');
                 await loadEntries();
             } catch (e) {
-                console.error('❌ deleteEntry Fehler:', e.code, e.message);
                 showToast('❌ Löschen fehlgeschlagen: ' + (e.code || e.message), true);
             }
         }
         window.deleteEntry = deleteEntry;
 
         /* ══════════════════════════════════════════
-           LOAD ENTRIES  – kein orderBy, kein Index nötig
+           LOAD ENTRIES
         ══════════════════════════════════════════ */
         async function loadEntries() {
-            console.log('📥 loadEntries() gestartet...');
             const { collection, getDocs } = window._firebaseFns;
             const snap = await getDocs(collection(window._db, 'calendar_entries'));
             allEntries = [];
             snap.forEach(d => allEntries.push({ id: d.id, ...d.data() }));
             allEntries.sort((a, b) => (a.from || '').localeCompare(b.from || ''));
-            console.log('📥 loadEntries() fertig –', allEntries.length, 'Einträge');
             renderCalendar();
             renderOverview();
         }
@@ -1392,12 +1461,14 @@
                 const section = document.createElement('div');
                 section.className = 'overview-room';
                 const title = document.createElement('div');
-                title.className = 'overview-room-name'; title.textContent = `🚪 ${roomName}`;
+                title.className = 'overview-room-name';
+                title.textContent = `🚪 ${roomName}`;
                 section.appendChild(title);
 
                 if (roomEntries.length === 0) {
                     const empty = document.createElement('div');
-                    empty.className = 'no-ov-entries'; empty.textContent = 'Keine Einträge diesen Monat.';
+                    empty.className = 'no-ov-entries';
+                    empty.textContent = 'Keine Einträge diesen Monat.';
                     section.appendChild(empty);
                 } else {
                     roomEntries.forEach(entry => {
@@ -1414,21 +1485,37 @@
                         card.className = `ov-entry-card type-${entry.type}`;
                         const info = document.createElement('div'); info.className = 'ov-info';
                         const badge = document.createElement('div');
-                        badge.className = `ov-badge type-${entry.type}`; badge.textContent = typeLabel(entry.type);
+                        badge.className = `ov-badge type-${entry.type}`;
+                        badge.textContent = typeLabel(entry.type);
                         const dates = document.createElement('div');
-                        dates.className = 'ov-dates'; dates.textContent = dateStr;
-                        info.appendChild(badge); info.appendChild(dates);
+                        dates.className = 'ov-dates';
+                        dates.textContent = dateStr;
+                        info.appendChild(badge);
+                        info.appendChild(dates);
                         if (entry.note) {
-                            const n = document.createElement('div'); n.className = 'ov-note'; n.textContent = `📝 ${entry.note}`; info.appendChild(n);
+                            const n = document.createElement('div');
+                            n.className = 'ov-note';
+                            n.textContent = `📝 ${entry.note}`;
+                            info.appendChild(n);
                         }
-                        const meta = document.createElement('div'); meta.className = 'ov-meta'; meta.textContent = metaStr; info.appendChild(meta);
-                        const actions = document.createElement('div'); actions.className = 'ov-actions';
-                        const editBtn = document.createElement('button'); editBtn.className = 'btn-ov-edit'; editBtn.textContent = '✏️ Bearbeiten';
+                        const meta = document.createElement('div');
+                        meta.className = 'ov-meta';
+                        meta.textContent = metaStr;
+                        info.appendChild(meta);
+                        const actions = document.createElement('div');
+                        actions.className = 'ov-actions';
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'btn-ov-edit';
+                        editBtn.textContent = '✏️ Bearbeiten';
                         editBtn.addEventListener('click', () => openEditPanel(entry.id));
-                        const delBtn = document.createElement('button'); delBtn.className = 'btn-ov-del'; delBtn.textContent = '🗑️';
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'btn-ov-del';
+                        delBtn.textContent = '🗑️';
                         delBtn.addEventListener('click', () => deleteEntry(entry.id));
-                        actions.appendChild(editBtn); actions.appendChild(delBtn);
-                        card.appendChild(info); card.appendChild(actions);
+                        actions.appendChild(editBtn);
+                        actions.appendChild(delBtn);
+                        card.appendChild(info);
+                        card.appendChild(actions);
                         section.appendChild(card);
                     });
                 }
@@ -1484,7 +1571,8 @@
             setTimeout(() => t.classList.remove('show'), 4000);
         }
         function logout() {
-            sessionStorage.clear(); localStorage.clear();
+            sessionStorage.clear();
+            localStorage.clear();
             window.location.href = 'start.html';
         }
         window.logout = logout;
