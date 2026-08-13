@@ -1,0 +1,1346 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat – Kati Knuhr</title>
+    <link rel="icon" type="image/jpeg" href="Ice.jpeg">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection, addDoc, query, orderBy,
+            onSnapshot, serverTimestamp, doc,
+            updateDoc, getDocs, where
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHCOxeQufkdx0sYIxTKPnAdrzcvErOrEA",
+            authDomain: "katiknuhr-91ba3.firebaseapp.com",
+            projectId: "katiknuhr-91ba3",
+            storageBucket: "katiknuhr-91ba3.firebasestorage.app",
+            messagingSenderId: "608861491092",
+            appId: "1:608861491092:web:73a0deb3c58cbd75c18981"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window._db = db;
+        window._firebaseFns = {
+            collection, addDoc, query, orderBy,
+            onSnapshot, serverTimestamp, doc,
+            updateDoc, getDocs, where
+        };
+        window._firebaseReady = true;
+        document.dispatchEvent(new Event('firebaseReady'));
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-image: url('Medien/Eis.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to bottom,rgba(0,0,0,0.55),rgba(0,0,0,0.75));
+            z-index: 0;
+        }
+
+        /* ── HEADER ─────────────────────────────── */
+        header {
+            position: relative;
+            z-index: 10;
+            background: rgba(30,30,30,0.6);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+            .back-btn:hover {
+                background: rgba(255,255,255,0.2);
+            }
+
+        header h1 {
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .user-badge {
+            background: rgba(168,216,234,0.2);
+            border: 1px solid rgba(168,216,234,0.4);
+            color: #a8d8ea;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* ── LAYOUT ──────────────────────────────── */
+        .chat-wrapper {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ── SIDEBAR ─────────────────────────────── */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: rgba(20,20,20,0.55);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 16px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+            .sidebar-header h2 {
+                color: white;
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+            .sidebar-header p {
+                color: rgba(255,255,255,0.4);
+                font-size: 12px;
+                margin-top: 2px;
+            }
+
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+            .contact-list::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .contact-list::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.15);
+                border-radius: 4px;
+            }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+            .contact-item:hover {
+                background: rgba(255,255,255,0.06);
+            }
+
+            .contact-item.active {
+                background: rgba(168,216,234,0.12);
+                border-left-color: #a8d8ea;
+            }
+
+        .contact-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#2c6e8a,#a8d8ea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+            .contact-avatar.group {
+                background: linear-gradient(135deg,#6a3d9a,#c77dff);
+                font-size: 20px;
+            }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-name {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-preview {
+            color: rgba(255,255,255,0.45);
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .contact-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .contact-time {
+            color: rgba(255,255,255,0.3);
+            font-size: 11px;
+        }
+
+        .unread-badge {
+            background: #a8d8ea;
+            color: #1a4a5e;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 7px;
+            min-width: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        /* ── CHAT AREA ───────────────────────────── */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-placeholder {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.3);
+            gap: 12px;
+        }
+
+            .chat-placeholder .icon {
+                font-size: 64px;
+                opacity: 0.4;
+            }
+
+            .chat-placeholder p {
+                font-size: 16px;
+            }
+
+        .chat-header {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            background: rgba(20,20,20,0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+            .chat-header.visible {
+                display: flex;
+            }
+
+        .chat-header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#2c6e8a,#a8d8ea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+        }
+
+            .chat-header-avatar.group {
+                background: linear-gradient(135deg,#6a3d9a,#c77dff);
+                font-size: 18px;
+            }
+
+        .chat-header-info h3 {
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .chat-header-info p {
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+        }
+
+        /* ── MESSAGES ────────────────────────────── */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 20px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+            .messages-container::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .messages-container::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.15);
+                border-radius: 4px;
+            }
+
+        .date-divider {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+            .date-divider span {
+                background: rgba(255,255,255,0.1);
+                color: rgba(255,255,255,0.5);
+                font-size: 11px;
+                padding: 4px 12px;
+                border-radius: 50px;
+            }
+
+        .message-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+            .message-row.own {
+                flex-direction: row-reverse;
+            }
+
+        .msg-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#2c6e8a,#a8d8ea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+            .msg-avatar.hidden {
+                visibility: hidden;
+            }
+
+        .message-bubble {
+            max-width: 65%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .message-row:not(.own) .message-bubble {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-row.own .message-bubble {
+            background: linear-gradient(135deg,#2c6e8a,#3a8aaa);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-sender-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: #a8d8ea;
+            margin-bottom: 3px;
+        }
+
+        .msg-time {
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* ── INPUT AREA ──────────────────────────── */
+        .input-area {
+            display: none;
+            padding: 12px 16px;
+            background: rgba(20,20,20,0.5);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            flex-direction: column;
+            gap: 8px;
+        }
+
+            .input-area.visible {
+                display: flex;
+            }
+
+        .input-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .input-area textarea {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 22px;
+            padding: 12px 18px;
+            color: white;
+            font-size: 14px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            resize: none;
+            outline: none;
+            max-height: 120px;
+            min-height: 46px;
+            line-height: 1.4;
+            transition: border 0.3s;
+        }
+
+            .input-area textarea::placeholder {
+                color: rgba(255,255,255,0.35);
+            }
+
+            .input-area textarea:focus {
+                border-color: #a8d8ea;
+            }
+
+        .emoji-toggle-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+            .emoji-toggle-btn:hover {
+                background: rgba(255,255,255,0.2);
+                transform: scale(1.08);
+            }
+
+            .emoji-toggle-btn.active {
+                background: rgba(168,216,234,0.25);
+                border-color: #a8d8ea;
+            }
+
+        .send-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg,#2c6e8a,#a8d8ea);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+            .send-btn:hover {
+                transform: scale(1.08);
+                box-shadow: 0 4px 14px rgba(44,110,138,0.5);
+            }
+
+            .send-btn:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        /* ── EMOJI PICKER ────────────────────────── */
+        .emoji-picker {
+            display: none;
+            background: rgba(22,22,22,0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.13);
+            border-radius: 16px;
+            padding: 10px;
+            width: 100%;
+            flex-direction: column;
+            gap: 8px;
+            /* Höhe: Tabs + Grid */
+        }
+
+            .emoji-picker.open {
+                display: flex;
+            }
+
+        /* Tabs */
+        .emoji-tabs {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            flex-shrink: 0;
+        }
+
+            .emoji-tabs::-webkit-scrollbar {
+                height: 3px;
+            }
+
+            .emoji-tabs::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.18);
+                border-radius: 3px;
+            }
+
+        .emoji-tab {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 5px 9px;
+            font-size: 17px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.18s;
+            color: white;
+            position: relative;
+        }
+
+            .emoji-tab:hover {
+                background: rgba(255,255,255,0.16);
+            }
+
+            .emoji-tab.active {
+                background: rgba(168,216,234,0.22);
+                border-color: rgba(168,216,234,0.6);
+            }
+
+            /* Recent-Tab bekommt Uhr-Icon */
+            .emoji-tab.recent-tab {
+                font-size: 15px;
+            }
+
+        /* Kategorie-Label */
+        .emoji-cat-label {
+            color: rgba(255,255,255,0.35);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 0 2px 4px;
+            flex-shrink: 0;
+        }
+
+        /* Grid */
+        .emoji-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            overflow-y: auto;
+            max-height: 160px;
+        }
+
+            .emoji-grid::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .emoji-grid::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.15);
+                border-radius: 4px;
+            }
+
+        .emoji-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            font-size: 21px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+
+            .emoji-btn:hover {
+                background: rgba(255,255,255,0.11);
+            }
+
+        /* Leer-Hinweis für Recent */
+        .emoji-empty {
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            padding: 18px 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* ── MOBILE ──────────────────────────────── */
+        .back-to-contacts {
+            display: none;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .sidebar {
+                width: 100%;
+                min-width: unset;
+                position: absolute;
+                inset: 0;
+                z-index: 20;
+                transition: transform 0.3s;
+            }
+
+                .sidebar.hidden-mobile {
+                    transform: translateX(-100%);
+                }
+
+            .chat-area {
+                position: absolute;
+                inset: 0;
+                z-index: 15;
+                display: none;
+            }
+
+                .chat-area.visible-mobile {
+                    display: flex;
+                }
+
+            .back-to-contacts {
+                display: flex !important;
+            }
+        }
+
+        .spinner {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255,255,255,0.4);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-left">
+            <a href="Mentlberg.html" class="back-btn">← Zurück</a>
+            <h1>💬 Gruppen-Chat</h1>
+        </div>
+        <div class="user-badge" id="header-username">...</div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="chat-wrapper">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>💬 Chats</h2>
+                <p id="sidebar-sub">Lade Kontakte...</p>
+            </div>
+            <div class="contact-list" id="contact-list">
+                <div class="spinner">⏳ Lade...</div>
+            </div>
+        </div>
+
+        <!-- CHAT AREA -->
+        <div class="chat-area" id="chat-area">
+
+            <div class="chat-placeholder" id="chat-placeholder">
+                <div class="icon">💬</div>
+                <p>Wähle einen Chat aus</p>
+            </div>
+
+            <div class="chat-header" id="chat-header">
+                <button class="back-to-contacts" onclick="showSidebar()">‹</button>
+                <div class="chat-header-avatar" id="chat-header-avatar">?</div>
+                <div class="chat-header-info">
+                    <h3 id="chat-header-name">–</h3>
+                    <p id="chat-header-sub">–</p>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messages-container"></div>
+
+            <!-- INPUT -->
+            <div class="input-area" id="input-area">
+
+                <!-- Emoji Picker -->
+                <div class="emoji-picker" id="emoji-picker">
+                    <div class="emoji-tabs" id="emoji-tabs"></div>
+                    <div class="emoji-cat-label" id="emoji-cat-label">Zuletzt verwendet</div>
+                    <div class="emoji-grid" id="emoji-grid"></div>
+                </div>
+
+                <!-- Input Row -->
+                <div class="input-row">
+                    <button class="emoji-toggle-btn" id="emoji-toggle-btn"
+                            onclick="toggleEmojiPicker()" title="Emoji einfügen">
+                        😊
+                    </button>
+                    <textarea id="msg-input"
+                              placeholder="Nachricht schreiben..."
+                              rows="1"
+                              onkeydown="handleKey(event)"
+                              oninput="autoResize(this)"></textarea>
+                    <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ── Auth ──────────────────────────────────────────────────
+        const myName = sessionStorage.getItem('kati_name') || localStorage.getItem('kati_name');
+        const myUid = sessionStorage.getItem('kati_uid') || localStorage.getItem('kati_uid');
+        const myRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role');
+
+        if (!myName || (!myUid && myRole !== 'admin')) {
+            window.location.href = 'start.html';
+        }
+
+        document.getElementById('header-username').textContent = '👤 ' + myName;
+
+        // ── State ─────────────────────────────────────────────────
+        let currentChatId = null;
+        let currentChatName = null;
+        let unsubscribeMessages = null;
+        let allUsers = [];
+        let unreadListeners = {};
+
+        function waitForFirebase() {
+            return new Promise(r => {
+                if (window._firebaseReady) r();
+                else document.addEventListener('firebaseReady', r, { once: true });
+            });
+        }
+
+        function getPrivateChatId(uid1, uid2) {
+            return [uid1, uid2].sort().join('__');
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // EMOJI DATA
+        // ══════════════════════════════════════════════════════════
+        const EMOJI_CATEGORIES = [
+            {
+                id: 'recent',
+                label: '🕐',
+                name: 'Zuletzt verwendet',
+                emojis: []          // wird aus localStorage befüllt
+            },
+            {
+                id: 'smileys',
+                label: '😀',
+                name: 'Smileys & Gefühle',
+                emojis: ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
+                    '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙',
+                    '🥲', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫',
+                    '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬',
+                    '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢',
+                    '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸',
+                    '😎', '🤓', '🧐', '😕', '😟', '🙁', '☹️', '😮', '😯', '😲',
+                    '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱',
+                    '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠',
+                    '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻']
+            },
+            {
+                id: 'gestures',
+                label: '👍',
+                name: 'Gesten & Menschen',
+                emojis: ['👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞',
+                    '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍',
+                    '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝',
+                    '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶', '👂',
+                    '🦻', '👃', '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄', '💋',
+                    '🫦', '👶', '🧒', '👦', '👧', '🧑', '👱', '👨', '🧔', '👩',
+                    '🧓', '👴', '👵', '🙍', '🙎', '🙅', '🙆', '💁', '🙋', '🧏',
+                    '🙇', '🤦', '🤷', '💆', '💇', '🚶', '🧍', '🧎', '🏃', '🧖']
+            },
+            {
+                id: 'hearts',
+                label: '❤️',
+                name: 'Herzen & Symbole',
+                emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔',
+                    '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥️',
+                    '❤️‍🔥', '❤️‍🩹', '💯', '🔥', '⭐', '🌟', '💫', '✨', '⚡', '🌈',
+                    '☀️', '🌤️', '⛅', '☁️', '🌧️', '⛈️', '❄️', '☃️', '⛄', '🌊',
+                    '🎵', '🎶', '🎼', '🎤', '🎧', '🎷', '🎸', '🎹', '🎺', '🎻',
+                    '🥁', '🪘', '🎉', '🎊', '🎈', '🎁', '🎀', '🏮', '🪔', '🧨']
+            },
+            {
+                id: 'animals',
+                label: '🐶',
+                name: 'Tiere & Natur',
+                emojis: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐻‍❄️', '🐨',
+                    '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🙈', '🙉', '🙊', '🐔',
+                    '🐧', '🐦', '🐤', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴',
+                    '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦟', '🦗', '🕷️',
+                    '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞',
+                    '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐅',
+                    '🐆', '🦓', '🦍', '🦧', '🦣', '🐘', '🦛', '🦏', '🐪', '🐫',
+                    '🦒', '🦘', '🦬', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑']
+            },
+            {
+                id: 'food',
+                label: '🍕',
+                name: 'Essen & Trinken',
+                emojis: ['🍎', '🍊', '🍋', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭',
+                    '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌶️',
+                    '🫑', '🧄', '🧅', '🥔', '🍠', '🥐', '🥯', '🍞', '🥖', '🥨',
+                    '🧀', '🥚', '🍳', '🧈', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖',
+                    '🌭', '🍔', '🍟', '🍕', '🫓', '🥪', '🥙', '🧆', '🌮', '🌯',
+                    '🥗', '🥘', '🫕', '🥫', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱',
+                    '🥟', '🦪', '🍤', '🍙', '🍚', '🍘', '🍥', '🥮', '🍢', '🧁',
+                    '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩', '🍪', '🌰']
+            },
+            {
+                id: 'sport',
+                label: '⚽',
+                name: 'Sport & Aktivität',
+                emojis: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱',
+                    '🏓', '🏸', '🏒', '🥍', '🏑', '🏏', '🪃', '🥅', '⛳', '🪁',
+                    '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷', '⛸️',
+                    '🥌', '🎿', '⛷️', '🏂', '🪂', '🏋️', '🤼', '🤸', '⛹️', '🤺',
+                    '🤾', '🏌️', '🏇', '🧘', '🏄', '🏊', '🤽', '🚣', '🧗', '🚵',
+                    '🚴', '🏆', '🥇', '🥈', '🥉', '🏅', '🎖️', '🏵️', '🎗️', '🎫']
+            },
+            {
+                id: 'travel',
+                label: '🌍',
+                name: 'Reise & Orte',
+                emojis: ['🌍', '🌎', '🌏', '🗺️', '🧭', '🏔️', '⛰️', '🌋', '🗻', '🏕️',
+                    '🏖️', '🏜️', '🏝️', '🏞️', '🏟️', '🏛️', '🏗️', '🧱', '🪨', '🪵',
+                    '🛖', '🏘️', '🏚️', '🏠', '🏡', '🏢', '🏣', '🏤', '🏥', '🏦',
+                    '🏨', '🏩', '🏪', '🏫', '🏬', '🏭', '🏯', '🏰', '💒', '🗼',
+                    '🗽', '⛪', '🕌', '🛕', '🕍', '⛩️', '🕋', '⛲', '⛺', '🌁',
+                    '🌃', '🏙️', '🌄', '🌅', '🌆', '🌇', '🌉', '♨️', '🚂', '🚃',
+                    '🚄', '🚅', '🚆', '🚇', '🚈', '🚉', '🚊', '🚝', '🚞', '🚋',
+                    '🚌', '🚍', '🚎', '🚐', '🚑', '🚒', '🚓', '🚔', '🚕', '🚗']
+            }
+        ];
+
+        // ══════════════════════════════════════════════════════════
+        // RECENT EMOJIS  (localStorage)
+        // ══════════════════════════════════════════════════════════
+        const RECENT_KEY = 'kati_recent_emojis';
+        const RECENT_MAX = 32;   // max. gespeicherte Emojis
+
+        function loadRecentEmojis() {
+            try {
+                return JSON.parse(localStorage.getItem(RECENT_KEY)) || [];
+            } catch { return []; }
+        }
+
+        function saveRecentEmoji(emoji) {
+            let recent = loadRecentEmojis();
+            // Duplikat entfernen, vorne einfügen
+            recent = [emoji, ...recent.filter(e => e !== emoji)];
+            // Auf Max begrenzen
+            if (recent.length > RECENT_MAX) recent = recent.slice(0, RECENT_MAX);
+            localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+            // Kategorie aktualisieren
+            EMOJI_CATEGORIES[0].emojis = recent;
+            // Falls gerade Recent-Tab aktiv → Grid neu rendern
+            if (activeCategory === 0) renderEmojiGrid(0);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // EMOJI PICKER
+        // ══════════════════════════════════════════════════════════
+        let activeCategory = 0;
+        let emojiPickerOpen = false;
+
+        function buildEmojiPicker() {
+            // Recent aus localStorage laden
+            EMOJI_CATEGORIES[0].emojis = loadRecentEmojis();
+
+            const tabsEl = document.getElementById('emoji-tabs');
+            tabsEl.innerHTML = '';
+
+            EMOJI_CATEGORIES.forEach((cat, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'emoji-tab' + (idx === 0 ? ' active recent-tab' : '');
+                btn.textContent = cat.label;
+                btn.title = cat.name;
+                btn.onclick = () => switchCategory(idx);
+                tabsEl.appendChild(btn);
+            });
+
+            renderEmojiGrid(0);
+            updateCatLabel(0);
+        }
+
+        function switchCategory(idx) {
+            activeCategory = idx;
+            document.querySelectorAll('.emoji-tab').forEach((t, i) =>
+                t.classList.toggle('active', i === idx)
+            );
+            renderEmojiGrid(idx);
+            updateCatLabel(idx);
+        }
+
+        function updateCatLabel(idx) {
+            document.getElementById('emoji-cat-label').textContent =
+                EMOJI_CATEGORIES[idx].name;
+        }
+
+        function renderEmojiGrid(idx) {
+            const gridEl = document.getElementById('emoji-grid');
+            gridEl.innerHTML = '';
+
+            const emojis = EMOJI_CATEGORIES[idx].emojis;
+
+            if (emojis.length === 0) {
+                // Noch keine Recent-Emojis
+                const empty = document.createElement('div');
+                empty.className = 'emoji-empty';
+                empty.textContent = '🕐 Noch keine zuletzt verwendeten Emojis';
+                gridEl.appendChild(empty);
+                return;
+            }
+
+            emojis.forEach(emoji => {
+                const btn = document.createElement('button');
+                btn.className = 'emoji-btn';
+                btn.textContent = emoji;
+                btn.onclick = () => insertEmoji(emoji);
+                gridEl.appendChild(btn);
+            });
+        }
+
+        function insertEmoji(emoji) {
+            const input = document.getElementById('msg-input');
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            input.value =
+                input.value.slice(0, start) + emoji + input.value.slice(end);
+            const newPos = start + [...emoji].length; // korrekte Unicode-Länge
+            input.setSelectionRange(newPos, newPos);
+            input.focus();
+            autoResize(input);
+
+            // ✅ Als zuletzt verwendet speichern
+            saveRecentEmoji(emoji);
+        }
+
+        function toggleEmojiPicker() {
+            emojiPickerOpen = !emojiPickerOpen;
+            document.getElementById('emoji-picker')
+                .classList.toggle('open', emojiPickerOpen);
+            document.getElementById('emoji-toggle-btn')
+                .classList.toggle('active', emojiPickerOpen);
+
+            // Beim Öffnen immer Recent-Tab zeigen & aktualisieren
+            if (emojiPickerOpen) {
+                EMOJI_CATEGORIES[0].emojis = loadRecentEmojis();
+                switchCategory(0);
+            }
+        }
+
+        // Picker schließen wenn außerhalb geklickt
+        document.addEventListener('click', e => {
+            if (!emojiPickerOpen) return;
+            const picker = document.getElementById('emoji-picker');
+            const btn = document.getElementById('emoji-toggle-btn');
+            if (!picker.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                emojiPickerOpen = false;
+                picker.classList.remove('open');
+                btn.classList.remove('active');
+            }
+        });
+
+        // ══════════════════════════════════════════════════════════
+        // CONTACTS
+        // ══════════════════════════════════════════════════════════
+        async function loadContacts() {
+            await waitForFirebase();
+            const { collection, getDocs, where, query } = window._firebaseFns;
+            const db = window._db;
+
+            const snap = await getDocs(
+                query(collection(db, 'users'), where('status', '==', 'approved'))
+            );
+
+            allUsers = [];
+            snap.forEach(d => allUsers.push({ uid: d.id, ...d.data() }));
+
+            if (myRole === 'admin' && !allUsers.find(u => u.uid === 'admin')) {
+                allUsers.unshift({ uid: 'admin', name: 'Kati (Admin)', email: '' });
+            }
+
+            document.getElementById('sidebar-sub').textContent =
+                allUsers.length + ' Teilnehmer';
+
+            renderContactList();
+            listenUnreadCounts();
+            buildEmojiPicker();
+        }
+
+        function renderContactList() {
+            const list = document.getElementById('contact-list');
+            list.innerHTML = '';
+
+            list.appendChild(createContactItem({
+                id: 'group_all', name: '🏠 Mentlberg-WG',
+                sub: 'Alle Mitglieder', isGroup: true
+            }));
+
+            const sep = document.createElement('div');
+            sep.style.cssText =
+                'height:1px;background:rgba(255,255,255,0.07);margin:6px 0;';
+            list.appendChild(sep);
+
+            const myId = myRole === 'admin' ? 'admin' : myUid;
+            allUsers.forEach(user => {
+                if (user.uid === myId) return;
+                const chatId = getPrivateChatId(myId, user.uid);
+                list.appendChild(createContactItem({
+                    id: chatId, name: user.name,
+                    sub: '💬 Privater Chat', isGroup: false,
+                    initial: user.name.charAt(0)
+                }));
+            });
+        }
+
+        function createContactItem({ id, name, sub, isGroup, initial }) {
+            const div = document.createElement('div');
+            div.className = 'contact-item';
+            div.id = 'contact-' + id;
+            div.onclick = () => openChat(id, name, isGroup);
+            div.innerHTML = `
+            <div class="contact-avatar ${isGroup ? 'group' : ''}">
+                ${isGroup ? '🏠' : (initial || '?')}
+            </div>
+            <div class="contact-info">
+                <div class="contact-name">${name}</div>
+                <div class="contact-preview" id="preview-${id}">–</div>
+            </div>
+            <div class="contact-meta">
+                <div class="contact-time" id="time-${id}"></div>
+                <div class="unread-badge" id="unread-${id}">0</div>
+            </div>`;
+            return div;
+        }
+
+        // ── Unread ────────────────────────────────────────────────
+        function listenUnreadCounts() {
+            const { collection, query, orderBy, onSnapshot } = window._firebaseFns;
+            const db = window._db;
+            const myId = myRole === 'admin' ? 'admin' : myUid;
+
+            const chatIds = ['group_all'];
+            allUsers.forEach(u => {
+                if (u.uid !== myId) chatIds.push(getPrivateChatId(myId, u.uid));
+            });
+
+            chatIds.forEach(chatId => {
+                if (unreadListeners[chatId]) return;
+                const q = query(
+                    collection(db, 'chats', chatId, 'messages'),
+                    orderBy('createdAt', 'desc')
+                );
+                unreadListeners[chatId] = onSnapshot(q, snap => {
+                    if (snap.empty) return;
+                    const latest = snap.docs[0].data();
+                    const previewEl = document.getElementById('preview-' + chatId);
+                    const timeEl = document.getElementById('time-' + chatId);
+                    const unreadEl = document.getElementById('unread-' + chatId);
+
+                    if (previewEl && latest.text) {
+                        const sender = latest.senderName === myName ? 'Du' : latest.senderName;
+                        previewEl.textContent = sender + ': ' + latest.text;
+                    }
+                    if (timeEl && latest.createdAt) {
+                        timeEl.textContent = formatTime(latest.createdAt.toDate());
+                    }
+                    if (chatId !== currentChatId && unreadEl) {
+                        let count = 0;
+                        snap.docs.forEach(d => {
+                            const data = d.data();
+                            if (data.senderUid !== myId &&
+                                !(data.readBy || []).includes(myId)) count++;
+                        });
+                        unreadEl.textContent = count > 99 ? '99+' : count;
+                        unreadEl.style.display = count > 0 ? 'block' : 'none';
+                    }
+                });
+            });
+        }
+
+        // ── Chat öffnen ───────────────────────────────────────────
+        function openChat(chatId, chatName, isGroup) {
+            if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
+
+            currentChatId = chatId;
+            currentChatName = chatName;
+
+            document.querySelectorAll('.contact-item')
+                .forEach(el => el.classList.remove('active'));
+            const item = document.getElementById('contact-' + chatId);
+            if (item) item.classList.add('active');
+
+            const unreadEl = document.getElementById('unread-' + chatId);
+            if (unreadEl) unreadEl.style.display = 'none';
+
+            const headerAvatar = document.getElementById('chat-header-avatar');
+            headerAvatar.textContent = isGroup ? '🏠' : chatName.charAt(0).toUpperCase();
+            headerAvatar.className = 'chat-header-avatar' + (isGroup ? ' group' : '');
+            document.getElementById('chat-header-name').textContent = chatName;
+            document.getElementById('chat-header-sub').textContent =
+                isGroup ? '👥 Gruppen-Chat · alle Mitglieder' : '🔒 Privater Chat';
+
+            document.getElementById('chat-placeholder').style.display = 'none';
+            document.getElementById('chat-header').classList.add('visible');
+            document.getElementById('input-area').classList.add('visible');
+            document.getElementById('messages-container').innerHTML =
+                '<div class="spinner">⏳ Lade Nachrichten...</div>';
+
+            // Emoji-Picker schließen
+            emojiPickerOpen = false;
+            document.getElementById('emoji-picker').classList.remove('open');
+            document.getElementById('emoji-toggle-btn').classList.remove('active');
+
+            document.getElementById('sidebar').classList.add('hidden-mobile');
+            document.getElementById('chat-area').classList.add('visible-mobile');
+
+            listenMessages(chatId);
+        }
+
+        // ── Nachrichten ───────────────────────────────────────────
+        function listenMessages(chatId) {
+            const { collection, query, orderBy, onSnapshot, doc, updateDoc } =
+                window._firebaseFns;
+            const db = window._db;
+            const myId = myRole === 'admin' ? 'admin' : myUid;
+
+            const q = query(
+                collection(db, 'chats', chatId, 'messages'),
+                orderBy('createdAt', 'asc')
+            );
+
+            unsubscribeMessages = onSnapshot(q, snap => {
+                const container = document.getElementById('messages-container');
+                container.innerHTML = '';
+
+                if (snap.empty) {
+                    container.innerHTML =
+                        '<div class="spinner" style="color:rgba(255,255,255,0.3)">' +
+                        'Noch keine Nachrichten. Schreib etwas! 👋</div>';
+                    return;
+                }
+
+                let lastDate = null;
+                let lastSenderUid = null;
+
+                snap.docs.forEach(d => {
+                    const data = d.data();
+                    const isOwn = data.senderUid === myId;
+                    const ts = data.createdAt ? data.createdAt.toDate() : new Date();
+
+                    const dateStr = ts.toLocaleDateString('de-DE',
+                        { day: '2-digit', month: 'long', year: 'numeric' });
+                    const todayStr = new Date().toLocaleDateString('de-DE',
+                        { day: '2-digit', month: 'long', year: 'numeric' });
+
+                    if (dateStr !== lastDate) {
+                        const divider = document.createElement('div');
+                        divider.className = 'date-divider';
+                        divider.innerHTML =
+                            `<span>${dateStr === todayStr ? '📅 Heute' : dateStr}</span>`;
+                        container.appendChild(divider);
+                        lastDate = dateStr;
+                        lastSenderUid = null;
+                    }
+
+                    const showAvatar = data.senderUid !== lastSenderUid;
+                    lastSenderUid = data.senderUid;
+
+                    if (!isOwn) {
+                        const readBy = data.readBy || [];
+                        if (!readBy.includes(myId)) {
+                            updateDoc(doc(db, 'chats', chatId, 'messages', d.id), {
+                                readBy: [...readBy, myId]
+                            }).catch(() => { });
+                        }
+                    }
+
+                    const row = document.createElement('div');
+                    row.className = 'message-row' + (isOwn ? ' own' : '');
+
+                    const avatarHtml = `
+                    <div class="msg-avatar ${showAvatar && !isOwn ? '' : 'hidden'}">
+                        ${data.senderName ? data.senderName.charAt(0).toUpperCase() : '?'}
+                    </div>`;
+
+                    const senderLabel = (!isOwn && showAvatar)
+                        ? `<div class="msg-sender-name">${data.senderName || 'Unbekannt'}</div>`
+                        : '';
+
+                    row.innerHTML = `
+                    ${!isOwn ? avatarHtml : ''}
+                    <div>
+                        ${senderLabel}
+                        <div class="message-bubble">
+                            ${escapeHtml(data.text || '')}
+                            <div class="msg-time">
+                                ${formatTime(ts)}${isOwn ? ' ✓✓' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ${isOwn ? avatarHtml : ''}`;
+
+                    container.appendChild(row);
+                });
+
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        // ── Senden ────────────────────────────────────────────────
+        async function sendMessage() {
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text || !currentChatId) return;
+
+            const btn = document.getElementById('send-btn');
+            btn.disabled = true;
+
+            try {
+                await waitForFirebase();
+                const { collection, addDoc, serverTimestamp } = window._firebaseFns;
+                const db = window._db;
+                const myId = myRole === 'admin' ? 'admin' : myUid;
+
+                await addDoc(collection(db, 'chats', currentChatId, 'messages'), {
+                    text, senderUid: myId, senderName: myName,
+                    createdAt: serverTimestamp(),
+                    readBy: [myId]
+                });
+
+                input.value = '';
+                input.style.height = 'auto';
+            } catch (e) {
+                console.error('Fehler beim Senden:', e);
+            }
+
+            btn.disabled = false;
+            input.focus();
+        }
+
+        // ── Helpers ───────────────────────────────────────────────
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+        }
+
+        function formatTime(date) {
+            if (!date) return '';
+            return date.toLocaleTimeString('de-DE',
+                { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/\n/g, '<br>');
+        }
+
+        function showSidebar() {
+            document.getElementById('sidebar').classList.remove('hidden-mobile');
+            document.getElementById('chat-area').classList.remove('visible-mobile');
+        }
+
+        // ── Start ─────────────────────────────────────────────────
+        document.addEventListener('firebaseReady', loadContacts);
+        if (window._firebaseReady) loadContacts();
+    </script>
+
+</body>
+</html>

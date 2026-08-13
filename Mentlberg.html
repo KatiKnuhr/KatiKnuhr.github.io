@@ -67,6 +67,73 @@
             padding: 28px 16px 80px;
         }
 
+        /* ── KATI NAV BAR (only for katharinakn@outlook.de) ── */
+        .kati-navbar {
+            display: none; /* hidden by default, shown via JS */
+            position: relative;
+            z-index: 10;
+            background: rgba(44, 90, 110, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(168,216,234,0.25);
+            padding: 0 32px;
+            height: 52px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            .kati-navbar.visible {
+                display: flex;
+            }
+
+        .kati-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            list-style: none;
+            margin: 0 auto;
+        }
+
+            .kati-nav-links a {
+                color: rgba(255,255,255,0.82);
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 1.2px;
+                text-transform: uppercase;
+                padding: 6px 14px;
+                border-radius: 50px;
+                transition: background 0.22s, color 0.22s;
+            }
+
+                .kati-nav-links a:hover,
+                .kati-nav-links a.active {
+                    background: rgba(168,216,234,0.22);
+                    color: #a8d8ea;
+                }
+
+                .kati-nav-links a.active {
+                    border-bottom: 2px solid #a8d8ea;
+                    border-radius: 0;
+                    padding-bottom: 4px;
+                }
+
+        .kati-nav-logout {
+            padding: 6px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.32);
+            background: rgba(255,255,255,0.10);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .22s;
+            white-space: nowrap;
+        }
+
+            .kati-nav-logout:hover {
+                background: rgba(255,255,255,0.22);
+            }
+
         /* ── HEADER ─────────────────────────────────────── */
         .page-header {
             display: flex;
@@ -112,11 +179,37 @@
             font-weight: 600;
             cursor: pointer;
             transition: background .22s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
             .btn-header:hover {
                 background: rgba(255,255,255,0.26);
             }
+
+        .btn-chat {
+            background: rgba(168,216,234,0.18);
+            border-color: rgba(168,216,234,0.45);
+            color: #a8d8ea;
+            position: relative;
+        }
+
+            .btn-chat:hover {
+                background: rgba(168,216,234,0.32);
+            }
+
+        .chat-dot {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            display: none;
+        }
 
         /* ── MONTH NAV ──────────────────────────────────── */
         .month-nav {
@@ -212,7 +305,6 @@
             min-width: 480px;
         }
 
-            /* Column headers */
             .cal-table thead th {
                 padding: 10px 6px 14px;
                 text-align: center;
@@ -232,17 +324,16 @@
             padding-left: 4px;
         }
 
-        /* ── ROOM HEADER: name + pencil side by side ────── */
         .room-head-inner {
             display: flex;
-            flex-direction: row; /* ← horizontal */
+            flex-direction: row;
             align-items: center;
             justify-content: center;
             gap: 6px;
         }
 
         .room-head-name {
-            font-size: 16px; /* ← größer */
+            font-size: 16px;
             font-weight: 800;
             color: #fff;
             white-space: nowrap;
@@ -253,7 +344,7 @@
             border: none;
             color: rgba(255,255,255,0.5);
             cursor: pointer;
-            font-size: 14px; /* ← etwas größer */
+            font-size: 14px;
             padding: 0;
             transition: color .2s;
             line-height: 1;
@@ -264,7 +355,6 @@
                 color: #fff;
             }
 
-        /* Body rows */
         .cal-table tbody tr {
             transition: background .15s;
         }
@@ -273,7 +363,6 @@
                 background: rgba(255,255,255,0.04);
             }
 
-        /* Day label cell */
         .td-day {
             padding: 2px 8px 2px 4px;
             text-align: right;
@@ -306,23 +395,21 @@
             color: #a8d8ea;
         }
 
-        /* ── ROOM CELLS ─────────────────────────────────── */
         .cal-cell {
             padding: 2px 3px;
-            vertical-align: top; /* ← top so text starts at top */
+            vertical-align: top;
             cursor: pointer;
         }
 
-        /* cell-inner fills full height of the row */
         .cell-inner {
             border-radius: 8px;
             min-height: 36px;
-            height: 100%; /* ← fill row height */
+            height: 100%;
             width: 100%;
             display: flex;
-            align-items: flex-start; /* ← text starts top-left */
+            align-items: flex-start;
             justify-content: flex-start;
-            padding: 5px 7px; /* ← comfortable padding */
+            padding: 5px 7px;
             transition: filter .18s, border-color .18s;
             border: 2px solid transparent;
             position: relative;
@@ -334,7 +421,6 @@
             border-color: rgba(255,255,255,0.4);
         }
 
-        /* Status colours */
         .cell-inner.st-leer {
             background: rgba(255,255,255,0.07);
         }
@@ -351,24 +437,21 @@
             background: rgba(230,126,34,0.60);
         }
 
-        /* Today highlight */
         .today-row .cell-inner {
             border-color: rgba(168,216,234,0.55) !important;
         }
 
-        /* ── NOTE TEXT: bigger, fills cell ─────────────── */
         .cell-note {
-            font-size: 11px; /* ← größer (war 9px) */
+            font-size: 11px;
             color: rgba(255,255,255,0.95);
             font-weight: 600;
-            text-align: left; /* ← linksbündig */
+            text-align: left;
             line-height: 1.35;
             word-break: break-word;
-            width: 100%; /* ← volle Breite */
+            width: 100%;
             overflow: hidden;
         }
 
-        /* Week separator */
         .week-sep td {
             border-top: 1px solid rgba(255,255,255,0.09) !important;
         }
@@ -730,6 +813,23 @@
             .room-head-name {
                 font-size: 13px;
             }
+
+            .kati-navbar {
+                padding: 0 12px;
+                flex-wrap: wrap;
+                height: auto;
+                padding: 8px 12px;
+            }
+
+            .kati-nav-links {
+                gap: 2px;
+            }
+
+                .kati-nav-links a {
+                    font-size: 11px;
+                    padding: 5px 8px;
+                    letter-spacing: 0.5px;
+                }
         }
     </style>
 </head>
@@ -743,6 +843,18 @@
 
     <div class="overlay"></div>
 
+    <!-- ✅ KATI OWNER NAVBAR – only shown for katharinakn@outlook.de -->
+    <nav class="kati-navbar" id="kati-navbar">
+        <ul class="kati-nav-links">
+            <li><a href="index.html">HOME</a></li>
+            <li><a href="uebermich.html">ÜBER MICH</a></li>
+            <li><a href="hobbys.html">HOBBYS</a></li>
+            <li><a href="galerie.html">GALERIE</a></li>
+            <li><a href="Mentlberg.html" class="active">MENTLBERG</a></li>
+        </ul>
+        <button class="kati-nav-logout" onclick="logout()">🔓 Abmelden</button>
+    </nav>
+
     <div class="content">
 
         <!-- HEADER -->
@@ -750,6 +862,13 @@
             <h1 class="title">⛰️ Mentlberg-WG</h1>
             <div class="header-right">
                 <span class="user-chip" id="user-chip">👤 ...</span>
+
+                <!-- CHAT BUTTON -->
+                <a href="chat.html" class="btn-header btn-chat">
+                    💬 Chat
+                    <span class="chat-dot" id="chat-dot"></span>
+                </a>
+
                 <button class="btn-header" onclick="logout()">🔓 Abmelden</button>
             </div>
         </div>
@@ -836,9 +955,19 @@
     </div>
 
     <script>
+        // ══ OWNER EMAIL ══════════════════════════════════════════
+        const OWNER_EMAIL = 'katharinakn@outlook.de';
+
         // ══ STATE ════════════════════════════════════════════════
         const currentUser = sessionStorage.getItem('kati_name') || 'Unbekannt';
+        const currentEmail = sessionStorage.getItem('kati_email') || localStorage.getItem('kati_email') || '';
+
         document.getElementById('user-chip').textContent = '👤 ' + currentUser;
+
+        // ✅ Show owner navbar only for katharinakn@outlook.de
+        if (currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase()) {
+            document.getElementById('kati-navbar').classList.add('visible');
+        }
 
         const DEFAULT_ROOMS = ['Zimmer 1', 'Zimmer 2', 'Zimmer 3', 'Zimmer 4'];
         let rooms = [...DEFAULT_ROOMS];
@@ -866,6 +995,46 @@
             populateRoomSelect();
             renderCalendar();
             await loadEntries();
+            checkUnreadMessages();
+        }
+
+        // ══ UNREAD DOT ═══════════════════════════════════════════
+        async function checkUnreadMessages() {
+            try {
+                const { collection, getDocs } = window._firebaseFns;
+                const myId = sessionStorage.getItem('kati_uid') || localStorage.getItem('kati_uid') || 'admin';
+                const myRole = sessionStorage.getItem('kati_role') || localStorage.getItem('kati_role');
+                const meId = myRole === 'admin' ? 'admin' : myId;
+
+                const chatIds = ['group_all'];
+
+                const usersSnap = await getDocs(collection(window._db, 'users'));
+                usersSnap.forEach(d => {
+                    const data = d.data();
+                    if (data.status === 'approved' && d.id !== meId) {
+                        const cid = [meId, d.id].sort().join('__');
+                        chatIds.push(cid);
+                    }
+                });
+
+                let totalUnread = 0;
+                for (const chatId of chatIds) {
+                    const snap = await getDocs(collection(window._db, 'chats', chatId, 'messages'));
+                    snap.forEach(d => {
+                        const data = d.data();
+                        if (data.senderUid !== meId) {
+                            const readBy = data.readBy || [];
+                            if (!readBy.includes(meId)) totalUnread++;
+                        }
+                    });
+                }
+
+                if (totalUnread > 0) {
+                    document.getElementById('chat-dot').style.display = 'block';
+                }
+            } catch (e) {
+                // silently ignore
+            }
         }
 
         // ══ ROOM NAMES ═══════════════════════════════════════════
@@ -935,7 +1104,7 @@
             const todayD = today.getDate();
             const isThisMonth = (today.getMonth() === month && today.getFullYear() === year);
 
-            // ── THEAD ────────────────────────────────────────────
+            // THEAD
             const thead = document.getElementById('cal-thead');
             thead.innerHTML = '';
             const headRow = document.createElement('tr');
@@ -947,7 +1116,6 @@
 
             rooms.forEach((name, rIdx) => {
                 const th = document.createElement('th');
-                // Stift rechts neben Zimmername, inline
                 th.innerHTML = `
                         <div class="room-head-inner">
                             <span class="room-head-name">🚪 ${name}</span>
@@ -959,13 +1127,12 @@
             });
             thead.appendChild(headRow);
 
-            // ── TBODY ────────────────────────────────────────────
+            // TBODY
             const tbody = document.getElementById('cal-tbody');
             tbody.innerHTML = '';
 
             for (let d = 1; d <= 31; d++) {
                 const tr = document.createElement('tr');
-
                 const isValidDay = d <= daysInMonth;
                 const isToday = isThisMonth && isValidDay && d === todayD;
 
@@ -992,18 +1159,14 @@
                     td.className = 'cal-cell';
 
                     if (!isValidDay) {
-                        td.innerHTML =
-                            `<div class="cell-inner" style="opacity:.10;cursor:default;"></div>`;
+                        td.innerHTML = `<div class="cell-inner" style="opacity:.10;cursor:default;"></div>`;
                         tr.appendChild(td);
                         return;
                     }
 
-                    const dateStr =
-                        `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     const entry = getEntryForRoomDay(rIdx, d, month, year);
                     const status = entry ? entry.type : 'leer';
-
-                    // Show full note text (no truncation limit — cell wraps naturally)
                     const noteText = (entry && entry.note) ? entry.note : '';
 
                     td.innerHTML = `
@@ -1015,8 +1178,7 @@
                         ? `${typeLabel(entry.type)}${entry.note ? ' · ' + entry.note : ''}\n` +
                         `✏️ ${entry.lastEditedBy || ''}` +
                         `${entry.lastEditedAt?.toDate
-                            ? ' · ' + entry.lastEditedAt.toDate().toLocaleString('de-DE')
-                            : ''}`
+                            ? ' · ' + entry.lastEditedAt.toDate().toLocaleString('de-DE') : ''}`
                         : `${roomName} – ${d}. ${MONTH_NAMES[month]}: kein Eintrag`;
 
                     td.addEventListener('click', () => openPanel(rIdx, dateStr));
@@ -1046,8 +1208,7 @@
             document.getElementById('panel-title').textContent =
                 `📅 Neuer Eintrag – ${rooms[roomIdx]} – ${formatDate(dateStr)}`;
             document.getElementById('entry-panel').classList.add('open');
-            document.getElementById('entry-panel')
-                .scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('entry-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function openEditPanel(entryId) {
@@ -1062,8 +1223,7 @@
             document.getElementById('panel-title').textContent =
                 `✏️ Eintrag bearbeiten – ${rooms[e.roomIndex]}`;
             document.getElementById('entry-panel').classList.add('open');
-            document.getElementById('entry-panel')
-                .scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('entry-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function closePanel() {
@@ -1091,8 +1251,7 @@
             };
 
             if (editingEntryId) {
-                await updateDoc(
-                    doc(window._db, 'calendar_entries', editingEntryId), payload);
+                await updateDoc(doc(window._db, 'calendar_entries', editingEntryId), payload);
                 showToast('✅ Eintrag aktualisiert!');
             } else {
                 await addDoc(collection(window._db, 'calendar_entries'), payload);
@@ -1115,8 +1274,7 @@
         // ══ LOAD ══════════════════════════════════════════════════
         async function loadEntries() {
             const { collection, getDocs, query, orderBy } = window._firebaseFns;
-            const q = query(
-                collection(window._db, 'calendar_entries'), orderBy('from'));
+            const q = query(collection(window._db, 'calendar_entries'), orderBy('from'));
             const snap = await getDocs(q);
             allEntries = [];
             snap.forEach(d => allEntries.push({ id: d.id, ...d.data() }));
@@ -1145,12 +1303,10 @@
 
                 const section = document.createElement('div');
                 section.className = 'overview-room';
-                section.innerHTML =
-                    `<div class="overview-room-name">🚪 ${roomName}</div>`;
+                section.innerHTML = `<div class="overview-room-name">🚪 ${roomName}</div>`;
 
                 if (roomEntries.length === 0) {
-                    section.innerHTML +=
-                        `<div class="no-ov-entries">Keine Einträge diesen Monat.</div>`;
+                    section.innerHTML += `<div class="no-ov-entries">Keine Einträge diesen Monat.</div>`;
                 } else {
                     roomEntries.forEach(entry => {
                         const sameDay = entry.from === entry.to;
@@ -1160,34 +1316,22 @@
 
                         let metaStr = '';
                         if (entry.lastEditedBy) {
-                            const ts = entry.lastEditedAt?.toDate
-                                ? entry.lastEditedAt.toDate() : null;
-                            metaStr = `✏️ ${entry.lastEditedBy}` +
-                                `${ts ? ' · ' + ts.toLocaleString('de-DE') : ''}`;
+                            const ts = entry.lastEditedAt?.toDate ? entry.lastEditedAt.toDate() : null;
+                            metaStr = `✏️ ${entry.lastEditedBy}${ts ? ' · ' + ts.toLocaleString('de-DE') : ''}`;
                         }
 
                         const card = document.createElement('div');
                         card.className = `ov-entry-card type-${entry.type}`;
                         card.innerHTML = `
                                 <div class="ov-info">
-                                    <div class="ov-badge type-${entry.type}">
-                                        ${typeLabel(entry.type)}
-                                    </div>
+                                    <div class="ov-badge type-${entry.type}">${typeLabel(entry.type)}</div>
                                     <div class="ov-dates">${dateStr}</div>
-                                    ${entry.note
-                                ? `<div class="ov-note">📝 ${entry.note}</div>`
-                                : ''}
+                                    ${entry.note ? `<div class="ov-note">📝 ${entry.note}</div>` : ''}
                                     <div class="ov-meta">${metaStr}</div>
                                 </div>
                                 <div class="ov-actions">
-                                    <button class="btn-ov-edit"
-                                        onclick="openEditPanel('${entry.id}')">
-                                        ✏️ Bearbeiten
-                                    </button>
-                                    <button class="btn-ov-del"
-                                        onclick="deleteEntry('${entry.id}')">
-                                        🗑️
-                                    </button>
+                                    <button class="btn-ov-edit" onclick="openEditPanel('${entry.id}')">✏️ Bearbeiten</button>
+                                    <button class="btn-ov-del"  onclick="deleteEntry('${entry.id}')">🗑️</button>
                                 </div>`;
                         section.appendChild(card);
                     });
@@ -1216,7 +1360,6 @@
         }
 
         function logout() {
-            // Beide Speicher leeren → wirklich ausloggen
             sessionStorage.clear();
             localStorage.clear();
             window.location.href = 'start.html';
