@@ -1893,7 +1893,7 @@
 
         function grantAccess() {
             document.getElementById('page-content').style.display = 'block';
-            if (_isOwner) document.getElementById('admin-toolbar').style.display = 'flex';
+            document.getElementById('admin-toolbar').style.display = 'flex';
             loadAll();
         }
 
@@ -2003,35 +2003,35 @@
             grid.innerHTML = list.map(r => {
                 const imgHTML = r.imageURL
                     ? `<div class="card-img" onclick="openModal('${r.firestoreId}')">
-                           <img src="${escHtml(r.imageURL)}" alt="${escHtml(r.title)}" loading="lazy" />
-                       </div>`
+                   <img src="${escHtml(r.imageURL)}" alt="${escHtml(r.title)}" loading="lazy" />
+               </div>`
                     : `<div class="card-img" onclick="openModal('${r.firestoreId}')">${r.emoji || '🍽️'}</div>`;
 
                 return `
-                    <div class="recipe-card">
-                        ${_isOwner ? `
-                        <div class="card-actions">
-                            <button class="card-action-btn btn-edit-card"
-                                onclick="openEditModal('${r.firestoreId}')" title="Bearbeiten">✏️</button>
-                            <button class="card-action-btn btn-delete-card"
-                                onclick="confirmDelete('${r.firestoreId}','${escHtml(r.title)}')" title="Löschen">🗑️</button>
-                        </div>` : ''}
-                        ${imgHTML}
-                        <div class="card-body" onclick="openModal('${r.firestoreId}')">
-                            <span class="card-category" style="${getCatBadgeStyle(r.category)}">${getCatLabel(r.category)}</span>
-                            <div class="card-title">${escHtml(r.title)}</div>
-                            <div class="card-desc">${escHtml(r.desc)}</div>
-                            <div class="card-meta">
-                                <span>⏱️ ${escHtml(r.time || '–')}</span>
-                                <span>👥 ${escHtml(r.portions || '–')}</span>
-                                <span>📊 ${escHtml(r.difficulty || '–')}</span>
-                            </div>
-                        </div>
+            <div class="recipe-card">
+                <div class="card-actions">
+                    <button class="card-action-btn btn-edit-card"
+                        onclick="openEditModal('${r.firestoreId}')" title="Bearbeiten">✏️</button>
+                    ${_isOwner ? `
+                    <button class="card-action-btn btn-delete-card"
+                        onclick="confirmDelete('${r.firestoreId}','${escHtml(r.title)}')" title="Löschen">🗑️</button>
+                    ` : ''}
+                </div>
+                ${imgHTML}
+                <div class="card-body" onclick="openModal('${r.firestoreId}')">
+                    <span class="card-category" style="${getCatBadgeStyle(r.category)}">${getCatLabel(r.category)}</span>
+                    <div class="card-title">${escHtml(r.title)}</div>
+                    <div class="card-desc">${escHtml(r.desc)}</div>
+                    <div class="card-meta">
+                        <span>⏱️ ${escHtml(r.time || '–')}</span>
+                        <span>👥 ${escHtml(r.portions || '–')}</span>
+                        <span>📊 ${escHtml(r.difficulty || '–')}</span>
                     </div>
-                `;
+                </div>
+            </div>
+        `;
             }).join('');
         }
-
         function filterRecipes(cat, btn) {
             currentFilter = cat;
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
