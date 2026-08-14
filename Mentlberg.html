@@ -963,7 +963,6 @@
         const currentUid = sessionStorage.getItem('kati_uid') || localStorage.getItem('kati_uid') || '';
         const isOwner = currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase() || currentRole === 'admin';
 
-        /* Parse permissions from session/localStorage */
         let perms = {};
         try {
             const raw = sessionStorage.getItem('kati_permissions')
@@ -972,35 +971,32 @@
             perms = JSON.parse(raw);
         } catch (e) { perms = {}; }
 
-        console.log('🔑 Permissions:', perms, '| isOwner:', isOwner);
-
-        /* ── All nav pages definition ── */
+        /* ══ NAV PAGES – rezepte added ══ */
         const NAV_PAGES = [
             { key: 'home', href: 'index.html', icon: '🏠', label: 'Home' },
             { key: 'uebermich', href: 'ueber.html', icon: '👤', label: 'Über mich' },
             { key: 'hobbys', href: 'hobbys.html', icon: '🎿', label: 'Hobbys' },
             { key: 'galerie', href: 'galerie.html', icon: '🖼️', label: 'Galerie' },
             { key: 'mentlberg', href: 'Mentlberg.html', icon: '⛰️', label: 'Mentlberg' },
+            { key: 'rezepte', href: 'rezepte.html', icon: '🍽️', label: 'Rezepte' },
         ];
 
-        /* ── Build navigation ── */
+        /* ══ Build navigation ══ */
         (function buildNav() {
             const nav = document.getElementById('owner-nav');
             nav.innerHTML = '';
 
-            /* Decide which pages to show */
             const visiblePages = isOwner
-                ? NAV_PAGES                                          /* admin sees all */
-                : NAV_PAGES.filter(p => perms[p.key] === true);     /* user sees only allowed */
+                ? NAV_PAGES
+                : NAV_PAGES.filter(p => perms[p.key] === true);
 
-            if (visiblePages.length === 0) return; /* no nav at all */
+            if (visiblePages.length === 0) return;
 
             visiblePages.forEach(page => {
                 const li = document.createElement('li');
                 const a = document.createElement('a');
                 a.href = page.href;
                 a.textContent = `${page.icon} ${page.label}`;
-                /* Mark current page as active */
                 const currentFile = window.location.pathname.split('/').pop() || 'index.html';
                 if (page.href === currentFile) a.classList.add('active');
                 li.appendChild(a);
@@ -1010,7 +1006,7 @@
             nav.classList.add('visible');
         })();
 
-        /* ── User chip ── */
+        /* ══ User chip ══ */
         (function setupChip() {
             const chip = document.getElementById('user-chip');
             chip.textContent = '👤 ' + currentUser;
@@ -1021,7 +1017,7 @@
             }
         })();
 
-        /* ── Live-refresh permissions from Firestore (so changes take effect without re-login) ── */
+        /* ══ Live-refresh permissions ══ */
         async function refreshPermissionsFromFirestore() {
             if (!currentUid || isOwner) return;
             try {
@@ -1033,20 +1029,15 @@
                 const fresh = data.permissions || {};
                 const freshJson = JSON.stringify(fresh);
 
-                /* Update storage */
                 sessionStorage.setItem('kati_permissions', freshJson);
                 if (localStorage.getItem('kati_logged_in') === 'true')
                     localStorage.setItem('kati_permissions', freshJson);
 
-                /* Rebuild nav if permissions changed */
                 if (freshJson !== JSON.stringify(perms)) {
                     perms = fresh;
-                    console.log('🔄 Permissions aktualisiert:', perms);
                     buildNavFromPerms();
                 }
-            } catch (e) {
-                console.warn('⚠️ Permission-Refresh fehlgeschlagen:', e);
-            }
+            } catch (e) { console.warn('⚠️ Permission-Refresh fehlgeschlagen:', e); }
         }
 
         function buildNavFromPerms() {
@@ -1133,7 +1124,6 @@
                 renderOverview();
             }
 
-            /* Refresh permissions live from Firestore */
             refreshPermissionsFromFirestore();
             checkUnreadMessages();
         }

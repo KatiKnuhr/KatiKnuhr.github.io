@@ -508,6 +508,7 @@
             <li><a href="hobbys.html">🎿 Hobbys</a></li>
             <li><a href="galerie.html">🖼️ Galerie</a></li>
             <li><a href="Mentlberg.html">⛰️ Mentlberg</a></li>
+            <li><a href="rezepte.html">🍽️ Rezepte</a></li>
         </ul>
 
         <div class="header-right">
@@ -561,13 +562,14 @@
         const EMAILJS_TEMPLATE_ACTIVATED = 'template_o78ci8o';
         const EMAILJS_TEMPLATE_REREGISTER = 'template_o78ci8o';
 
-        // All pages that can be toggled per user
+        /* ══ ALL PAGES – add new pages here ══ */
         const ALL_PAGES = [
             { key: 'home', label: '🏠 Home', href: 'index.html' },
             { key: 'uebermich', label: '👤 Über mich', href: 'ueber.html' },
             { key: 'hobbys', label: '🎿 Hobbys', href: 'hobbys.html' },
             { key: 'galerie', label: '🖼️ Galerie', href: 'galerie.html' },
             { key: 'mentlberg', label: '⛰️ Mentlberg', href: 'Mentlberg.html' },
+            { key: 'rezepte', label: '🍽️ Rezepte', href: 'rezepte.html' },
         ];
 
         function waitForFirebase() {
@@ -577,7 +579,7 @@
             });
         }
 
-        // ── LOAD USERS ──────────────────────────────────────────────
+        /* ══ LOAD USERS ══ */
         async function loadUsers() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('user-table-el').style.display = 'none';
@@ -641,7 +643,6 @@
                             <button class="btn-delete"     onclick="deleteUser('${user.id}','${user.name}')">🗑️ Löschen</button>`;
                 }
 
-                // Always add permissions button (except for owner themselves)
                 const isOwnerRow = user.email?.toLowerCase() === 'katharinakn@outlook.de';
                 const permsBtn = isOwnerRow
                     ? `<span style="font-size:11px;color:#aaa;padding:6px 10px;">👑 Owner</span>`
@@ -669,7 +670,7 @@
 
             document.getElementById('user-table-el').style.display = 'table';
 
-            // Attach checkbox listeners after DOM is built
+            /* Attach checkbox listeners */
             users.forEach(user => {
                 ALL_PAGES.forEach(page => {
                     const cb = document.getElementById(`perm-${user.id}-${page.key}`);
@@ -683,16 +684,15 @@
             });
         }
 
-        // ── BUILD PERMISSIONS PANEL HTML ────────────────────────────
+        /* ══ BUILD PERMISSIONS PANEL ══ */
         function buildPermsPanel(user) {
-            // permissions field: object like { home: true, galerie: false, ... }
-            // default: all false (hidden)
             const perms = user.permissions || {};
 
             const toggles = ALL_PAGES.map(page => {
                 const checked = perms[page.key] === true;
                 return `
-                        <label class="perm-toggle ${checked ? 'checked' : ''}" for="perm-${user.id}-${page.key}">
+                        <label class="perm-toggle ${checked ? 'checked' : ''}"
+                               for="perm-${user.id}-${page.key}">
                             <input type="checkbox"
                                    id="perm-${user.id}-${page.key}"
                                    ${checked ? 'checked' : ''} />
@@ -704,28 +704,29 @@
                     <div class="perms-panel">
                         <h4>🔑 Seitenberechtigungen für <em>${user.name || user.email}</em></h4>
                         <p style="font-size:12px;color:#888;margin-top:-8px;">
-                            Aktivierte Seiten sind für diesen Benutzer im Menü sichtbar. Standard: alles verborgen.
+                            Aktivierte Seiten sind für diesen Benutzer im Menü sichtbar.
+                            Standard: alles verborgen.
                         </p>
                         <div class="perms-grid">
                             ${toggles}
                         </div>
-                        <button class="perms-save-btn" onclick="savePermissions('${user.id}','${user.name}')">
+                        <button class="perms-save-btn"
+                                onclick="savePermissions('${user.id}','${user.name}')">
                             💾 Speichern
                         </button>
                     </div>`;
         }
 
-        // ── TOGGLE PERMISSIONS PANEL ─────────────────────────────────
+        /* ══ TOGGLE PERMISSIONS PANEL ══ */
         function togglePermsPanel(uid) {
             const row = document.getElementById(`perms-${uid}`);
             if (!row) return;
             const isOpen = row.style.display !== 'none';
-            // Close all open panels first
             document.querySelectorAll('.perms-row').forEach(r => r.style.display = 'none');
             if (!isOpen) row.style.display = 'table-row';
         }
 
-        // ── SAVE PERMISSIONS ─────────────────────────────────────────
+        /* ══ SAVE PERMISSIONS ══ */
         async function savePermissions(uid, name) {
             await waitForFirebase();
             const { doc, updateDoc } = window._firebaseFns;
@@ -738,17 +739,17 @@
 
             await updateDoc(doc(window._db, 'users', uid), { permissions });
             showToast(`🔑 Berechtigungen für ${name} gespeichert!`);
-            // Close panel
             const row = document.getElementById(`perms-${uid}`);
             if (row) row.style.display = 'none';
         }
 
-        // ── USER ACTIONS ─────────────────────────────────────────────
+        /* ══ USER ACTIONS ══ */
         async function approveUser(uid, email, name) {
             if (!confirm(`✅ "${name}" freischalten?`)) return;
             await waitForFirebase();
             const { doc, updateDoc } = window._firebaseFns;
-            await updateDoc(doc(window._db, 'users', uid), { status: 'approved', reregisterAllowed: false });
+            await updateDoc(doc(window._db, 'users', uid),
+                { status: 'approved', reregisterAllowed: false });
             try {
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ACTIVATED, {
                     to_email: email, to_name: name,
@@ -763,7 +764,8 @@
             if (!confirm(`❌ "${name}" ablehnen/sperren?`)) return;
             await waitForFirebase();
             const { doc, updateDoc } = window._firebaseFns;
-            await updateDoc(doc(window._db, 'users', uid), { status: 'rejected', reregisterAllowed: false });
+            await updateDoc(doc(window._db, 'users', uid),
+                { status: 'rejected', reregisterAllowed: false });
             showToast(`🚫 ${name} wurde gesperrt.`);
             loadUsers();
         }
@@ -772,7 +774,8 @@
             if (!confirm(`🔄 "${name}" darf sich erneut registrieren?`)) return;
             await waitForFirebase();
             const { doc, updateDoc } = window._firebaseFns;
-            await updateDoc(doc(window._db, 'users', uid), { status: 'reregister', reregisterAllowed: true });
+            await updateDoc(doc(window._db, 'users', uid),
+                { status: 'reregister', reregisterAllowed: true });
             try {
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REREGISTER, {
                     to_email: email, to_name: name,
@@ -792,7 +795,7 @@
             loadUsers();
         }
 
-        // ── HELPERS ──────────────────────────────────────────────────
+        /* ══ HELPERS ══ */
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;

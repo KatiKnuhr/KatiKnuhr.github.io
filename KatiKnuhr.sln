@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		hobbys.html = hobbys.html
 		index.html = index.html
 		Mentlberg.html = Mentlberg.html
+		rezepte.html = rezepte.html
 		start.html = start.html
 		ueber.html = ueber.html
 	EndProjectSection
