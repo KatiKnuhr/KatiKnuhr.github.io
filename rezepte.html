@@ -2012,10 +2012,8 @@
                 <div class="card-actions">
                     <button class="card-action-btn btn-edit-card"
                         onclick="openEditModal('${r.firestoreId}')" title="Bearbeiten">✏️</button>
-                    ${_isOwner ? `
                     <button class="card-action-btn btn-delete-card"
                         onclick="confirmDelete('${r.firestoreId}','${escHtml(r.title)}')" title="Löschen">🗑️</button>
-                    ` : ''}
                 </div>
                 ${imgHTML}
                 <div class="card-body" onclick="openModal('${r.firestoreId}')">
