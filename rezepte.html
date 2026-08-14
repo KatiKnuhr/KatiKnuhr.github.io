@@ -10,8 +10,11 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import {
             getFirestore, collection, getDocs, doc, getDoc,
-            addDoc, updateDoc, deleteDoc, serverTimestamp
+            addDoc, updateDoc, deleteDoc, serverTimestamp, setDoc
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import {
+            getStorage, ref, uploadBytes, getDownloadURL, deleteObject
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDHCOxeQufkdx0sYIxTKPnAdrzcvErOrEA",
@@ -24,9 +27,15 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         window._db = db;
-        window._firebaseFns = { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp };
+        window._storage = storage;
+        window._firebaseFns = {
+            collection, getDocs, doc, getDoc,
+            addDoc, updateDoc, deleteDoc, serverTimestamp, setDoc,
+            ref, uploadBytes, getDownloadURL, deleteObject
+        };
         window._firebaseReady = true;
         document.dispatchEvent(new Event('firebaseReady'));
     </script>
@@ -213,11 +222,20 @@
             padding: 40px 20px 60px;
         }
 
-        /* ══ TOOLBAR (Add Button) ══ */
+        /* ══ TOOLBAR ══ */
         .toolbar {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .btn-add {
@@ -242,6 +260,27 @@
                 box-shadow: 0 7px 20px rgba(192,57,43,0.45);
             }
 
+        .btn-manage-cats {
+            background: white;
+            color: #c0392b;
+            border: 2px solid #c0392b;
+            padding: 11px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background .2s, color .2s;
+        }
+
+            .btn-manage-cats:hover {
+                background: #c0392b;
+                color: white;
+            }
+
         /* ══ FILTER BAR ══ */
         .filter-bar {
             display: flex;
@@ -249,6 +288,7 @@
             gap: 10px;
             margin-bottom: 36px;
             justify-content: center;
+            align-items: center;
         }
 
         .filter-btn {
@@ -262,6 +302,9 @@
             cursor: pointer;
             transition: all .2s;
             font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
             .filter-btn:hover, .filter-btn.active {
@@ -292,7 +335,6 @@
                 box-shadow: 0 14px 36px rgba(0,0,0,0.14);
             }
 
-        /* Admin action buttons on card */
         .card-actions {
             position: absolute;
             top: 10px;
@@ -334,14 +376,22 @@
         .card-img {
             width: 100%;
             height: 200px;
-            object-fit: cover;
             background: linear-gradient(135deg, #f5e6d3, #fad7c1);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 64px;
             cursor: pointer;
+            overflow: hidden;
+            position: relative;
         }
+
+            .card-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
 
         .card-body {
             padding: 20px 22px 22px;
@@ -357,36 +407,6 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             margin-bottom: 10px;
-        }
-
-        .cat-hauptgericht {
-            background: #fde8e8;
-            color: #c0392b;
-        }
-
-        .cat-dessert {
-            background: #fef3cd;
-            color: #856404;
-        }
-
-        .cat-vorspeise {
-            background: #d1e7dd;
-            color: #0a3622;
-        }
-
-        .cat-snack {
-            background: #cff4fc;
-            color: #055160;
-        }
-
-        .cat-getraenk {
-            background: #e2d9f3;
-            color: #432874;
-        }
-
-        .cat-sonstiges {
-            background: #e2e3e5;
-            color: #41464b;
         }
 
         .card-title {
@@ -443,7 +463,7 @@
             }
         }
 
-        /* ══ MODAL (View) ══ */
+        /* ══ VIEW MODAL ══ */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -466,9 +486,9 @@
         .modal {
             background: white;
             border-radius: 24px;
-            max-width: 680px;
+            max-width: 720px;
             width: 100%;
-            max-height: 88vh;
+            max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 24px 60px rgba(0,0,0,0.25);
             transform: scale(0.93);
@@ -479,9 +499,28 @@
             transform: scale(1);
         }
 
+        .modal-photo {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .modal-photo-emoji {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #c0392b, #e67e22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            border-radius: 24px 24px 0 0;
+        }
+
         .modal-header {
             background: linear-gradient(135deg, #c0392b, #e67e22);
-            padding: 28px 30px 22px;
+            padding: 22px 30px 18px;
             color: white;
             position: relative;
         }
@@ -633,7 +672,7 @@
         .form-modal {
             background: white;
             border-radius: 24px;
-            max-width: 700px;
+            max-width: 720px;
             width: 100%;
             max-height: 92vh;
             overflow-y: auto;
@@ -691,7 +730,6 @@
             padding: 28px;
         }
 
-        /* ── Form elements ── */
         .form-group {
             margin-bottom: 20px;
         }
@@ -739,7 +777,118 @@
             gap: 16px;
         }
 
-        /* Dynamic list (ingredients / steps) */
+        /* ── Image Upload ── */
+        .image-upload-area {
+            border: 2px dashed #e0d5cc;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            overflow: hidden;
+            position: relative;
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fdfaf7;
+        }
+
+            .image-upload-area:hover {
+                border-color: #c0392b;
+                background: #fef8f7;
+            }
+
+        .image-upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 30px;
+            text-align: center;
+        }
+
+            .image-upload-placeholder .upload-icon {
+                font-size: 42px;
+            }
+
+            .image-upload-placeholder p {
+                font-size: 14px;
+                color: #999;
+                font-weight: 600;
+                line-height: 1.5;
+            }
+
+            .image-upload-placeholder .upload-hint {
+                font-size: 12px;
+                color: #bbb;
+            }
+
+        .upload-source-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .upload-src-btn {
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: 2px solid #e0d5cc;
+            background: white;
+            color: #666;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .upload-src-btn:hover {
+                border-color: #c0392b;
+                color: #c0392b;
+                background: #fde8e8;
+            }
+
+        .image-preview-wrap {
+            width: 100%;
+            position: relative;
+        }
+
+            .image-preview-wrap img {
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                display: block;
+            }
+
+        .image-preview-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .img-action-btn {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s;
+        }
+
+            .img-action-btn:hover {
+                background: white;
+            }
+
+        /* ── Dynamic lists ── */
         .dynamic-list {
             display: flex;
             flex-direction: column;
@@ -833,7 +982,7 @@
             border-bottom: 2px solid #fde8e8;
         }
 
-        /* Emoji picker row */
+        /* ── Emoji picker ── */
         .emoji-picker {
             display: flex;
             flex-wrap: wrap;
@@ -859,7 +1008,7 @@
                 background: #fde8e8;
             }
 
-        /* Form footer buttons */
+        /* ── Form footer ── */
         .form-footer {
             display: flex;
             gap: 12px;
@@ -912,6 +1061,222 @@
                 opacity: 0.6;
                 cursor: not-allowed;
                 transform: none;
+            }
+
+        /* ══ CATEGORY MANAGER MODAL ══ */
+        .cat-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+
+            .cat-modal-overlay.open {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+        .cat-modal {
+            background: white;
+            border-radius: 24px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+            transform: scale(0.93);
+            transition: transform .3s;
+        }
+
+        .cat-modal-overlay.open .cat-modal {
+            transform: scale(1);
+        }
+
+        .cat-modal-header {
+            background: linear-gradient(135deg, #c0392b, #e67e22);
+            padding: 22px 26px 18px;
+            color: white;
+            position: relative;
+            border-radius: 24px 24px 0 0;
+        }
+
+            .cat-modal-header h2 {
+                font-size: 20px;
+                font-weight: 900;
+            }
+
+            .cat-modal-header p {
+                font-size: 13px;
+                opacity: .85;
+                margin-top: 4px;
+            }
+
+        .cat-modal-close {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 18px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s;
+        }
+
+            .cat-modal-close:hover {
+                background: rgba(255,255,255,0.35);
+            }
+
+        .cat-modal-body {
+            padding: 24px;
+        }
+
+        .cat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #fdfaf7;
+            border: 2px solid #f0e8e0;
+            border-radius: 14px;
+            transition: border-color .2s;
+        }
+
+            .cat-item:hover {
+                border-color: #e0d5cc;
+            }
+
+        .cat-item-emoji {
+            font-size: 22px;
+            flex-shrink: 0;
+            width: 36px;
+            text-align: center;
+        }
+
+        .cat-item-info {
+            flex: 1;
+        }
+
+        .cat-item-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .cat-item-key {
+            font-size: 11px;
+            color: #aaa;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .cat-item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .cat-item-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s;
+        }
+
+        .cat-btn-delete {
+            background: #fde8e8;
+            color: #c0392b;
+        }
+
+            .cat-btn-delete:hover {
+                background: #fbc9c9;
+            }
+
+        .cat-locked {
+            font-size: 11px;
+            color: #bbb;
+            font-weight: 600;
+        }
+
+        .add-cat-form {
+            background: #fdfaf7;
+            border: 2px dashed #e0d5cc;
+            border-radius: 16px;
+            padding: 18px;
+        }
+
+            .add-cat-form h4 {
+                font-size: 13px;
+                font-weight: 800;
+                color: #c0392b;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 14px;
+            }
+
+        .add-cat-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+            .add-cat-row input {
+                padding: 9px 12px;
+                border: 2px solid #e8ddd4;
+                border-radius: 10px;
+                font-size: 14px;
+                font-family: inherit;
+                outline: none;
+                transition: border-color .2s;
+                background: white;
+            }
+
+                .add-cat-row input:focus {
+                    border-color: #c0392b;
+                }
+
+        .btn-add-cat {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #c0392b, #e67e22);
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity .2s;
+        }
+
+            .btn-add-cat:hover {
+                opacity: 0.88;
             }
 
         /* ══ CONFIRM DIALOG ══ */
@@ -1038,6 +1403,38 @@
             grid-column: 1 / -1;
         }
 
+        /* ══ PROGRESS BAR ══ */
+        .upload-progress {
+            margin-top: 10px;
+            display: none;
+        }
+
+            .upload-progress.show {
+                display: block;
+            }
+
+        .progress-bar-wrap {
+            background: #f0e8e0;
+            border-radius: 50px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #c0392b, #e67e22);
+            border-radius: 50px;
+            transition: width .3s;
+            width: 0%;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+            text-align: center;
+        }
+
         /* ══ RESPONSIVE ══ */
         @media (max-width: 820px) {
             .main-header {
@@ -1068,6 +1465,14 @@
             .form-row {
                 grid-template-columns: 1fr;
             }
+
+            .add-cat-row {
+                grid-template-columns: 50px 1fr;
+            }
+
+                .add-cat-row input:last-child {
+                    grid-column: 1 / -1;
+                }
         }
     </style>
 </head>
@@ -1106,26 +1511,25 @@
     <div id="page-content" style="display:none">
         <div class="hero">
             <h1>🍽️ Rezepte</h1>
-            <p>Katis liebste Rezepte – von herzhaft bis süß, immer mit ❤️ gekocht.</p>
+            <p>Katis besten innsbrucker Rezepte immer mit ⛷️ gekocht.</p>
         </div>
 
         <div class="container">
-            <!-- Add button (only visible for owner) -->
+
+            <!-- Toolbar (owner only) -->
             <div class="toolbar" id="admin-toolbar" style="display:none">
-                <button class="btn-add" onclick="openFormModal()">
-                    ➕ Neues Rezept hinzufügen
-                </button>
+                <div class="toolbar-left">
+                    <button class="btn-manage-cats" onclick="openCatModal()">🏷️ Kategorien verwalten</button>
+                </div>
+                <button class="btn-add" onclick="openFormModal()">➕ Neues Rezept</button>
             </div>
 
             <!-- Category filter -->
             <div class="filter-bar" id="filter-bar">
-                <button class="filter-btn active" onclick="filterRecipes('alle', this)">🍴 Alle</button>
-                <button class="filter-btn" onclick="filterRecipes('hauptgericht', this)">🥘 Hauptgericht</button>
-                <button class="filter-btn" onclick="filterRecipes('vorspeise', this)">🥗 Vorspeise</button>
-                <button class="filter-btn" onclick="filterRecipes('dessert', this)">🍰 Dessert</button>
-                <button class="filter-btn" onclick="filterRecipes('snack', this)">🥨 Snack</button>
-                <button class="filter-btn" onclick="filterRecipes('getraenk', this)">🥤 Getränk</button>
-                <button class="filter-btn" onclick="filterRecipes('sonstiges', this)">✨ Sonstiges</button>
+                <div style="display:flex;align-items:center;gap:8px;color:#c0392b;font-size:13px">
+                    <div class="spinner" style="width:22px;height:22px;border-width:3px;margin:0"></div>
+                    Laden…
+                </div>
             </div>
 
             <div class="recipe-grid" id="recipe-grid">
@@ -1140,6 +1544,7 @@
     <!-- ══ VIEW MODAL ══ -->
     <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
         <div class="modal" id="modal">
+            <div id="modal-photo-area"></div>
             <div class="modal-header">
                 <button class="modal-close" onclick="closeModalDirect()">✕</button>
                 <h2 id="modal-title">Rezeptname</h2>
@@ -1149,15 +1554,64 @@
         </div>
     </div>
 
-    <!-- ══ FORM MODAL (Add / Edit) ══ -->
+    <!-- ══ FORM MODAL ══ -->
     <div class="form-modal-overlay" id="form-modal-overlay">
-        <div class="form-modal" id="form-modal">
+        <div class="form-modal">
             <div class="form-modal-header">
                 <button class="form-modal-close" onclick="closeFormModal()">✕</button>
                 <h2 id="form-modal-title">Neues Rezept</h2>
                 <p id="form-modal-subtitle">Fülle alle Felder aus und speichere das Rezept.</p>
             </div>
             <div class="form-modal-body">
+
+                <!-- Image upload -->
+                <div class="form-group">
+                    <label>📸 Foto des Rezepts</label>
+                    <div class="image-upload-area" id="image-upload-area">
+                        <div class="image-upload-placeholder" id="image-placeholder">
+                            <div class="upload-icon">🖼️</div>
+                            <p>Tippe um ein Bild hinzuzufügen</p>
+                            <div class="upload-source-btns">
+                                <button type="button" class="upload-src-btn"
+                                        onclick="triggerImagePicker('gallery')">
+                                    🖼️ Galerie
+                                </button>
+                                <button type="button" class="upload-src-btn"
+                                        onclick="triggerImagePicker('camera')">
+                                    📷 Kamera
+                                </button>
+                            </div>
+                            <span class="upload-hint">JPG, PNG, WebP · max. 5 MB</span>
+                        </div>
+                        <div class="image-preview-wrap" id="image-preview-wrap" style="display:none">
+                            <img id="image-preview" src="" alt="Vorschau" />
+                            <div class="image-preview-actions">
+                                <button type="button" class="img-action-btn" title="Bild ändern"
+                                        onclick="triggerImagePicker('gallery')">
+                                    🔄
+                                </button>
+                                <button type="button" class="img-action-btn" title="Bild entfernen"
+                                        onclick="removeImage()">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden file inputs – capture is set via JS to avoid validator warning -->
+                    <input type="file" id="file-gallery" accept="image/*" style="display:none"
+                           onchange="handleImageFile(this)" />
+                    <input type="file" id="file-camera" accept="image/*"
+                           style="display:none" onchange="handleImageFile(this)" />
+
+                    <!-- Upload progress -->
+                    <div class="upload-progress" id="upload-progress">
+                        <div class="progress-bar-wrap">
+                            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                        </div>
+                        <div class="progress-label" id="progress-label">Wird hochgeladen…</div>
+                    </div>
+                </div>
 
                 <!-- Basic info -->
                 <div class="form-group">
@@ -1168,14 +1622,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>🏷️ Kategorie *</label>
-                        <select id="f-category">
-                            <option value="hauptgericht">🥘 Hauptgericht</option>
-                            <option value="vorspeise">🥗 Vorspeise</option>
-                            <option value="dessert">🍰 Dessert</option>
-                            <option value="snack">🥨 Snack</option>
-                            <option value="getraenk">🥤 Getränk</option>
-                            <option value="sonstiges">✨ Sonstiges</option>
-                        </select>
+                        <select id="f-category"></select>
                     </div>
                     <div class="form-group">
                         <label>⏱️ Zubereitungszeit</label>
@@ -1202,15 +1649,18 @@
 
                 <div class="form-group">
                     <label>📝 Kurzbeschreibung *</label>
-                    <textarea id="f-desc" placeholder="Eine kurze appetitliche Beschreibung des Rezepts…" maxlength="300"></textarea>
+                    <textarea id="f-desc" placeholder="Eine kurze appetitliche Beschreibung…" maxlength="300"></textarea>
                 </div>
 
                 <!-- Emoji picker -->
                 <div class="form-group">
-                    <label>🎨 Emoji / Symbol</label>
-                    <div class="emoji-picker" id="emoji-picker">
-                        <!-- filled by JS -->
-                    </div>
+                    <label>
+                        🎨 Emoji / Symbol
+                        <span style="font-weight:400;color:#aaa;text-transform:none;letter-spacing:0">
+                            (Fallback wenn kein Foto)
+                        </span>
+                    </label>
+                    <div class="emoji-picker" id="emoji-picker"></div>
                     <input type="hidden" id="f-emoji" value="🍽️" />
                 </div>
 
@@ -1228,7 +1678,6 @@
                     <button class="btn-add-item" onclick="addStep()">+ Schritt hinzufügen</button>
                 </div>
 
-                <!-- Footer -->
                 <div class="form-footer">
                     <button class="btn-cancel" onclick="closeFormModal()">Abbrechen</button>
                     <button class="btn-save" id="btn-save" onclick="saveRecipe()">
@@ -1239,12 +1688,35 @@
         </div>
     </div>
 
-    <!-- ══ CONFIRM DELETE DIALOG ══ -->
+    <!-- ══ CATEGORY MANAGER MODAL ══ -->
+    <div class="cat-modal-overlay" id="cat-modal-overlay">
+        <div class="cat-modal">
+            <div class="cat-modal-header">
+                <button class="cat-modal-close" onclick="closeCatModal()">✕</button>
+                <h2>🏷️ Kategorien verwalten</h2>
+                <p>Füge neue Kategorien hinzu oder entferne bestehende.</p>
+            </div>
+            <div class="cat-modal-body">
+                <div class="cat-list" id="cat-list"></div>
+                <div class="add-cat-form">
+                    <h4>➕ Neue Kategorie</h4>
+                    <div class="add-cat-row">
+                        <input type="text" id="new-cat-emoji" placeholder="🍜" maxlength="4" />
+                        <input type="text" id="new-cat-name" placeholder="Name (z.B. Pasta)" maxlength="30" />
+                        <input type="text" id="new-cat-key" placeholder="ID (z.B. pasta)" maxlength="20" />
+                    </div>
+                    <button class="btn-add-cat" onclick="addCategory()">✅ Kategorie hinzufügen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ CONFIRM DIALOG ══ -->
     <div class="confirm-overlay" id="confirm-overlay">
         <div class="confirm-box">
             <div class="confirm-icon">🗑️</div>
-            <h3>Rezept löschen?</h3>
-            <p id="confirm-text">Möchtest du dieses Rezept wirklich löschen? Das kann nicht rückgängig gemacht werden.</p>
+            <h3 id="confirm-title">Löschen?</h3>
+            <p id="confirm-text">Möchtest du das wirklich löschen?</p>
             <div class="confirm-btns">
                 <button class="btn-confirm-cancel" onclick="closeConfirm()">Abbrechen</button>
                 <button class="btn-confirm-delete" id="btn-confirm-delete">Löschen</button>
@@ -1256,13 +1728,17 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        /* ════════════════════════════════════════════════════
+        /* ═══════════════════════════════════════════════════════════
            STATE
-           ════════════════════════════════════════════════════ */
-        let ALL_RECIPES = [];   // loaded from Firestore
+        ═══════════════════════════════════════════════════════════ */
+        let ALL_RECIPES = [];
+        let CATEGORIES = [];
         let currentFilter = 'alle';
-        let editingId = null; // Firestore doc ID when editing
-        let deleteTargetId = null;
+        let editingId = null;
+
+        let selectedImageFile = null;
+        let currentImageURL = null;
+        let imageWasRemoved = false;
 
         const EMOJIS = [
             '🍽️', '🍝', '🍜', '🍛', '🍲', '🥘', '🥗', '🥙', '🌮', '🌯',
@@ -1272,9 +1748,33 @@
             '🥤', '☕', '🍵', '🧃', '🍹', '🥛', '🍺', '🍷', '🧋', '🫖'
         ];
 
-        /* ════════════════════════════════════════════════════
+        const BUILTIN_CATS = ['hauptgericht', 'vorspeise', 'dessert', 'snack', 'getraenk', 'sonstiges'];
+
+        const DEFAULT_CATS = [
+            { key: 'hauptgericht', name: 'Hauptgericht', emoji: '🥘' },
+            { key: 'vorspeise', name: 'Vorspeise', emoji: '🥗' },
+            { key: 'dessert', name: 'Dessert', emoji: '🍰' },
+            { key: 'snack', name: 'Snack', emoji: '🥨' },
+            { key: 'getraenk', name: 'Getränk', emoji: '🥤' },
+            { key: 'sonstiges', name: 'Sonstiges', emoji: '✨' },
+        ];
+
+        const CAT_COLORS = [
+            { bg: '#fde8e8', color: '#c0392b' },
+            { bg: '#fef3cd', color: '#856404' },
+            { bg: '#d1e7dd', color: '#0a3622' },
+            { bg: '#cff4fc', color: '#055160' },
+            { bg: '#e2d9f3', color: '#432874' },
+            { bg: '#e2e3e5', color: '#41464b' },
+            { bg: '#fff3e0', color: '#e65100' },
+            { bg: '#f3e5f5', color: '#6a1b9a' },
+            { bg: '#e8f5e9', color: '#1b5e20' },
+            { bg: '#fce4ec', color: '#880e4f' },
+        ];
+
+        /* ═══════════════════════════════════════════════════════════
            HELPERS
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         function waitForFirebase() {
             return new Promise(resolve => {
                 if (window._firebaseReady) resolve();
@@ -1290,19 +1790,34 @@
             setTimeout(() => t.classList.remove('show'), 3200);
         }
 
-        function getCatClass(cat) {
-            const map = { hauptgericht: 'cat-hauptgericht', dessert: 'cat-dessert', vorspeise: 'cat-vorspeise', snack: 'cat-snack', getraenk: 'cat-getraenk', sonstiges: 'cat-sonstiges' };
-            return map[cat] || 'cat-sonstiges';
+        function escHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
         }
 
-        function getCatLabel(cat) {
-            const map = { hauptgericht: '🥘 Hauptgericht', dessert: '🍰 Dessert', vorspeise: '🥗 Vorspeise', snack: '🥨 Snack', getraenk: '🥤 Getränk', sonstiges: '✨ Sonstiges' };
-            return map[cat] || cat;
+        function getCatInfo(key) {
+            const idx = CATEGORIES.findIndex(c => c.key === key);
+            const cat = CATEGORIES[idx] || { key, name: key, emoji: '🍽️' };
+            const colorIdx = idx >= 0 ? idx % CAT_COLORS.length : 0;
+            return { ...cat, ...CAT_COLORS[colorIdx] };
         }
 
-        /* ════════════════════════════════════════════════════
+        function getCatLabel(key) {
+            const c = getCatInfo(key);
+            return `${c.emoji} ${c.name}`;
+        }
+
+        function getCatBadgeStyle(key) {
+            const c = getCatInfo(key);
+            return `background:${c.bg};color:${c.color}`;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
            NAV
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         async function buildNav() {
             const nav = document.getElementById('main-nav');
             const chip = document.getElementById('user-chip');
@@ -1353,9 +1868,9 @@
             }
         }
 
-        /* ════════════════════════════════════════════════════
+        /* ═══════════════════════════════════════════════════════════
            ACCESS CHECK
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         async function checkAccess() {
             if (_isOwner) { grantAccess(); return; }
             if (!_email && !_uid) { window.location.href = 'start.html'; return; }
@@ -1379,16 +1894,78 @@
         function grantAccess() {
             document.getElementById('page-content').style.display = 'block';
             if (_isOwner) document.getElementById('admin-toolbar').style.display = 'flex';
-            loadRecipes();
+            loadAll();
         }
 
         function denyAccess() {
             document.getElementById('access-denied-screen').style.display = 'block';
         }
 
-        /* ════════════════════════════════════════════════════
-           FIRESTORE – LOAD
-           ════════════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════════════════════════
+           LOAD CATEGORIES
+        ═══════════════════════════════════════════════════════════ */
+        async function loadCategories() {
+            await waitForFirebase();
+            const { collection, getDocs } = window._firebaseFns;
+
+            try {
+                const snap = await getDocs(collection(window._db, 'recipe_categories'));
+                if (snap.empty) {
+                    CATEGORIES = [...DEFAULT_CATS];
+                    await saveCategoriesToFirestore();
+                } else {
+                    CATEGORIES = [];
+                    snap.forEach(d => CATEGORIES.push(d.data()));
+                    CATEGORIES.sort((a, b) => (a.order || 99) - (b.order || 99));
+                }
+            } catch (e) {
+                console.warn('Kategorien-Fehler, nutze Defaults.', e);
+                CATEGORIES = [...DEFAULT_CATS];
+            }
+        }
+
+        async function saveCategoriesToFirestore() {
+            const { collection, doc, setDoc, deleteDoc, getDocs } = window._firebaseFns;
+            const snap = await getDocs(collection(window._db, 'recipe_categories'));
+            for (const d of snap.docs) {
+                await deleteDoc(doc(window._db, 'recipe_categories', d.id));
+            }
+            for (let i = 0; i < CATEGORIES.length; i++) {
+                const cat = { ...CATEGORIES[i], order: i };
+                await setDoc(doc(window._db, 'recipe_categories', cat.key), cat);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           RENDER FILTER BAR
+        ═══════════════════════════════════════════════════════════ */
+        function renderFilterBar() {
+            const bar = document.getElementById('filter-bar');
+            bar.innerHTML = `
+                <button class="filter-btn ${currentFilter === 'alle' ? 'active' : ''}"
+                    onclick="filterRecipes('alle', this)">🍴 Alle</button>
+                ${CATEGORIES.map(c => `
+                    <button class="filter-btn ${currentFilter === c.key ? 'active' : ''}"
+                        onclick="filterRecipes('${escHtml(c.key)}', this)">
+                        ${c.emoji} ${escHtml(c.name)}
+                    </button>
+                `).join('')}
+            `;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           LOAD ALL
+        ═══════════════════════════════════════════════════════════ */
+        async function loadAll() {
+            await loadCategories();
+            renderFilterBar();
+            await loadRecipes();
+            populateCategorySelect();
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           LOAD RECIPES
+        ═══════════════════════════════════════════════════════════ */
         async function loadRecipes() {
             await waitForFirebase();
             const { collection, getDocs } = window._firebaseFns;
@@ -1396,107 +1973,20 @@
             try {
                 const snap = await getDocs(collection(window._db, 'recipes'));
                 ALL_RECIPES = [];
-                snap.forEach(d => {
-                    ALL_RECIPES.push({ firestoreId: d.id, ...d.data() });
-                });
-
-                // Sort by creation time if available
-                ALL_RECIPES.sort((a, b) => {
-                    const ta = a.createdAt?.seconds || 0;
-                    const tb = b.createdAt?.seconds || 0;
-                    return ta - tb;
-                });
-
+                snap.forEach(d => ALL_RECIPES.push({ firestoreId: d.id, ...d.data() }));
+                ALL_RECIPES.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
                 renderRecipes(getFiltered());
             } catch (err) {
-                console.error('Fehler beim Laden:', err);
+                console.error(err);
                 showToast('❌ Fehler beim Laden der Rezepte', 'error');
                 document.getElementById('recipe-grid').innerHTML =
                     `<div class="empty-recipes">❌ Rezepte konnten nicht geladen werden.</div>`;
             }
         }
 
-        /* ════════════════════════════════════════════════════
-           FIRESTORE – SAVE (Add / Edit)
-           ════════════════════════════════════════════════════ */
-        async function saveRecipe() {
-            const title = document.getElementById('f-title').value.trim();
-            const category = document.getElementById('f-category').value;
-            const time = document.getElementById('f-time').value.trim() || '–';
-            const portions = document.getElementById('f-portions').value.trim() || '–';
-            const difficulty = document.getElementById('f-difficulty').value;
-            const desc = document.getElementById('f-desc').value.trim();
-            const emoji = document.getElementById('f-emoji').value || '🍽️';
-
-            // Collect ingredients
-            const ingredients = [];
-            document.querySelectorAll('#ingredients-list .dynamic-item input').forEach(inp => {
-                const v = inp.value.trim();
-                if (v) ingredients.push(v);
-            });
-
-            // Collect steps
-            const steps = [];
-            document.querySelectorAll('#steps-list .dynamic-item input').forEach(inp => {
-                const v = inp.value.trim();
-                if (v) steps.push(v);
-            });
-
-            // Validation
-            if (!title) { showToast('⚠️ Bitte einen Rezeptnamen eingeben!', 'error'); return; }
-            if (!desc) { showToast('⚠️ Bitte eine Beschreibung eingeben!', 'error'); return; }
-            if (ingredients.length === 0) { showToast('⚠️ Bitte mindestens eine Zutat eingeben!', 'error'); return; }
-            if (steps.length === 0) { showToast('⚠️ Bitte mindestens einen Schritt eingeben!', 'error'); return; }
-
-            const btn = document.getElementById('btn-save');
-            btn.disabled = true;
-            document.getElementById('save-btn-text').textContent = '⏳ Speichern…';
-
-            const { collection, doc, addDoc, updateDoc, serverTimestamp } = window._firebaseFns;
-
-            const data = { title, category, time, portions, difficulty, desc, emoji, ingredients, steps };
-
-            try {
-                if (editingId) {
-                    // Update existing
-                    const ref = doc(window._db, 'recipes', editingId);
-                    await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
-                    showToast('✅ Rezept erfolgreich aktualisiert!', 'success');
-                } else {
-                    // Add new
-                    await addDoc(collection(window._db, 'recipes'), { ...data, createdAt: serverTimestamp() });
-                    showToast('✅ Rezept erfolgreich hinzugefügt!', 'success');
-                }
-
-                closeFormModal();
-                await loadRecipes();
-            } catch (err) {
-                console.error('Fehler beim Speichern:', err);
-                showToast('❌ Fehler beim Speichern!', 'error');
-            } finally {
-                btn.disabled = false;
-                document.getElementById('save-btn-text').textContent = '💾 Speichern';
-            }
-        }
-
-        /* ════════════════════════════════════════════════════
-           FIRESTORE – DELETE
-           ════════════════════════════════════════════════════ */
-        async function deleteRecipe(firestoreId) {
-            const { doc, deleteDoc } = window._firebaseFns;
-            try {
-                await deleteDoc(doc(window._db, 'recipes', firestoreId));
-                showToast('🗑️ Rezept gelöscht!', 'success');
-                await loadRecipes();
-            } catch (err) {
-                console.error('Fehler beim Löschen:', err);
-                showToast('❌ Fehler beim Löschen!', 'error');
-            }
-        }
-
-        /* ════════════════════════════════════════════════════
-           RENDER
-           ════════════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════════════════════════
+           RENDER RECIPES
+        ═══════════════════════════════════════════════════════════ */
         function getFiltered() {
             return currentFilter === 'alle'
                 ? ALL_RECIPES
@@ -1505,23 +1995,30 @@
 
         function renderRecipes(list) {
             const grid = document.getElementById('recipe-grid');
-            if (list.length === 0) {
+            if (!list.length) {
                 grid.innerHTML = `<div class="empty-recipes">🍴 Keine Rezepte in dieser Kategorie.</div>`;
                 return;
             }
 
-            grid.innerHTML = list.map(r => `
+            grid.innerHTML = list.map(r => {
+                const imgHTML = r.imageURL
+                    ? `<div class="card-img" onclick="openModal('${r.firestoreId}')">
+                           <img src="${escHtml(r.imageURL)}" alt="${escHtml(r.title)}" loading="lazy" />
+                       </div>`
+                    : `<div class="card-img" onclick="openModal('${r.firestoreId}')">${r.emoji || '🍽️'}</div>`;
+
+                return `
                     <div class="recipe-card">
                         ${_isOwner ? `
                         <div class="card-actions">
                             <button class="card-action-btn btn-edit-card"
                                 onclick="openEditModal('${r.firestoreId}')" title="Bearbeiten">✏️</button>
                             <button class="card-action-btn btn-delete-card"
-                                onclick="confirmDelete('${r.firestoreId}', '${escHtml(r.title)}')" title="Löschen">🗑️</button>
+                                onclick="confirmDelete('${r.firestoreId}','${escHtml(r.title)}')" title="Löschen">🗑️</button>
                         </div>` : ''}
-                        <div class="card-img" onclick="openModal('${r.firestoreId}')">${r.emoji || '🍽️'}</div>
+                        ${imgHTML}
                         <div class="card-body" onclick="openModal('${r.firestoreId}')">
-                            <span class="card-category ${getCatClass(r.category)}">${getCatLabel(r.category)}</span>
+                            <span class="card-category" style="${getCatBadgeStyle(r.category)}">${getCatLabel(r.category)}</span>
                             <div class="card-title">${escHtml(r.title)}</div>
                             <div class="card-desc">${escHtml(r.desc)}</div>
                             <div class="card-meta">
@@ -1531,15 +2028,8 @@
                             </div>
                         </div>
                     </div>
-                `).join('');
-        }
-
-        function escHtml(str) {
-            return String(str || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
+                `;
+            }).join('');
         }
 
         function filterRecipes(cat, btn) {
@@ -1549,14 +2039,19 @@
             renderRecipes(getFiltered());
         }
 
-        /* ════════════════════════════════════════════════════
+        /* ═══════════════════════════════════════════════════════════
            VIEW MODAL
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         function openModal(firestoreId) {
             const r = ALL_RECIPES.find(x => x.firestoreId === firestoreId);
             if (!r) return;
 
-            document.getElementById('modal-title').textContent = (r.emoji || '🍽️') + ' ' + r.title;
+            const photoArea = document.getElementById('modal-photo-area');
+            photoArea.innerHTML = r.imageURL
+                ? `<img class="modal-photo" src="${escHtml(r.imageURL)}" alt="${escHtml(r.title)}" />`
+                : `<div class="modal-photo-emoji">${r.emoji || '🍽️'}</div>`;
+
+            document.getElementById('modal-title').textContent = r.title;
             document.getElementById('modal-subtitle').textContent = getCatLabel(r.category);
 
             const ingredientsHTML = (r.ingredients || []).map(i => `<li>${escHtml(i)}</li>`).join('');
@@ -1565,24 +2060,24 @@
             ).join('');
 
             document.getElementById('modal-body').innerHTML = `
-                    <div class="modal-meta-row">
-                        <span class="meta-chip">⏱️ ${escHtml(r.time || '–')}</span>
-                        <span class="meta-chip">👥 ${escHtml(r.portions || '–')}</span>
-                        <span class="meta-chip">📊 ${escHtml(r.difficulty || '–')}</span>
-                    </div>
-                    <div class="modal-section">
-                        <h3>📝 Beschreibung</h3>
-                        <p style="font-size:14px;color:#555;line-height:1.7">${escHtml(r.desc)}</p>
-                    </div>
-                    <div class="modal-section">
-                        <h3>🛒 Zutaten</h3>
-                        <ul class="ingredients-list">${ingredientsHTML}</ul>
-                    </div>
-                    <div class="modal-section">
-                        <h3>👨‍🍳 Zubereitung</h3>
-                        <ol class="steps-list">${stepsHTML}</ol>
-                    </div>
-                `;
+                <div class="modal-meta-row">
+                    <span class="meta-chip">⏱️ ${escHtml(r.time || '–')}</span>
+                    <span class="meta-chip">👥 ${escHtml(r.portions || '–')}</span>
+                    <span class="meta-chip">📊 ${escHtml(r.difficulty || '–')}</span>
+                </div>
+                <div class="modal-section">
+                    <h3>📝 Beschreibung</h3>
+                    <p style="font-size:14px;color:#555;line-height:1.7">${escHtml(r.desc)}</p>
+                </div>
+                <div class="modal-section">
+                    <h3>🛒 Zutaten</h3>
+                    <ul class="ingredients-list">${ingredientsHTML}</ul>
+                </div>
+                <div class="modal-section">
+                    <h3>👨‍🍳 Zubereitung</h3>
+                    <ol class="steps-list">${stepsHTML}</ol>
+                </div>
+            `;
 
             document.getElementById('modal-overlay').classList.add('open');
             document.body.style.overflow = 'hidden';
@@ -1597,23 +2092,106 @@
             document.body.style.overflow = '';
         }
 
-        /* ════════════════════════════════════════════════════
+        /* ═══════════════════════════════════════════════════════════
+           IMAGE HANDLING
+        ═══════════════════════════════════════════════════════════ */
+        function triggerImagePicker(source) {
+            if (source === 'camera') {
+                const input = document.getElementById('file-camera');
+                // Set capture via JS to avoid HTML validator warning
+                input.setAttribute('capture', 'environment');
+                input.click();
+            } else {
+                const input = document.getElementById('file-gallery');
+                input.removeAttribute('capture');
+                input.click();
+            }
+        }
+
+        function handleImageFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('⚠️ Bild ist zu groß! Maximal 5 MB.', 'error');
+                input.value = '';
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                showToast('⚠️ Bitte nur Bilddateien auswählen!', 'error');
+                input.value = '';
+                return;
+            }
+
+            selectedImageFile = file;
+            imageWasRemoved = false;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('image-preview').src = e.target.result;
+                document.getElementById('image-placeholder').style.display = 'none';
+                document.getElementById('image-preview-wrap').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            input.value = '';
+        }
+
+        function removeImage() {
+            selectedImageFile = null;
+            imageWasRemoved = true;
+            currentImageURL = null;
+            document.getElementById('image-preview').src = '';
+            document.getElementById('image-preview-wrap').style.display = 'none';
+            document.getElementById('image-placeholder').style.display = 'flex';
+        }
+
+        async function uploadImageToStorage(file, recipeId) {
+            const { ref, uploadBytes, getDownloadURL } = window._firebaseFns;
+            const storageRef = ref(window._storage, `recipe_images/${recipeId}_${Date.now()}`);
+
+            const progressEl = document.getElementById('upload-progress');
+            const fillEl = document.getElementById('progress-bar-fill');
+            const labelEl = document.getElementById('progress-label');
+            progressEl.classList.add('show');
+            fillEl.style.width = '30%';
+            labelEl.textContent = 'Bild wird hochgeladen…';
+
+            const snapshot = await uploadBytes(storageRef, file);
+            fillEl.style.width = '80%';
+            const url = await getDownloadURL(snapshot.ref);
+            fillEl.style.width = '100%';
+            labelEl.textContent = '✅ Fertig!';
+            setTimeout(() => progressEl.classList.remove('show'), 1500);
+
+            return url;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
            FORM MODAL – ADD
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         function openFormModal() {
             editingId = null;
+            selectedImageFile = null;
+            currentImageURL = null;
+            imageWasRemoved = false;
+
             document.getElementById('form-modal-title').textContent = '➕ Neues Rezept';
             document.getElementById('form-modal-subtitle').textContent = 'Fülle alle Felder aus und speichere das Rezept.';
 
-            // Reset fields
             document.getElementById('f-title').value = '';
-            document.getElementById('f-category').value = 'hauptgericht';
             document.getElementById('f-time').value = '';
             document.getElementById('f-portions').value = '';
             document.getElementById('f-difficulty').value = 'Mittel';
             document.getElementById('f-desc').value = '';
             document.getElementById('f-emoji').value = '🍽️';
 
+            document.getElementById('image-preview').src = '';
+            document.getElementById('image-preview-wrap').style.display = 'none';
+            document.getElementById('image-placeholder').style.display = 'flex';
+            document.getElementById('upload-progress').classList.remove('show');
+
+            populateCategorySelect();
             buildEmojiPicker('🍽️');
             resetDynamicList('ingredients-list');
             resetDynamicList('steps-list');
@@ -1625,36 +2203,49 @@
             document.body.style.overflow = 'hidden';
         }
 
-        /* ════════════════════════════════════════════════════
+        /* ═══════════════════════════════════════════════════════════
            FORM MODAL – EDIT
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         function openEditModal(firestoreId) {
             const r = ALL_RECIPES.find(x => x.firestoreId === firestoreId);
             if (!r) return;
 
             editingId = firestoreId;
+            selectedImageFile = null;
+            currentImageURL = r.imageURL || null;
+            imageWasRemoved = false;
+
             document.getElementById('form-modal-title').textContent = '✏️ Rezept bearbeiten';
             document.getElementById('form-modal-subtitle').textContent = 'Ändere die gewünschten Felder und speichere.';
 
             document.getElementById('f-title').value = r.title || '';
-            document.getElementById('f-category').value = r.category || 'hauptgericht';
             document.getElementById('f-time').value = r.time || '';
             document.getElementById('f-portions').value = r.portions || '';
             document.getElementById('f-difficulty').value = r.difficulty || 'Mittel';
             document.getElementById('f-desc').value = r.desc || '';
             document.getElementById('f-emoji').value = r.emoji || '🍽️';
 
+            document.getElementById('upload-progress').classList.remove('show');
+            if (currentImageURL) {
+                document.getElementById('image-preview').src = currentImageURL;
+                document.getElementById('image-preview-wrap').style.display = 'block';
+                document.getElementById('image-placeholder').style.display = 'none';
+            } else {
+                document.getElementById('image-preview').src = '';
+                document.getElementById('image-preview-wrap').style.display = 'none';
+                document.getElementById('image-placeholder').style.display = 'flex';
+            }
+
+            populateCategorySelect(r.category);
             buildEmojiPicker(r.emoji || '🍽️');
 
-            // Fill ingredients
             resetDynamicList('ingredients-list');
             (r.ingredients || []).forEach(ing => addIngredient(ing));
-            if ((r.ingredients || []).length === 0) addIngredient();
+            if (!(r.ingredients || []).length) addIngredient();
 
-            // Fill steps
             resetDynamicList('steps-list');
             (r.steps || []).forEach(step => addStep(step));
-            if ((r.steps || []).length === 0) addStep();
+            if (!(r.steps || []).length) addStep();
 
             document.getElementById('form-modal-overlay').classList.add('open');
             document.body.style.overflow = 'hidden';
@@ -1665,15 +2256,212 @@
             document.body.style.overflow = '';
         }
 
-        /* ════════════════════════════════════════════════════
+        /* ═══════════════════════════════════════════════════════════
+           SAVE RECIPE
+        ═══════════════════════════════════════════════════════════ */
+        async function saveRecipe() {
+            const title = document.getElementById('f-title').value.trim();
+            const category = document.getElementById('f-category').value;
+            const time = document.getElementById('f-time').value.trim() || '–';
+            const portions = document.getElementById('f-portions').value.trim() || '–';
+            const difficulty = document.getElementById('f-difficulty').value;
+            const desc = document.getElementById('f-desc').value.trim();
+            const emoji = document.getElementById('f-emoji').value || '🍽️';
+
+            const ingredients = [];
+            document.querySelectorAll('#ingredients-list .dynamic-item input').forEach(inp => {
+                const v = inp.value.trim(); if (v) ingredients.push(v);
+            });
+
+            const steps = [];
+            document.querySelectorAll('#steps-list .dynamic-item input').forEach(inp => {
+                const v = inp.value.trim(); if (v) steps.push(v);
+            });
+
+            if (!title) { showToast('⚠️ Bitte einen Rezeptnamen eingeben!', 'error'); return; }
+            if (!desc) { showToast('⚠️ Bitte eine Beschreibung eingeben!', 'error'); return; }
+            if (!ingredients.length) { showToast('⚠️ Bitte mindestens eine Zutat!', 'error'); return; }
+            if (!steps.length) { showToast('⚠️ Bitte mindestens einen Schritt!', 'error'); return; }
+
+            const btn = document.getElementById('btn-save');
+            btn.disabled = true;
+            document.getElementById('save-btn-text').textContent = '⏳ Speichern…';
+
+            const { collection, doc, addDoc, updateDoc, serverTimestamp } = window._firebaseFns;
+
+            try {
+                let imageURL = imageWasRemoved ? null : (currentImageURL || null);
+
+                if (selectedImageFile) {
+                    const tempId = editingId || ('new_' + Date.now());
+                    imageURL = await uploadImageToStorage(selectedImageFile, tempId);
+                }
+
+                const data = {
+                    title, category, time, portions, difficulty,
+                    desc, emoji, ingredients, steps,
+                    imageURL: imageURL || null
+                };
+
+                if (editingId) {
+                    await updateDoc(doc(window._db, 'recipes', editingId), { ...data, updatedAt: serverTimestamp() });
+                    showToast('✅ Rezept aktualisiert!', 'success');
+                } else {
+                    await addDoc(collection(window._db, 'recipes'), { ...data, createdAt: serverTimestamp() });
+                    showToast('✅ Rezept hinzugefügt!', 'success');
+                }
+
+                closeFormModal();
+                await loadRecipes();
+            } catch (err) {
+                console.error(err);
+                showToast('❌ Fehler beim Speichern!', 'error');
+            } finally {
+                btn.disabled = false;
+                document.getElementById('save-btn-text').textContent = '💾 Speichern';
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           DELETE RECIPE
+        ═══════════════════════════════════════════════════════════ */
+        async function deleteRecipe(firestoreId) {
+            const { doc, deleteDoc } = window._firebaseFns;
+            try {
+                await deleteDoc(doc(window._db, 'recipes', firestoreId));
+                showToast('🗑️ Rezept gelöscht!', 'success');
+                await loadRecipes();
+            } catch (err) {
+                console.error(err);
+                showToast('❌ Fehler beim Löschen!', 'error');
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           CATEGORY MANAGER
+        ═══════════════════════════════════════════════════════════ */
+        function openCatModal() {
+            renderCatList();
+            document.getElementById('cat-modal-overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCatModal() {
+            document.getElementById('cat-modal-overlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function renderCatList() {
+            const list = document.getElementById('cat-list');
+            if (!CATEGORIES.length) {
+                list.innerHTML = `<p style="color:#bbb;text-align:center;padding:16px">Keine Kategorien vorhanden.</p>`;
+                return;
+            }
+
+            list.innerHTML = CATEGORIES.map(c => {
+                const isBuiltin = BUILTIN_CATS.includes(c.key);
+                return `
+                    <div class="cat-item">
+                        <div class="cat-item-emoji">${c.emoji}</div>
+                        <div class="cat-item-info">
+                            <div class="cat-item-name">${escHtml(c.name)}</div>
+                            <div class="cat-item-key">ID: ${escHtml(c.key)}</div>
+                        </div>
+                        <div class="cat-item-actions">
+                            ${isBuiltin
+                        ? `<span class="cat-locked">🔒 Standard</span>`
+                        : `<button class="cat-item-btn cat-btn-delete"
+                                        onclick="confirmDeleteCategory('${escHtml(c.key)}','${escHtml(c.name)}')"
+                                        title="Löschen">🗑️</button>`
+                    }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function addCategory() {
+            const emoji = document.getElementById('new-cat-emoji').value.trim() || '🍽️';
+            const name = document.getElementById('new-cat-name').value.trim();
+            const key = document.getElementById('new-cat-key').value.trim()
+                .toLowerCase().replace(/[^a-z0-9]/g, '');
+
+            if (!name) { showToast('⚠️ Bitte einen Kategorienamen eingeben!', 'error'); return; }
+            if (!key) { showToast('⚠️ Bitte eine Kategorie-ID eingeben!', 'error'); return; }
+
+            if (CATEGORIES.find(c => c.key === key)) {
+                showToast('⚠️ Diese Kategorie-ID existiert bereits!', 'error');
+                return;
+            }
+
+            CATEGORIES.push({ key, name, emoji });
+
+            try {
+                await saveCategoriesToFirestore();
+                showToast('✅ Kategorie hinzugefügt!', 'success');
+                document.getElementById('new-cat-emoji').value = '';
+                document.getElementById('new-cat-name').value = '';
+                document.getElementById('new-cat-key').value = '';
+                renderCatList();
+                renderFilterBar();
+                populateCategorySelect();
+            } catch (e) {
+                console.error(e);
+                showToast('❌ Fehler beim Speichern der Kategorie!', 'error');
+                CATEGORIES.pop();
+            }
+        }
+
+        function confirmDeleteCategory(key, name) {
+            document.getElementById('confirm-title').textContent = 'Kategorie löschen?';
+            document.getElementById('confirm-text').textContent =
+                `Möchtest du "${name}" wirklich löschen? Rezepte dieser Kategorie bleiben erhalten.`;
+            document.getElementById('confirm-overlay').classList.add('open');
+            document.getElementById('btn-confirm-delete').onclick = async () => {
+                closeConfirm();
+                await deleteCategoryByKey(key);
+            };
+        }
+
+        async function deleteCategoryByKey(key) {
+            CATEGORIES = CATEGORIES.filter(c => c.key !== key);
+            try {
+                await saveCategoriesToFirestore();
+                showToast('🗑️ Kategorie gelöscht!', 'success');
+                renderCatList();
+                renderFilterBar();
+                populateCategorySelect();
+                if (currentFilter === key) {
+                    currentFilter = 'alle';
+                    renderRecipes(getFiltered());
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('❌ Fehler beim Löschen der Kategorie!', 'error');
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           CATEGORY SELECT IN FORM
+        ═══════════════════════════════════════════════════════════ */
+        function populateCategorySelect(selectedKey = null) {
+            const sel = document.getElementById('f-category');
+            sel.innerHTML = CATEGORIES.map(c =>
+                `<option value="${escHtml(c.key)}" ${c.key === selectedKey ? 'selected' : ''}>
+                    ${c.emoji} ${escHtml(c.name)}
+                </option>`
+            ).join('');
+            if (selectedKey) sel.value = selectedKey;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
            EMOJI PICKER
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         function buildEmojiPicker(selected) {
-            const container = document.getElementById('emoji-picker');
-            container.innerHTML = EMOJIS.map(e => `
-                    <button type="button" class="emoji-opt ${e === selected ? 'selected' : ''}"
-                        onclick="selectEmoji('${e}', this)">${e}</button>
-                `).join('');
+            document.getElementById('emoji-picker').innerHTML = EMOJIS.map(e => `
+                <button type="button" class="emoji-opt ${e === selected ? 'selected' : ''}"
+                    onclick="selectEmoji('${e}', this)">${e}</button>
+            `).join('');
         }
 
         function selectEmoji(emoji, btn) {
@@ -1682,25 +2470,24 @@
             btn.classList.add('selected');
         }
 
-        /* ════════════════════════════════════════════════════
-           DYNAMIC LISTS (ingredients / steps)
-           ════════════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════════════════════════
+           DYNAMIC LISTS
+        ═══════════════════════════════════════════════════════════ */
         function resetDynamicList(listId) {
             document.getElementById(listId).innerHTML = '';
         }
 
         function addIngredient(value = '') {
             const list = document.getElementById('ingredients-list');
-            const idx = list.children.length + 1;
             const div = document.createElement('div');
             div.className = 'dynamic-item';
             div.innerHTML = `
-                    <span class="item-num">•</span>
-                    <input type="text" placeholder="z.B. 200 g Spaghetti" value="${escHtml(value)}" />
-                    <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()">✕</button>
-                `;
+                <span class="item-num">•</span>
+                <input type="text" placeholder="z.B. 200 g Spaghetti" value="${escHtml(value)}" />
+                <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()">✕</button>
+            `;
             list.appendChild(div);
-            div.querySelector('input').focus();
+            if (!value) div.querySelector('input').focus();
         }
 
         function addStep(value = '') {
@@ -1709,31 +2496,29 @@
             const div = document.createElement('div');
             div.className = 'dynamic-item';
             div.innerHTML = `
-                    <span class="item-num">${idx}</span>
-                    <input type="text" placeholder="Schritt ${idx} beschreiben…" value="${escHtml(value)}" />
-                    <button type="button" class="btn-remove-item" onclick="removeStep(this)">✕</button>
-                `;
+                <span class="item-num">${idx}</span>
+                <input type="text" placeholder="Schritt ${idx} beschreiben…" value="${escHtml(value)}" />
+                <button type="button" class="btn-remove-item" onclick="removeStep(this)">✕</button>
+            `;
             list.appendChild(div);
-            div.querySelector('input').focus();
+            if (!value) div.querySelector('input').focus();
         }
 
         function removeStep(btn) {
             btn.parentElement.remove();
-            // Re-number
             document.querySelectorAll('#steps-list .item-num').forEach((num, i) => {
                 num.textContent = i + 1;
             });
         }
 
-        /* ════════════════════════════════════════════════════
-           CONFIRM DELETE
-           ════════════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════════════════════════
+           CONFIRM DIALOG
+        ═══════════════════════════════════════════════════════════ */
         function confirmDelete(firestoreId, title) {
-            deleteTargetId = firestoreId;
+            document.getElementById('confirm-title').textContent = 'Rezept löschen?';
             document.getElementById('confirm-text').textContent =
                 `Möchtest du "${title}" wirklich löschen? Das kann nicht rückgängig gemacht werden.`;
             document.getElementById('confirm-overlay').classList.add('open');
-
             document.getElementById('btn-confirm-delete').onclick = async () => {
                 closeConfirm();
                 await deleteRecipe(firestoreId);
@@ -1742,21 +2527,20 @@
 
         function closeConfirm() {
             document.getElementById('confirm-overlay').classList.remove('open');
-            deleteTargetId = null;
         }
 
-        /* ════════════════════════════════════════════════════
+        /* ═══════════════════════════════════════════════════════════
            AUTH
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         function logout() {
             sessionStorage.clear();
             localStorage.clear();
             window.location.href = 'start.html';
         }
 
-        /* ════════════════════════════════════════════════════
+        /* ═══════════════════════════════════════════════════════════
            INIT
-           ════════════════════════════════════════════════════ */
+        ═══════════════════════════════════════════════════════════ */
         buildNav();
         checkAccess();
     </script>
